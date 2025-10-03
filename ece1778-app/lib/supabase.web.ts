@@ -1,3 +1,4 @@
+// code taken from https://supabase.com/docs/guides/auth/quickstarts/with-expo-react-native-social-auth
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../database.types";
