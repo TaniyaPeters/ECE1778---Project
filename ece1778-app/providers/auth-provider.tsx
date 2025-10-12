@@ -66,6 +66,8 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     fetchProfile();
   }, [session]);
 
+  // TODO: add login and logout functions?
+
   return (
     <AuthContext.Provider
       value={{
