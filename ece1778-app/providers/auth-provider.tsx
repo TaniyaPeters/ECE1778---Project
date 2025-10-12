@@ -1,3 +1,4 @@
+// code adapted from https://supabase.com/docs/guides/auth/quickstarts/with-expo-react-native-social-auth
 import { Tables } from "../database.types";
 import { AuthContext } from "../hooks/use-auth-context";
 import { supabase } from "../lib/supabase.web";
