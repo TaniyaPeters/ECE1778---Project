@@ -6,7 +6,6 @@ export default function LibraryScreen() {
   return (
     <View style={styles.container}>
       <Text>Library Screen</Text>
-      <Button title="Go To Home Page" onPress={() => router.push("/")}/>
     </View>
   );
 }

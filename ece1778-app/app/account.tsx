@@ -1,15 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import { router } from "expo-router";
-import { Button } from 'react-native';
-export default function HomeScreen() {
+
+export default function AccountScreen() {
   return (
     <View style={styles.container}>
-      <Text>Home Screen</Text>
+      <Text>Account Settings!</Text>
+      <StatusBar style="auto" />
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
