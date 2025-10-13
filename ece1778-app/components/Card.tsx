@@ -1,4 +1,10 @@
-import { View, StyleSheet, ViewProps, StyleProp, ViewStyle } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ViewProps,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { colors } from "../constants/colors";
 
 type Props = ViewProps & {
@@ -15,11 +21,11 @@ export default function Card({ children, style, ...props }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.light.primary,
     borderRadius: 8,
     padding: 15,
     marginBottom: 10,
-    shadowColor: colors.shadow,
+    shadowColor: colors.light.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,

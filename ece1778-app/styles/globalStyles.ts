@@ -1,15 +1,14 @@
 import { Platform, StyleSheet } from "react-native";
 import { colors } from "../constants/colors";
 
-const defaultSerif = Platform.OS === 'ios' ? 'Times New Roman' : 'serif';
-const defaultSans = Platform.OS === 'ios' ? 'Helvetica' : 'sans-serif';
+const defaultSerif = Platform.OS === "ios" ? "Times New Roman" : "serif";
+const defaultSans = Platform.OS === "ios" ? "Helvetica" : "sans-serif";
 
 export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: colors.light.background,
-    alignItems: 'center',
   },
   titleText: {
     fontSize: 40,
@@ -32,10 +31,10 @@ export const globalStyles = StyleSheet.create({
     fontFamily: defaultSans,
   },
   detailsImage: {
-    width: '100%',
+    width: "100%",
     height: 400,
     aspectRatio: 1,
-    alignSelf: 'center',
+    alignSelf: "center",
     paddingBottom: 10,
     paddingTop: 10,
     borderRadius: 16,
