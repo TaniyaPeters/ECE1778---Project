@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.58.0",
     "0g": "^0.4.2",
     "expo": "~54.0.12",
+    "expo-file-system": "~19.0.17",
     "expo-constants": "~18.0.9",
     "expo-linking": "~8.0.8",
     "expo-router": "~6.0.10",
@@ -30,6 +31,7 @@
     "react-native-screens": "~4.16.0"
   },
   "devDependencies": {
+    "@types/expo__vector-icons": "^9.0.1",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },
