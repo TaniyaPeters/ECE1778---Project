@@ -1,21 +1,12 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text, Button } from "react-native";
 import { router } from "expo-router";
-import { Button } from 'react-native';
-export default function HomeScreen() {
+import { globalStyles } from "../styles/globalStyles";
+
+export default function Home() {
   return (
-    <View style={styles.container}>
-      <Text>Home Screen</Text>
+    <View style={globalStyles.container}>
+      <Text style={globalStyles.titleText}>Home Screen</Text>
+      <Button title="Go to Movie Details" onPress={() => router.push("/movieDetails/1")}/>
     </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
