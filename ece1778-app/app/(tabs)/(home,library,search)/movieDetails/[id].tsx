@@ -7,12 +7,12 @@ import {
   View,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import { globalStyles } from "../../styles/globalStyles";
-import { Review } from "../../types";
-import ReviewListItem from "../../components/ReviewListItem";
-import Card from "../../components/Card";
-import { colors } from "../../constants/colors";
-import GeneralCard from "../../components/generalCard";
+import { globalStyles } from "@styles/globalStyles";
+import { Review } from "@app/types";
+import ReviewListItem from "@components/ReviewListItem";
+import Card from "@components/Card";
+import { colors } from "@constants/colors";
+import GeneralCard from "@components/generalCard";
 
 export default function movieDetails() {
   const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
@@ -38,7 +38,7 @@ export default function movieDetails() {
   ];
   const director: string = "Chris Columbus";
   const cast: string[] = ["Daniel Radcliffe", "Rupert Grint", "Emma Watson"]; //could also be just a string depending on how the info is returned from api
-  const moviePoster = require("../../assets/harry-potter-movie-poster.jpg"); //delete this image from assets folder later
+  const moviePoster = require("@assets/harry-potter-movie-poster.jpg"); //delete this image from assets folder later
 
   return (
     <ScrollView style={globalStyles.container}>
