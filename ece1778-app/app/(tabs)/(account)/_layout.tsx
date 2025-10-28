@@ -1,7 +1,7 @@
 import { Stack } from "expo-router";
 import {SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-export default function HomeLayout() {
+export default function AccountLayout() {
   return (    
     <SafeAreaProvider>
       <Stack>        

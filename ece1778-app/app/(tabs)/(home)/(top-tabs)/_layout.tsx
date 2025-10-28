@@ -17,7 +17,7 @@ export const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
-export default function TabLayout() {
+export default function TopTabsLayout() {
   return (
     <SafeAreaProvider>
       <MaterialTopTabs>

@@ -2,7 +2,7 @@ import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
 import { Button, Text, View } from "react-native";
 
-export default function TabOneScreen() {
+export default function TabBooks() {
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.titleText}>Books Tab</Text>
