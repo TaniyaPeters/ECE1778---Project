@@ -16,6 +16,9 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.yourcompany.yourappname",
+      "googleServicesFile": "./google-services.json",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -31,7 +34,16 @@
       "typedRoutes": true
     },
     "plugins": [
-      "expo-router", "expo-secure-store", "expo-font"
-    ]
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      "expo-notifications"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5bf70171-acd0-4a7a-b78a-2990b81158ab"
+      }
+    }
   }
 }
