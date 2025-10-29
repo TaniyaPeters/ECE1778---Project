@@ -9,18 +9,18 @@ type Props = {
 };
 
 export default function ReviewListItem({ review }: Props) {
-    return (
-        <Card style={styles.card}>
-            <View style={styles.content}>
-                {/* User who wrote review */}
-                <Text style={[globalStyles.paragraph, styles.text]}>{review.user}</Text>
-                {/* Divider line */}
-                <View style={styles.line}/>
-                {/* Review text */}
-                <Text style={[globalStyles.paragraph, styles.text]}>{review.text}</Text>
-            </View>
-        </Card>
-    );
+  return (
+    <Card style={styles.card}>
+      <View style={styles.content}>
+        {/* User who wrote review */}
+        <Text style={[globalStyles.paragraph, styles.text]}>{review.user}</Text>
+        {/* Divider line */}
+        <View style={styles.line} />
+        {/* Review text */}
+        <Text style={[globalStyles.paragraph, styles.text]}>{review.text}</Text>
+      </View>
+    </Card>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
     marginVertical: 3,
   },
   line: {
-    height: 1, 
-    backgroundColor: colors.text, 
-    width: '100%', 
-    marginVertical: 10, 
+    height: 1,
+    backgroundColor: colors.light.black,
+    width: "100%",
+    marginVertical: 10,
   },
 });
