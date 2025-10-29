@@ -24,8 +24,8 @@ export default function AccountLayout() {
 				options={{ title: "Edit Friends" }}
 			/>
 			<Stack.Screen
-				name="reset-password"
-				options={{ title: "Reset Password" }}
+				name="create-account"
+				options={{ title: "Create Account" }}
 			/>
 		</Stack>
 	);

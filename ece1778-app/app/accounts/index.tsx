@@ -9,21 +9,21 @@ import {
 	Keyboard,
 	TouchableWithoutFeedback,
 } from "react-native";
-import { useAuthContext } from "../../hooks/use-auth-context";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { globalStyles } from "../../styles/globalStyles";
-import { supabase } from "../../lib/supabase.web";
 import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
 import { Barlow_500Medium } from "@expo-google-fonts/barlow";
 import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 import { colors } from "../../constants/colors";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountScreen() {
-	const { session, profile, isLoggedIn } = useAuthContext();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
+	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
+	const params = useLocalSearchParams();
+	const [email, setEmail] = useState((params.email as string) || "");
+	const [password, setPassword] = useState((params.password as string) || "");
 	const [isLightMode, setIsLightMode] = useState(true);
 	const sun = require("../../assets/sun.png");
 	const moon = require("../../assets/moon.png");
@@ -34,56 +34,42 @@ export default function AccountScreen() {
 		// Load fonts or any other async tasks
 	}, []);
 
-	async function signUpNewUser() {
-		const { data, error } = await supabase.auth.signUp({
-			email: "ipxic7wjy@mozmail.com",
-			password: "password",
-			options: {
-				data: {
-					full_name: "Test User",
-					username: "testuser",
-					avatar_url:
-						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
-				},
-			},
+	const handleLogin = async () => {
+		if (email.trim() === "" || password.trim() === "") {
+			Alert.alert("Error", "Please enter an email and password.");
+			return;
+		}
+
+		signInWithEmail(email, password).then(({ error }) => {
+			if (error) {
+				Alert.alert("Error", error.message);
+				return;
+			}
 		});
-
-		Alert.alert("Signed Up!", JSON.stringify({ data, error }));
-	}
-
-	async function signInWithEmail() {
-		const { data, error } = await supabase.auth.signInWithPassword({
-			email: "socials@yhnl.mozmail.com",
-			password: "password",
-		});
-
-		Alert.alert("Signed In!", JSON.stringify({ data, error }));
-	}
-
-	async function signOut() {
-		const { error } = await supabase.auth.signOut();
-	}
+	};
 
 	return (
 		<SafeAreaView style={globalStyles.container}>
+			<View style={styles.row}>
+				<Pressable onPress={() => setIsLightMode(!isLightMode)}>
+					<Image
+						source={isLightMode ? moon : sun}
+						style={{ width: 24, height: 24 }}
+					/>
+				</Pressable>
+				{isLoggedIn && (
+					<Pressable
+						style={{
+							alignSelf: "flex-end",
+						}}
+						onPress={signOut}
+					>
+						<Text style={styles.text}>Log Out</Text>
+					</Pressable>
+				)}
+			</View>
 			{isLoggedIn ? (
 				<View style={styles.container}>
-					<View style={styles.row}>
-						<Pressable onPress={() => setIsLightMode(!isLightMode)}>
-							<Image
-								source={isLightMode ? moon : sun}
-								style={{ width: 24, height: 24 }}
-							/>
-						</Pressable>
-						<Pressable
-							style={{
-								alignSelf: "flex-end",
-							}}
-							onPress={signOut}
-						>
-							<Text style={styles.text}>Log Out</Text>
-						</Pressable>
-					</View>
 					<Image
 						source={{
 							uri:
@@ -155,25 +141,32 @@ export default function AccountScreen() {
 								secureTextEntry={true}
 							/>
 						</Pressable>
-						<Pressable
-							style={({ pressed }: { pressed: boolean }) => [
-								styles.button,
-								{
-									opacity: pressed ? 0.6 : 1,
-								},
-							]}
-							onPress={signInWithEmail}
-						>
-							<Text style={styles.text}>Login</Text>
-						</Pressable>
-						<Pressable
-							style={styles.hiddenButton}
-							onPress={() =>
-								router.push("/accounts/reset-password")
-							}
-						>
-							<Text style={styles.text}>Forgot Password?</Text>
-						</Pressable>
+						<View style={styles.row}>
+							<Pressable
+								style={({ pressed }: { pressed: boolean }) => [
+									styles.button,
+									{
+										opacity: pressed ? 0.6 : 1,
+									},
+								]}
+								onPress={handleLogin}
+							>
+								<Text style={styles.text}>Login</Text>
+							</Pressable>
+							<Pressable
+								style={({ pressed }: { pressed: boolean }) => [
+									styles.button,
+									{
+										opacity: pressed ? 0.6 : 1,
+									},
+								]}
+								onPress={() => {
+									router.push("/accounts/create-account");
+								}}
+							>
+								<Text style={styles.text}>Sign Up</Text>
+							</Pressable>
+						</View>
 					</View>
 				</TouchableWithoutFeedback>
 			)}

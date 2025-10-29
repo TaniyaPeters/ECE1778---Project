@@ -11,7 +11,7 @@ import {
 	Keyboard,
 } from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
-import { useAuthContext } from "../../hooks/use-auth-context";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { colors } from "../../constants/colors";
 import { supabase } from "../../lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -53,16 +53,12 @@ export default function EditAccountScreen() {
 
 	// Input validation
 	const handleSubmit = () => {
-		if (
-			name.trim() === "" ||
-			username.trim() === "" ||
-			email.trim() === ""
-		) {
+		if (username.trim() === "" || email.trim() === "") {
 			Alert.alert("Error", "Cannot leave fields empty.");
 			return;
 		}
 
-		if (/^[A-Za-z\ ]+$/.test(name) === false) {
+		if (name.trim() !== "" && /^[A-Za-z\ ]+$/.test(name) === false) {
 			Alert.alert("Error", "Name can only contain letters.");
 			return;
 		}

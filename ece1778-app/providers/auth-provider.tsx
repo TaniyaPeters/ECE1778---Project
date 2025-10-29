@@ -1,7 +1,6 @@
 // code adapted from https://supabase.com/docs/guides/auth/quickstarts/with-expo-react-native-social-auth
-import { Alert } from "react-native";
-import { Tables } from "../database.types";
-import { AuthContext } from "../hooks/use-auth-context";
+import { Tables } from "../types/database.types";
+import { AuthContext } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase.web";
 import type { Session } from "@supabase/supabase-js";
 import { PropsWithChildren, useEffect, useState } from "react";
@@ -67,7 +66,54 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 		fetchProfile();
 	}, [session]);
 
-	// TODO: add login and logout functions?
+	const signInWithEmail = async (email: string, password: string) => {
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
+
+		if (error) {
+			return { error };
+		}
+
+		return {};
+	};
+
+	const signOut = async () => {
+		const { error } = await supabase.auth.signOut();
+
+		if (error) {
+			return { error };
+		}
+		return {};
+	};
+
+	const signUpWithEmail = async (
+		email: string,
+		password: string,
+		name: Tables<"profiles">["full_name"],
+		username: Tables<"profiles">["username"]
+	) => {
+		const { data, error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				emailRedirectTo: "myapp://accounts",
+				data: {
+					full_name: name ?? "",
+					username: username,
+					avatar_url:
+						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
+				},
+			},
+		});
+
+		if (error) {
+			return { error };
+		}
+
+		return {};
+	};
 
 	return (
 		<AuthContext.Provider
@@ -75,6 +121,9 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 				session,
 				isLoading,
 				profile,
+				signInWithEmail,
+				signOut,
+				signUpWithEmail,
 				isLoggedIn: session != undefined,
 			}}
 		>
