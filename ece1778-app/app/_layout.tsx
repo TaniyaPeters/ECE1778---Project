@@ -1,9 +1,11 @@
+import AuthProvider from "@app/providers/auth-provider";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
 import { Platform } from "react-native";
 
 export default function RootLayout() {
   return (
+    <AuthProvider>
     <NativeTabs>
       <NativeTabs.Trigger name="(tabs)/(home)">
         <Label>Home</Label>
@@ -34,5 +36,6 @@ export default function RootLayout() {
         })}
       </NativeTabs.Trigger>
     </NativeTabs>
+    </AuthProvider>
   );
 }

@@ -1,10 +1,10 @@
 import {
-  FlatList,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+	FlatList,
+	Image,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
@@ -15,7 +15,7 @@ import { colors } from "@constants/colors";
 import GeneralCard from "@components/generalCard";
 
 export default function movieDetails() {
-  const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
+	const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
 
   //Hardcoding for now - later retrieve using api
   const title: string = "Harry Potter and the Sorcerer's Stone";
@@ -40,103 +40,105 @@ export default function movieDetails() {
   const cast: string[] = ["Daniel Radcliffe", "Rupert Grint", "Emma Watson"]; //could also be just a string depending on how the info is returned from api
   const moviePoster = require("@assets/harry-potter-movie-poster.jpg"); //delete this image from assets folder later
 
-  return (
-    <ScrollView style={globalStyles.container}>
-      {/* Movie title */}
-      <Text style={globalStyles.titleText}>{title}</Text>
+	return (
+		<ScrollView style={globalStyles.container}>
+			{/* Movie title */}
+			<Text style={globalStyles.titleText}>{title}</Text>
 
-      {/* Release year */}
-      <Text style={[globalStyles.paragraph, styles.year]}>{release_year}</Text>
+			{/* Release year */}
+			<Text style={[globalStyles.paragraph, styles.year]}>
+				{release_year}
+			</Text>
 
-      {/* Rating out of 5 and number of ratings */}
-      <View style={styles.ratingContainer}>
-        <Text style={[globalStyles.paragraph, styles.rating]}>
-          ⭐ {rating} / 5
-        </Text>
-        <Text style={[globalStyles.paragraph, styles.num_ratings]}>
-          {" "}
-          ({num_ratings} ratings)
-        </Text>
-      </View>
+			{/* Rating out of 5 and number of ratings */}
+			<View style={styles.ratingContainer}>
+				<Text style={[globalStyles.paragraph, styles.rating]}>
+					⭐ {rating} / 5
+				</Text>
+				<Text style={[globalStyles.paragraph, styles.num_ratings]}>
+					{" "}
+					({num_ratings} ratings)
+				</Text>
+			</View>
 
-      {/* Movie poster */}
-      <Image
-        source={moviePoster}
-        style={globalStyles.detailsImage}
-        resizeMode="contain"
-      />
+			{/* Movie poster */}
+			<Image
+				source={moviePoster}
+				style={globalStyles.detailsImage}
+				resizeMode="contain"
+			/>
 
-      <Card style={styles.card}>
-        {/* Movie description */}
-        <Text style={globalStyles.paragraph}>{description}</Text>
+			<Card style={styles.card}>
+				{/* Movie description */}
+				<Text style={globalStyles.paragraph}>{description}</Text>
 
-        {/* Director */}
-        <View style={styles.horizontalContainer}>
-          <Text style={globalStyles.paragraphBold}>Director: </Text>
-          <Text style={globalStyles.paragraph}>{director}</Text>
-        </View>
+				{/* Director */}
+				<View style={styles.horizontalContainer}>
+					<Text style={globalStyles.paragraphBold}>Director: </Text>
+					<Text style={globalStyles.paragraph}>{director}</Text>
+				</View>
 
-        {/* Cast */}
-        <View style={styles.verticalContainer}>
-          <Text style={globalStyles.paragraphBold}>Cast: </Text>
-          {cast.map((actor, index) => (
-            <Text key={index} style={globalStyles.paragraph}>
-              {actor}
-            </Text>
-          ))}
-        </View>
-      </Card>
+				{/* Cast */}
+				<View style={styles.verticalContainer}>
+					<Text style={globalStyles.paragraphBold}>Cast: </Text>
+					{cast.map((actor, index) => (
+						<Text key={index} style={globalStyles.paragraph}>
+							{actor}
+						</Text>
+					))}
+				</View>
+			</Card>
 
-      {/* Reviews by other users */}
-      <Text style={globalStyles.paragraphBold}>Reviews:</Text>
-      <FlatList
-        data={reviews}
-        keyExtractor={(item: Review) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ReviewListItem review={item}></ReviewListItem>
-        )}
-        scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
-        contentContainerStyle={styles.reviewList}
-      />
-    </ScrollView>
-  );
+			{/* Reviews by other users */}
+			<Text style={globalStyles.paragraphBold}>Reviews:</Text>
+			<FlatList
+				data={reviews}
+				keyExtractor={(item: Review) => item.id.toString()}
+				renderItem={({ item }) => (
+					<ReviewListItem review={item}></ReviewListItem>
+				)}
+				scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
+				contentContainerStyle={styles.reviewList}
+			/>
+		</ScrollView>
+	);
 }
 
 const styles = StyleSheet.create({
-  year: {
-    textAlign: "center",
-    fontWeight: "bold",
-    color: colors.light.secondary,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    alignItems: "baseline",
-  },
-  rating: {
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 25,
-  },
-  num_ratings: {
-    textAlign: "center",
-  },
-  horizontalContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
-    marginTop: 14,
-  },
-  verticalContainer: {
-    flexDirection: "column",
-  },
-  reviewList: {
-    paddingBottom: 20,
-    paddingTop: 10,
-  },
-  card: {
-    backgroundColor: colors.light.background,
-    marginTop: 10,
-    marginBottom: 10,
-  },
+	year: {
+		textAlign: "center",
+		fontWeight: "bold",
+		color: colors.light.secondary,
+	},
+	ratingContainer: {
+		flexDirection: "row",
+		alignSelf: "center",
+		alignItems: "baseline",
+	},
+	rating: {
+		textAlign: "center",
+		fontWeight: "bold",
+		fontSize: 25,
+	},
+	num_ratings: {
+		textAlign: "center",
+	},
+	horizontalContainer: {
+		flexDirection: "row",
+		flexWrap: "wrap",
+		alignItems: "flex-start",
+		marginTop: 14,
+	},
+	verticalContainer: {
+		flexDirection: "column",
+	},
+	reviewList: {
+		paddingBottom: 20,
+		paddingTop: 10,
+	},
+	card: {
+		backgroundColor: colors.light.background,
+		marginTop: 10,
+		marginBottom: 10,
+	},
 });
