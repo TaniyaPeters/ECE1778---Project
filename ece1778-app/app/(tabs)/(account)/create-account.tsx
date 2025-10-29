@@ -9,9 +9,9 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
-import { useAuthContext } from "../../contexts/AuthContext";
-import { colors } from "../../constants/colors";
+import { globalStyles } from "@styles/globalStyles";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { colors } from "@constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
@@ -65,7 +65,7 @@ export default function EditAccountScreen() {
 				"Check your email to verify your account, then sign in."
 			);
 			router.push({
-				pathname: "/accounts",
+				pathname: "/",
 				params: { email: email, password: password },
 			});
 		});
