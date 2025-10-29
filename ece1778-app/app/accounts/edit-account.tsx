@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
-import { Text, TextInput, View, Image, Pressable, Alert } from "react-native";
+import {
+	Text,
+	TextInput,
+	View,
+	Image,
+	Pressable,
+	Alert,
+	StyleSheet,
+	TouchableWithoutFeedback,
+	Keyboard,
+} from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
 import { useAuthContext } from "../../hooks/use-auth-context";
 import { colors } from "../../constants/colors";
 import { supabase } from "../../lib/supabase.web";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -72,7 +83,7 @@ export default function EditAccountScreen() {
 			return;
 		}
 
-		if (password === "" && !passwordLocked) {
+		if (password.trim() === "" && !passwordLocked) {
 			Alert.alert(
 				"Error",
 				"Please enter a new password or lock the field."
@@ -113,76 +124,78 @@ export default function EditAccountScreen() {
 	}, [passwordLocked]);
 
 	return (
-		<View style={(globalStyles.container, styles.container)}>
-			<Image
-				source={{
-					uri:
-						profile?.avatar_url ??
-						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
-				}}
-				style={globalStyles.profileImage}
-			/>
+		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+			<SafeAreaView style={[globalStyles.container, styles.container]}>
+				<Image
+					source={{
+						uri:
+							profile?.avatar_url ??
+							"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
+					}}
+					style={globalStyles.profileImage}
+				/>
 
-			<View style={styles.input}>
-				<Text style={styles.text}>Name</Text>
-				<TextInput
-					placeholder="Name"
-					value={name}
-					onChangeText={setName}
-				/>
-			</View>
-			<View style={styles.input}>
-				<Text style={styles.text}>Username</Text>
-				<TextInput
-					placeholder="Username"
-					value={username}
-					onChangeText={setUsername}
-				/>
-			</View>
-			<View style={styles.input}>
-				<Text style={styles.text}>Email</Text>
-				<TextInput
-					placeholder="Email"
-					value={email}
-					onChangeText={setEmail}
-				/>
-			</View>
-			<View style={styles.input}>
-				<Text style={styles.text}>Password</Text>
-				<View style={styles.row}>
+				<View style={styles.input}>
+					<Text style={styles.text}>Name</Text>
 					<TextInput
-						placeholder="***********"
-						value={password}
-						onChangeText={setPassword}
-						secureTextEntry={true}
-						editable={passwordLocked ? false : true}
+						placeholder="Name"
+						value={name}
+						onChangeText={setName}
 					/>
-					<Pressable
-						onPress={() => setPasswordLocked(!passwordLocked)}
-					>
-						<Image
-							source={passwordLocked ? lock : unlock}
-							style={styles.icon}
-						/>
-					</Pressable>
 				</View>
-			</View>
-			<Pressable
-				style={({ pressed }: { pressed: boolean }) => [
-					styles.button,
-					{
-						opacity: pressed ? 0.6 : 1,
-					},
-				]}
-				onPress={handleSubmit}
-			>
-				<Text style={styles.text}>Save Changes</Text>
-			</Pressable>
-		</View>
+				<View style={styles.input}>
+					<Text style={styles.text}>Username</Text>
+					<TextInput
+						placeholder="Username"
+						value={username}
+						onChangeText={setUsername}
+					/>
+				</View>
+				<View style={styles.input}>
+					<Text style={styles.text}>Email</Text>
+					<TextInput
+						placeholder="Email"
+						value={email}
+						onChangeText={setEmail}
+					/>
+				</View>
+				<View style={styles.input}>
+					<Text style={styles.text}>Password</Text>
+					<View style={styles.row}>
+						<TextInput
+							placeholder="***********"
+							value={password}
+							onChangeText={setPassword}
+							secureTextEntry={true}
+							editable={passwordLocked ? false : true}
+						/>
+						<Pressable
+							onPress={() => setPasswordLocked(!passwordLocked)}
+						>
+							<Image
+								source={passwordLocked ? lock : unlock}
+								style={styles.icon}
+							/>
+						</Pressable>
+					</View>
+				</View>
+				<Pressable
+					style={({ pressed }: { pressed: boolean }) => [
+						styles.button,
+						{
+							opacity: pressed ? 0.6 : 1,
+						},
+					]}
+					onPress={handleSubmit}
+				>
+					<Text style={styles.text}>Save Changes</Text>
+				</Pressable>
+			</SafeAreaView>
+		</TouchableWithoutFeedback>
 	);
 }
 
-const styles = {
+const styles = StyleSheet.create({
 	button: {
 		paddingVertical: 8,
 		width: 120,
@@ -195,7 +208,6 @@ const styles = {
 	container: {
 		flex: 1,
 		backgroundColor: colors.light.background,
-		paddingTop: 150,
 		alignItems: "center",
 	},
 	icon: {
@@ -213,7 +225,7 @@ const styles = {
 		justifyContent: "space-between",
 	},
 	text: {
-		fontFamily: "Barlow_400Regular",
+		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
 	},
-};
+});

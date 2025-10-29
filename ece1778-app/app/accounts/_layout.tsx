@@ -1,8 +1,16 @@
 import { Stack } from "expo-router";
+import { colors } from "../../constants/colors";
 
 export default function AccountLayout() {
 	return (
-		<Stack screenOptions={{ initialRouteName: "index" }}>
+		<Stack
+			screenOptions={{
+				headerStyle: { backgroundColor: colors.light.primary },
+				headerTitleAlign: "center",
+				headerTitleStyle: { color: colors.light.secondary },
+				headerBackTitle: "Back",
+			}}
+		>
 			<Stack.Screen
 				name="index"
 				options={{ title: "Account", headerShown: false }}
@@ -14,6 +22,10 @@ export default function AccountLayout() {
 			<Stack.Screen
 				name="edit-friends"
 				options={{ title: "Edit Friends" }}
+			/>
+			<Stack.Screen
+				name="reset-password"
+				options={{ title: "Reset Password" }}
 			/>
 		</Stack>
 	);

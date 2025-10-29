@@ -5,76 +5,85 @@ import {
 	View,
 	Image,
 	Alert,
-	Button,
-	ScrollView,
 	TextInput,
+	Keyboard,
+	TouchableWithoutFeedback,
 } from "react-native";
 import { useAuthContext } from "../../hooks/use-auth-context";
 import { globalStyles } from "../../styles/globalStyles";
 import { supabase } from "../../lib/supabase.web";
 import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
-import { Barlow_400Regular } from "@expo-google-fonts/barlow";
+import { Barlow_500Medium } from "@expo-google-fonts/barlow";
 import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 import { colors } from "../../constants/colors";
 import { router } from "expo-router";
-
-async function signUpNewUser() {
-	const { data, error } = await supabase.auth.signUp({
-		email: "ipxic7wjy@mozmail.com",
-		password: "password",
-		options: {
-			data: {
-				full_name: "Test User",
-				username: "testuser",
-				avatar_url:
-					"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
-			},
-		},
-	});
-
-	Alert.alert("Signed Up!", JSON.stringify({ data, error }));
-}
-
-async function signInWithEmail() {
-	const { data, error } = await supabase.auth.signInWithPassword({
-		email: "ipxic7wjy@mozmail.com",
-		password: "password",
-	});
-
-	Alert.alert("Signed In!", JSON.stringify({ data, error }));
-}
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AccountScreen() {
 	const { session, profile, isLoggedIn } = useAuthContext();
-	const [isEditing, setIsEditing] = useState(false);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [isLightMode, setIsLightMode] = useState(true);
 	const sun = require("../../assets/sun.png");
 	const moon = require("../../assets/moon.png");
 
-	useFonts({ Quicksand_400Regular, Barlow_400Regular });
+	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 
 	useEffect(() => {
 		// Load fonts or any other async tasks
 	}, []);
 
-	const handleEditProfile = () => {
-		setIsEditing(!isEditing);
-	};
+	async function signUpNewUser() {
+		const { data, error } = await supabase.auth.signUp({
+			email: "ipxic7wjy@mozmail.com",
+			password: "password",
+			options: {
+				data: {
+					full_name: "Test User",
+					username: "testuser",
+					avatar_url:
+						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
+				},
+			},
+		});
+
+		Alert.alert("Signed Up!", JSON.stringify({ data, error }));
+	}
+
+	async function signInWithEmail() {
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email: "socials@yhnl.mozmail.com",
+			password: "password",
+		});
+
+		Alert.alert("Signed In!", JSON.stringify({ data, error }));
+	}
+
+	async function signOut() {
+		const { error } = await supabase.auth.signOut();
+	}
 
 	return (
-		<View style={globalStyles.container}>
-			<Pressable
-				style={{ marginTop: 32, alignSelf: "flex-end" }}
-				onPress={() => setIsLightMode(!isLightMode)}
-			>
-				<Image
-					source={isLightMode ? moon : sun}
-					style={{ width: 24, height: 24 }}
-				/>
-			</Pressable>
+		<SafeAreaView style={globalStyles.container}>
 			{isLoggedIn ? (
 				<View style={styles.container}>
+					<View style={styles.row}>
+						<Pressable onPress={() => setIsLightMode(!isLightMode)}>
+							<Image
+								source={isLightMode ? moon : sun}
+								style={{ width: 24, height: 24 }}
+							/>
+						</Pressable>
+						<Pressable
+							style={{
+								alignSelf: "flex-end",
+							}}
+							onPress={signOut}
+						>
+							<Text style={styles.text}>Log Out</Text>
+						</Pressable>
+					</View>
 					<Image
 						source={{
 							uri:
@@ -92,7 +101,7 @@ export default function AccountScreen() {
 							style={({ pressed }: { pressed: boolean }) => [
 								styles.button,
 								{
-									opacity: pressed || isEditing ? 0.6 : 1,
+									opacity: pressed ? 0.6 : 1,
 								},
 							]}
 							onPress={() => {
@@ -124,13 +133,52 @@ export default function AccountScreen() {
 					</Pressable>
 				</View>
 			) : (
-				<View>
-					<Text>Please sign in to view your account.</Text>
-					<Button title="Sign In" onPress={signInWithEmail} />
-				</View>
+				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+					<View style={styles.container}>
+						<Text style={styles.header}>
+							Welcome! Sign in or create an account.
+						</Text>
+						<Pressable>
+							<TextInput
+								style={styles.input}
+								placeholder="Email"
+								value={email}
+								onChangeText={setEmail}
+							/>
+						</Pressable>
+						<Pressable>
+							<TextInput
+								style={styles.input}
+								placeholder="Password"
+								value={password}
+								onChangeText={setPassword}
+								secureTextEntry={true}
+							/>
+						</Pressable>
+						<Pressable
+							style={({ pressed }: { pressed: boolean }) => [
+								styles.button,
+								{
+									opacity: pressed ? 0.6 : 1,
+								},
+							]}
+							onPress={signInWithEmail}
+						>
+							<Text style={styles.text}>Login</Text>
+						</Pressable>
+						<Pressable
+							style={styles.hiddenButton}
+							onPress={() =>
+								router.push("/accounts/reset-password")
+							}
+						>
+							<Text style={styles.text}>Forgot Password?</Text>
+						</Pressable>
+					</View>
+				</TouchableWithoutFeedback>
 			)}
 			<StatusBar style="auto" />
-		</View>
+		</SafeAreaView>
 	);
 }
 
@@ -141,23 +189,40 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		alignItems: "center",
 		justifyContent: "center",
-		marginTop: 10,
+		marginTop: 16,
 		backgroundColor: colors.light.primary,
+	},
+	header: {
+		fontSize: 32,
+		fontFamily: "Quicksand_400Regular",
+		// fontWeight: "bold",
+		marginBottom: 20,
+		textAlign: "center",
 	},
 	hiddenButton: {
 		paddingVertical: 8,
-		marginTop: 20,
+		marginTop: 16,
 		alignItems: "center",
 		justifyContent: "center",
 	},
+	input: {
+		width: 300,
+		borderWidth: 1,
+		borderColor: colors.light.secondary,
+		borderRadius: 10,
+		padding: 10,
+		marginVertical: 10,
+	},
 	text: {
-		fontFamily: "Barlow_400Regular",
+		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
 	},
 	container: {
+		flex: 1,
 		alignItems: "center",
+		justifyContent: "center",
 		backgroundColor: colors.light.background,
-		marginTop: 200,
+		marginBottom: 150,
 	},
 	row: {
 		flexDirection: "row",
