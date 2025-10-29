@@ -10,10 +10,10 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
-import { useAuthContext } from "../../contexts/AuthContext";
-import { colors } from "../../constants/colors";
-import { supabase } from "../../lib/supabase.web";
+import { globalStyles } from "@styles/globalStyles";
+import { useAuthContext } from "@contexts/AuthContext";
+import { colors } from "@constants/colors";
+import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditAccountScreen() {
@@ -23,8 +23,8 @@ export default function EditAccountScreen() {
 	const [passwordLocked, setPasswordLocked] = useState(true);
 	const [username, setUsername] = useState(profile?.username || "");
 	const [name, setName] = useState(profile?.full_name || "");
-	const lock = require("../../assets/lock.png");
-	const unlock = require("../../assets/unlock.png");
+	const lock = require("@assets/lock.png");
+	const unlock = require("@assets/unlock.png");
 
 	// Update profile in public.profiles table
 	async function updateProfileInDatabase() {

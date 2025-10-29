@@ -9,13 +9,13 @@ import {
 	Keyboard,
 	TouchableWithoutFeedback,
 } from "react-native";
-import { useAuthContext } from "../../contexts/AuthContext";
-import { globalStyles } from "../../styles/globalStyles";
+import { useAuthContext } from "@contexts/AuthContext";
+import { globalStyles } from "@styles/globalStyles";
 import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
 import { Barlow_500Medium } from "@expo-google-fonts/barlow";
 import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
-import { colors } from "../../constants/colors";
+import { colors } from "@constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -25,8 +25,8 @@ export default function AccountScreen() {
 	const [email, setEmail] = useState((params.email as string) || "");
 	const [password, setPassword] = useState((params.password as string) || "");
 	const [isLightMode, setIsLightMode] = useState(true);
-	const sun = require("../../assets/sun.png");
-	const moon = require("../../assets/moon.png");
+	const sun = require("@assets/sun.png");
+	const moon = require("@assets/moon.png");
 
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 
@@ -91,7 +91,7 @@ export default function AccountScreen() {
 								},
 							]}
 							onPress={() => {
-								router.push("/accounts/edit-account");
+								router.push("/edit-account");
 							}}
 						>
 							<Text style={styles.text}>Edit Profile</Text>
@@ -161,7 +161,7 @@ export default function AccountScreen() {
 									},
 								]}
 								onPress={() => {
-									router.push("/accounts/create-account");
+									router.push("/create-account");
 								}}
 							>
 								<Text style={styles.text}>Sign Up</Text>
