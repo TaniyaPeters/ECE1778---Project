@@ -1,13 +1,32 @@
 import { Stack } from "expo-router";
-import {SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { colors } from "@constants/colors";
 
 export default function AccountLayout() {
-  return (    
-    <SafeAreaProvider>
-      <Stack>        
-        <Stack.Screen name="index" options={{ title:"Account"}}/>
-      </Stack>
-      <SafeAreaView style={{height:90}} />
-    </SafeAreaProvider>
-  )
+	return (
+		<Stack
+			screenOptions={{
+				headerStyle: { backgroundColor: colors.light.primary },
+				headerTitleAlign: "center",
+				headerTitleStyle: { color: colors.light.secondary },
+				headerBackTitle: "Back",
+			}}
+		>
+			<Stack.Screen
+				name="index"
+				options={{ title: "Account", headerShown: false }}
+			/>
+			<Stack.Screen
+				name="edit-account"
+				options={{ title: "Edit Account" }}
+			/>
+			<Stack.Screen
+				name="edit-friends"
+				options={{ title: "Edit Friends" }}
+			/>
+			<Stack.Screen
+				name="create-account"
+				options={{ title: "Create Account" }}
+			/>
+		</Stack>
+	);
 }
