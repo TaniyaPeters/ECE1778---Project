@@ -11,13 +11,12 @@ import {
 } from "react-native";
 import { useAuthContext } from "@contexts/AuthContext";
 import { globalStyles } from "@styles/globalStyles";
-import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
-import { Barlow_500Medium } from "@expo-google-fonts/barlow";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Pressable } from "react-native";
 import { colors } from "@constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GitHubSignInButton from "@app/components/GitHubSignIn";
 
 export default function AccountScreen() {
 	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
@@ -27,12 +26,6 @@ export default function AccountScreen() {
 	const [isLightMode, setIsLightMode] = useState(true);
 	const sun = require("@assets/sun.png");
 	const moon = require("@assets/moon.png");
-
-	useFonts({ Quicksand_400Regular, Barlow_500Medium });
-
-	useEffect(() => {
-		// Load fonts or any other async tasks
-	}, []);
 
 	const handleLogin = async () => {
 		if (email.trim() === "" || password.trim() === "") {
@@ -81,7 +74,6 @@ export default function AccountScreen() {
 					<Text style={styles.profileUsername}>
 						@{profile?.username}
 					</Text>
-					{/* <Button title="Sign Up" onPress={signUpNewUser} /> */}
 					<View style={styles.row}>
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
@@ -91,7 +83,7 @@ export default function AccountScreen() {
 								},
 							]}
 							onPress={() => {
-								router.push("/edit-account");
+								router.push("/account/edit-account");
 							}}
 						>
 							<Text style={styles.text}>Edit Profile</Text>
@@ -161,12 +153,13 @@ export default function AccountScreen() {
 									},
 								]}
 								onPress={() => {
-									router.push("/create-account");
+									router.push("/account/create-account");
 								}}
 							>
 								<Text style={styles.text}>Sign Up</Text>
 							</Pressable>
 						</View>
+						<GitHubSignInButton />
 					</View>
 				</TouchableWithoutFeedback>
 			)}
@@ -188,7 +181,6 @@ const styles = StyleSheet.create({
 	header: {
 		fontSize: 32,
 		fontFamily: "Quicksand_400Regular",
-		// fontWeight: "bold",
 		marginBottom: 20,
 		textAlign: "center",
 	},
