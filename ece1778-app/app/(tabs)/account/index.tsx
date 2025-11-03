@@ -11,12 +11,12 @@ import {
 } from "react-native";
 import { useAuthContext } from "@contexts/AuthContext";
 import { globalStyles } from "@styles/globalStyles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
 import { colors } from "@constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import GitHubSignInButton from "@app/components/GitHubSignIn";
+import OAuthSignInButton from "@app/components/OAuthSignIn";
 
 export default function AccountScreen() {
 	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
@@ -40,6 +40,11 @@ export default function AccountScreen() {
 			}
 		});
 	};
+
+	useEffect(() => {
+		setEmail("");
+		setPassword("");
+	}, [isLoggedIn]);
 
 	return (
 		<SafeAreaView style={globalStyles.container}>
@@ -133,7 +138,7 @@ export default function AccountScreen() {
 								secureTextEntry={true}
 							/>
 						</Pressable>
-						<View style={styles.row}>
+						<View style={[styles.row, { marginBottom: 32 }]}>
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									styles.button,
@@ -159,7 +164,8 @@ export default function AccountScreen() {
 								<Text style={styles.text}>Sign Up</Text>
 							</Pressable>
 						</View>
-						<GitHubSignInButton />
+						<OAuthSignInButton provider="github" />
+						<OAuthSignInButton provider="discord" />
 					</View>
 				</TouchableWithoutFeedback>
 			)}
@@ -183,6 +189,7 @@ const styles = StyleSheet.create({
 		fontFamily: "Quicksand_400Regular",
 		marginBottom: 20,
 		textAlign: "center",
+		color: colors.light.black,
 	},
 	hiddenButton: {
 		paddingVertical: 8,
@@ -201,6 +208,7 @@ const styles = StyleSheet.create({
 	text: {
 		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
+		color: colors.light.black,
 	},
 	container: {
 		flex: 1,
@@ -222,5 +230,6 @@ const styles = StyleSheet.create({
 		fontWeight: "bold",
 		marginTop: 16,
 		textAlign: "center",
+		color: colors.light.black,
 	},
 });

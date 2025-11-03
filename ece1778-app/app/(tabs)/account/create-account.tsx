@@ -155,5 +155,6 @@ const styles = StyleSheet.create({
 	text: {
 		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
+		color: colors.light.black,
 	},
 });

@@ -1,16 +1,26 @@
-import { Alert, Pressable, Text } from "react-native";
+import { Alert, Pressable, Text, Image, View, StyleSheet } from "react-native";
 import { supabase } from "@lib/supabase.web";
-import { router } from "expo-router";
 import {
 	maybeCompleteAuthSession,
 	openAuthSessionAsync,
 } from "expo-web-browser";
 import { createURL } from "expo-linking";
+import { colors } from "@app/constants/colors";
 
 maybeCompleteAuthSession();
 
-export default function GitHubSignInButton() {
+type OAuthProvider = "github" | "discord";
+
+export default function OAuthSignInButton({
+	provider,
+}: {
+	provider: OAuthProvider;
+}) {
 	const redirectTo = createURL("/account");
+	const logos = {
+		github: require("@app/assets/github-logo.png"),
+		discord: require("@app/assets/discord-logo.png"),
+	};
 
 	const extractParamsFromUrl = (url: string) => {
 		const parsedUrl = new URL(url);
@@ -26,10 +36,9 @@ export default function GitHubSignInButton() {
 		};
 	};
 
-	const signInWithGitHub = async () => {
-		// Implement GitHub OAuth sign-in logic here
+	const signInWithOAuth = async () => {
 		const { data, error } = await supabase.auth.signInWithOAuth({
-			provider: "github",
+			provider,
 			options: {
 				redirectTo,
 			},
@@ -40,14 +49,12 @@ export default function GitHubSignInButton() {
 			return;
 		}
 
-		const githubOAuthUrl = data.url;
-
-		if (!githubOAuthUrl) {
-			Alert.alert("Error", "OAuth not setup.");
+		if (!data.url) {
+			Alert.alert("Error", "OAuth not setup for this provider.");
 			return;
 		}
 
-		const result = await openAuthSessionAsync(githubOAuthUrl, redirectTo, {
+		const result = await openAuthSessionAsync(data.url, redirectTo, {
 			showInRecents: true,
 		}).catch((err) => {
 			Alert.alert("Error", "Authentication failed to start.");
@@ -81,8 +88,58 @@ export default function GitHubSignInButton() {
 	};
 
 	return (
-		<Pressable onPress={signInWithGitHub}>
-			<Text>Sign in with GitHub</Text>
+		<Pressable
+			onPress={signInWithOAuth}
+			style={[
+				styles.button,
+				{
+					backgroundColor:
+						provider === "github"
+							? colors.light.primary
+							: colors.light.discord,
+				},
+			]}
+		>
+			<View style={styles.row}>
+				<Image
+					source={logos[provider]}
+					style={styles[`${provider}Logo`]}
+				/>
+				<Text style={styles.text}>
+					Sign in with{" "}
+					{provider.charAt(0).toUpperCase() + provider.slice(1)}
+				</Text>
+			</View>
 		</Pressable>
 	);
 }
+
+const styles = StyleSheet.create({
+	button: {
+		paddingVertical: 8,
+		width: 200,
+		borderRadius: 10,
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 10,
+	},
+	githubLogo: {
+		width: 24,
+		height: 24,
+	},
+	discordLogo: {
+		width: 24,
+		height: 18,
+	},
+	row: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		gap: 10,
+		height: 24,
+	},
+	text: {
+		fontFamily: "Barlow_500Medium",
+		fontSize: 12,
+	},
+});
