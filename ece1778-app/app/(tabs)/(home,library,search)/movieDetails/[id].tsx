@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
 	FlatList,
 	Image,
+	Pressable,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -12,10 +13,13 @@ import { globalStyles } from "@styles/globalStyles";
 import { Review } from "@app/types/types";
 import ReviewListItem from "@components/ReviewListItem";
 import Card from "@components/Card";
+import RatingReviewPopup from "@components/RatingReviewPopup";
 import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
+import { useAuthContext } from "@contexts/AuthContext";
 
 export default function movieDetails() {
+	const { profile } = useAuthContext();
 	const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
 
 	//State variables for all movie info
@@ -28,6 +32,10 @@ export default function movieDetails() {
 	const [castMembers, setCastMembers] = useState<string[]>([]);
 	const [genres, setGenres] = useState<string[]>([]);
 	const [reviews, setReviews] = useState<Review[]>([]);
+
+	const [userReview, setUserReview] = useState<Review | null>(null); 
+	const [popupVisible, setPopupVisible] = useState<boolean>(false);
+	const [reviewButtonEnabled, setReviewButtonEnabled] = useState<boolean>(false);
 
 	async function retrieveMovieDetails(id_num: number) {
 		//Retrieve movie details from movies table
@@ -54,27 +62,43 @@ export default function movieDetails() {
 
 	async function retrieveReviews(id_num: number) {
 		setReviews([]); //clear old reviews
+		setUserReview(null);
 
 		//Retrieve reviews for movie
 		const { data, error } = await supabase
 		.from("reviews")
 		.select(`id,rating,review,user_id,profiles (username)`)
-		.eq("movie_id", id_num);
+		.eq("movie_id", id_num)
+		.order("id", { ascending: true });
 
 		//If no error in retrieving reviews, set all the reviews
 		if (!error && data && data.length > 0) {
 			const filtered_reviews = data
-				.filter(r => r.review !== null)
+				.filter(r => r.review !== null || r.user_id === profile?.id)
 				.map(r => ({
 					id: r.id,
+					user_id: r.user_id,
 					username: r.profiles?.username ?? "Anonymous",
 					rating: r.rating,
 					review: r.review
 				}));
-			setReviews(filtered_reviews);
+
+			//Put the review of the logged-in user at the top of list
+			const ordered_reviews = profile ? [...filtered_reviews.filter(r => r.user_id === profile.id), ...filtered_reviews.filter(r=> r.user_id !== profile.id)] : filtered_reviews;
+			setReviews(ordered_reviews);
+			
+			//Also save the user's review (eg. for updating purposes)
+			if (profile) {
+				const userReviewIndex = ordered_reviews.findIndex(r => r.user_id === profile.id);
+				if (userReviewIndex !== -1) {
+					setUserReview(ordered_reviews[userReviewIndex]);
+				}
+			}
 		}
 		else {
 			setReviews([]);
+			setUserReview(null);
+			setReviewButtonEnabled(false);
 		}
 	}
 
@@ -88,6 +112,7 @@ export default function movieDetails() {
 		setMoviePoster(null);
 		setCastMembers([]);
 		setGenres([]);
+		setReviewButtonEnabled(false);
 	};
 
 	useEffect(() => {
@@ -95,6 +120,7 @@ export default function movieDetails() {
 			//id in db is a number so convert it and make sure it's valid
 			const id_num = Number(id);
 			if (!Number.isNaN(id_num)) {
+				setReviewButtonEnabled(true);
 				//Run both fetches
 				(async () => {
 					try {
@@ -117,7 +143,91 @@ export default function movieDetails() {
 			clearMovieDetails();
 			setReviews([]);
 		}
-	}, [id]);
+	}, [id, profile]);
+
+
+	const handleSubmitReview = async (ratingNew: number, reviewTextNew: string) => {
+		if (!id || Number.isNaN(Number(id))) {
+			console.error("Invalid movie id");
+			return;
+		}
+		
+		if (profile) {
+			const reviewValue = reviewTextNew === "" ? null : reviewTextNew;
+
+			if (userReview) { //update
+				try {
+					const { data, error } = await supabase
+						.from('reviews')
+						.update({rating: ratingNew, review: reviewValue})
+						.eq('id', userReview.id)
+						.select();
+
+					if (!data || data.length === 0) {
+						console.error("Error updating user review:");
+					}
+				} catch (err) {
+					console.error("Error updating user review", err);
+				}
+			}
+			else { //create
+				try {
+					const { data, error } = await supabase
+						.from ('reviews')
+						.insert([{movie_id: Number(id), user_id: profile?.id ?? "", rating: ratingNew, review: reviewValue}])
+						.select();
+
+					if (!data || data.length === 0) {
+						console.error("Error creating user review");
+					}
+				} catch (err) {
+					console.error("Error creating user review:", err);
+				}
+			}
+		}
+
+		//Recalculate and set the number of ratings and average rating for movie
+		try {
+			let { data: dataAgg, error: errorAgg } = await supabase
+				.from('reviews')
+				.select('rating')
+				.eq('movie_id', Number(id));
+
+			if (!errorAgg && dataAgg) {
+				const ratingValues = dataAgg
+					.map(r => r.rating)
+					.filter((r): r is number => r !== null && r !== undefined);
+				const rating_count = ratingValues.length;
+				const rating_avg = rating_count > 0 
+					? Math.round((ratingValues.reduce((sum, r) => sum + r, 0) / rating_count) * 10) / 10
+					: null;
+
+				const { data: dataUpdate, error: errorUpdate } = await supabase 
+					.from('movies')
+					.update({rating_count: rating_count, avg_rating: rating_avg})
+					.eq("id", Number(id))
+					.select();
+
+				if (errorUpdate) {
+					console.error("Error updating rating count and average for movie: ", errorUpdate);
+				}
+			}
+			else {
+				console.error("Error retrieving rating count and average for movie: ", errorAgg)
+			}
+		} catch (err) {
+			console.error("Error updating rating count and average for movie:", err);
+		}
+		
+		//Refresh 
+		try {
+			await Promise.all([retrieveMovieDetails(Number(id)), retrieveReviews(Number(id))]);
+		} catch (err) {
+			console.error("Error fetching movie details:", err);
+		}
+
+		setPopupVisible(false);
+	}
 
 	return (
 		<ScrollView style={globalStyles.container}>
@@ -172,8 +282,19 @@ export default function movieDetails() {
 				</View>
 			</Card>
 
-			{/* Reviews by other users */}
-			<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+			{/* Reviews */}
+			<View style={styles.horizontalContainer}>
+				<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+				<Pressable
+					style={({ pressed }: { pressed: boolean }) => [
+						styles.button, { opacity: pressed ? 0.6 : 1},
+					]}
+					onPress={() => setPopupVisible(true)}
+					disabled={!reviewButtonEnabled}
+				>
+					<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Rating/Review" : "Add Rating/Review"}</Text>
+				</Pressable>
+			</View>
 			<FlatList
 				data={reviews}
 				keyExtractor={(item: Review) => item.id.toString()}
@@ -182,6 +303,14 @@ export default function movieDetails() {
 				)}
 				scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
 				contentContainerStyle={styles.reviewList}
+			/>
+
+			{/* Add/update review and rating popup*/}
+			<RatingReviewPopup
+				visible={popupVisible}
+				review={userReview}
+				onClose={() => setPopupVisible(false)}
+				onSubmit={handleSubmitReview}
 			/>
 		</ScrollView>
 	);
@@ -209,11 +338,26 @@ const styles = StyleSheet.create({
 	horizontalContainer: {
 		flexDirection: "row",
 		flexWrap: "wrap",
-		alignItems: "flex-start",
+		alignItems: "center",
 		marginTop: 14,
+		justifyContent: 'space-between',
 	},
 	verticalContainer: {
 		flexDirection: "column",
+	},
+	button: {
+		paddingVertical: 8,
+		width: 160,
+		height: 50,
+		borderRadius: 10,
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 16,
+		backgroundColor: colors.light.secondary,
+	},
+	buttonText: {
+		fontSize: 14,
+		color: colors.light.background
 	},
 	reviewList: {
 		paddingBottom: 20,
