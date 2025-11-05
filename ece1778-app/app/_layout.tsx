@@ -1,6 +1,16 @@
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { MaterialIcons } from "@expo/vector-icons";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
 import { Platform } from "react-native";
+=======
+import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+>>>>>>> Stashed changes
+=======
+import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+>>>>>>> Stashed changes
 
 export default function RootLayout() {
   return (
