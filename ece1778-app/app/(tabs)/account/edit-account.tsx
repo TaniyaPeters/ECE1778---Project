@@ -15,6 +15,7 @@ import { useAuthContext } from "@contexts/AuthContext";
 import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -25,9 +26,10 @@ export default function EditAccountScreen() {
 	const [name, setName] = useState(profile?.full_name || "");
 	const lock = require("@assets/lock.png");
 	const unlock = require("@assets/unlock.png");
+	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
 
 	// Update profile in public.profiles table
-	async function updateProfileInDatabase() {
+	const updateProfileInDatabase = async () => {
 		if (!session?.user) {
 			Alert.alert("No user session available");
 			return false;
@@ -49,7 +51,7 @@ export default function EditAccountScreen() {
 		} else {
 			return false;
 		}
-	}
+	};
 
 	// Input validation
 	const handleSubmit = () => {
@@ -111,7 +113,11 @@ export default function EditAccountScreen() {
 					return;
 				}
 
+				session!.user.user_metadata.full_name = name;
+				session!.user.user_metadata.username = username;
+
 				Alert.alert("Success", "Profile updated successfully!");
+				router.push("/account");
 			});
 	};
 
@@ -147,34 +153,40 @@ export default function EditAccountScreen() {
 						onChangeText={setUsername}
 					/>
 				</View>
-				<View style={styles.input}>
-					<Text style={styles.text}>Email</Text>
-					<TextInput
-						placeholder="Email"
-						value={email}
-						onChangeText={setEmail}
-					/>
-				</View>
-				<View style={styles.input}>
-					<Text style={styles.text}>Password</Text>
-					<View style={styles.row}>
+				{!isOAuth && (
+					<View style={styles.input}>
+						<Text style={styles.text}>Email</Text>
 						<TextInput
-							placeholder="***********"
-							value={password}
-							onChangeText={setPassword}
-							secureTextEntry={true}
-							editable={passwordLocked ? false : true}
+							placeholder="Email"
+							value={email}
+							onChangeText={setEmail}
 						/>
-						<Pressable
-							onPress={() => setPasswordLocked(!passwordLocked)}
-						>
-							<Image
-								source={passwordLocked ? lock : unlock}
-								style={styles.icon}
-							/>
-						</Pressable>
 					</View>
-				</View>
+				)}
+				{!isOAuth && (
+					<View style={styles.input}>
+						<Text style={styles.text}>Password</Text>
+						<View style={styles.row}>
+							<TextInput
+								placeholder="***********"
+								value={password}
+								onChangeText={setPassword}
+								secureTextEntry={true}
+								editable={passwordLocked ? false : true}
+							/>
+							<Pressable
+								onPress={() =>
+									setPasswordLocked(!passwordLocked)
+								}
+							>
+								<Image
+									source={passwordLocked ? lock : unlock}
+									style={styles.icon}
+								/>
+							</Pressable>
+						</View>
+					</View>
+				)}
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						styles.button,
@@ -223,5 +235,6 @@ const styles = StyleSheet.create({
 	text: {
 		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
+		color: colors.light.black,
 	},
 });

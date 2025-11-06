@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { colors } from '@app/constants/colors';
 
 type StarRatingProps = {
   rating: number; // 0 to 5, supports .5
@@ -8,7 +9,7 @@ type StarRatingProps = {
   color?: string;
 };
 
-const StarRating = ({ rating, size = 20, color = '#FFD700' }: StarRatingProps) => {
+const StarRating = ({ rating, size = 20, color = colors.light.background }: StarRatingProps) => {
   const stars = [];
 
   for (let i = 1; i <= 5; i++) {
