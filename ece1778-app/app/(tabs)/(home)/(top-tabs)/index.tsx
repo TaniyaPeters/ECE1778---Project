@@ -7,7 +7,7 @@ export default function TabMovies() {
   return (
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.titleText}>All Media</Text>
-      <Button title="Go to Movie Details" onPress={() => router.push("../movieDetails/1")}/>
+      <Button title="Go to Movie Details" onPress={() => router.push("../movieDetails/51")}/>
       <MonthlyRecap user="User" type="Movie" action="Watched"></MonthlyRecap>
       <MonthlyRecap user="User" type="Book" action="Read"></MonthlyRecap>
     </ScrollView>
