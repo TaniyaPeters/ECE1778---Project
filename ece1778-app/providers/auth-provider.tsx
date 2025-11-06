@@ -4,11 +4,14 @@ import { AuthContext } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase.web";
 import type { Session } from "@supabase/supabase-js";
 import { PropsWithChildren, useEffect, useState } from "react";
+import { createURL } from "expo-linking";
 
 export default function AuthProvider({ children }: PropsWithChildren) {
 	const [session, setSession] = useState<Session | undefined | null>();
 	const [profile, setProfile] = useState<Tables<"profiles"> | null>();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+
+	const redirectToAccount = createURL("/account");
 
 	// Fetch the session once, and subscribe to auth state changes
 	useEffect(() => {
@@ -98,7 +101,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 			email,
 			password,
 			options: {
-				emailRedirectTo: "myapp://accounts",
+				emailRedirectTo: redirectToAccount,
 				data: {
 					full_name: name ?? "",
 					username: username,

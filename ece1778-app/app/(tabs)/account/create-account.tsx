@@ -65,7 +65,7 @@ export default function EditAccountScreen() {
 				"Check your email to verify your account, then sign in."
 			);
 			router.push({
-				pathname: "/",
+				pathname: "/account",
 				params: { email: email, password: password },
 			});
 		});
@@ -155,5 +155,6 @@ const styles = StyleSheet.create({
 	text: {
 		fontFamily: "Barlow_500Medium",
 		fontSize: 12,
+		color: colors.light.black,
 	},
 });
