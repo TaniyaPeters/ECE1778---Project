@@ -40,6 +40,12 @@ export const accountStyles = StyleSheet.create({
 		justifyContent: "center",
 		marginBottom: 150,
 	},
+	header: {
+		fontSize: 32,
+		fontFamily: "Quicksand_400Regular",
+		marginBottom: 20,
+		textAlign: "center",
+	},
 	input: {
 		marginTop: 16,
 		paddingHorizontal: 32,
@@ -48,7 +54,6 @@ export const accountStyles = StyleSheet.create({
 	profileUsername: {
 		fontSize: 18,
 		fontFamily: "Quicksand_400Regular",
-		fontWeight: "bold",
 		marginTop: 16,
 		marginBottom: 16,
 		textAlign: "center",

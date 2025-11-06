@@ -176,7 +176,12 @@ export default function AccountScreen() {
 					<View
 						style={[accountStyles.container, accountStyles.bgLight]}
 					>
-						<Text style={[styles.header, accountStyles.textLight]}>
+						<Text
+							style={[
+								accountStyles.header,
+								accountStyles.textLight,
+							]}
+						>
 							Welcome! Sign in or create an account.
 						</Text>
 						<Pressable>
@@ -260,12 +265,6 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-	header: {
-		fontSize: 32,
-		fontFamily: "Quicksand_400Regular",
-		marginBottom: 20,
-		textAlign: "center",
-	},
 	hiddenButton: {
 		paddingVertical: 8,
 		marginTop: 16,

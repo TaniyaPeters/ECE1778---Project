@@ -19,10 +19,7 @@ export default function AccountLayout() {
 				name="edit-account"
 				options={{ title: "Edit Account" }}
 			/>
-			<Stack.Screen
-				name="edit-friends"
-				options={{ title: "Edit Friends" }}
-			/>
+			<Stack.Screen name="edit-friends" options={{ title: "" }} />
 			<Stack.Screen
 				name="create-account"
 				options={{ title: "Create Account" }}
