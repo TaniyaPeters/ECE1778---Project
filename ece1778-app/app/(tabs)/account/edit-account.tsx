@@ -16,6 +16,7 @@ import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { accountStyles } from "@app/styles/accountStyles";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -127,7 +128,13 @@ export default function EditAccountScreen() {
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-			<SafeAreaView style={[globalStyles.container, styles.container]}>
+			<SafeAreaView
+				style={[
+					globalStyles.container,
+					accountStyles.container,
+					accountStyles.bgLight,
+				]}
+			>
 				<Image
 					source={{
 						uri:
@@ -137,16 +144,20 @@ export default function EditAccountScreen() {
 					style={globalStyles.profileImage}
 				/>
 
-				<View style={styles.input}>
-					<Text style={styles.text}>Name</Text>
+				<View style={accountStyles.input}>
+					<Text style={[accountStyles.text, accountStyles.textLight]}>
+						Name
+					</Text>
 					<TextInput
 						placeholder="Name"
 						value={name}
 						onChangeText={setName}
 					/>
 				</View>
-				<View style={styles.input}>
-					<Text style={styles.text}>Username</Text>
+				<View style={accountStyles.input}>
+					<Text style={[accountStyles.text, accountStyles.textLight]}>
+						Username
+					</Text>
 					<TextInput
 						placeholder="Username"
 						value={username}
@@ -154,8 +165,15 @@ export default function EditAccountScreen() {
 					/>
 				</View>
 				{!isOAuth && (
-					<View style={styles.input}>
-						<Text style={styles.text}>Email</Text>
+					<View style={accountStyles.input}>
+						<Text
+							style={[
+								accountStyles.text,
+								accountStyles.textLight,
+							]}
+						>
+							Email
+						</Text>
 						<TextInput
 							placeholder="Email"
 							value={email}
@@ -164,9 +182,16 @@ export default function EditAccountScreen() {
 					</View>
 				)}
 				{!isOAuth && (
-					<View style={styles.input}>
-						<Text style={styles.text}>Password</Text>
-						<View style={styles.row}>
+					<View style={accountStyles.input}>
+						<Text
+							style={[
+								accountStyles.text,
+								accountStyles.textLight,
+							]}
+						>
+							Password
+						</Text>
+						<View style={accountStyles.row}>
 							<TextInput
 								placeholder="***********"
 								value={password}
@@ -189,14 +214,17 @@ export default function EditAccountScreen() {
 				)}
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
-						styles.button,
+						accountStyles.button,
+						accountStyles.primaryLight,
 						{
 							opacity: pressed ? 0.6 : 1,
 						},
 					]}
 					onPress={handleSubmit}
 				>
-					<Text style={styles.text}>Save Changes</Text>
+					<Text style={[accountStyles.text, accountStyles.textLight]}>
+						Save Changes
+					</Text>
 				</Pressable>
 			</SafeAreaView>
 		</TouchableWithoutFeedback>
@@ -204,37 +232,8 @@ export default function EditAccountScreen() {
 }
 
 const styles = StyleSheet.create({
-	button: {
-		paddingVertical: 8,
-		width: 120,
-		borderRadius: 10,
-		alignItems: "center",
-		justifyContent: "center",
-		marginTop: 10,
-		backgroundColor: colors.light.primary,
-	},
-	container: {
-		flex: 1,
-		backgroundColor: colors.light.background,
-		alignItems: "center",
-	},
 	icon: {
 		width: 20,
 		height: 20,
-	},
-	input: {
-		marginTop: 16,
-		paddingHorizontal: 32,
-		width: "90%",
-	},
-	row: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-	},
-	text: {
-		fontFamily: "Barlow_500Medium",
-		fontSize: 12,
-		color: colors.light.black,
 	},
 });

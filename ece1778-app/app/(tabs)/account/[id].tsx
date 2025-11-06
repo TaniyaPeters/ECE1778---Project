@@ -1,15 +1,16 @@
-import { colors } from "@app/constants/colors";
 import { supabase } from "@app/lib/supabase.web";
 import { Tables } from "@app/types/database.types";
 import { globalStyles } from "@styles/globalStyles";
+import { accountStyles } from "@app/styles/accountStyles";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, StyleSheet, Image, Text, Alert } from "react-native";
+import { View, Image, Text, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
 	const { id } = useLocalSearchParams();
 	const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
+	const [collections, setCollections] = useState<Tables<"collections">[]>([]);
 
 	const getProfileById = async (id: string) => {
 		let { data: profiles, error } = await supabase
@@ -27,13 +28,30 @@ export default function ProfileScreen() {
 		}
 	};
 
+	const getCollectionsById = async (id: string) => {
+		let { data: collections, error } = await supabase
+			.from("collections")
+			.select("*")
+			.eq("user_id", id);
+
+		if (error) {
+			Alert.alert("Error", error.message);
+			return;
+		}
+
+		if (collections) {
+			setCollections(collections);
+		}
+	};
+
 	useEffect(() => {
 		getProfileById(id as string);
+		getCollectionsById(id as string);
 	}, [id]);
 
 	return (
 		<SafeAreaView style={globalStyles.container}>
-			<View style={styles.container}>
+			<View style={[accountStyles.container, accountStyles.bgLight]}>
 				<Image
 					source={{
 						uri:
@@ -42,26 +60,15 @@ export default function ProfileScreen() {
 					}}
 					style={globalStyles.profileImage}
 				/>
-				<Text style={styles.profileUsername}>@{profile?.username}</Text>
+				<Text
+					style={[
+						accountStyles.profileUsername,
+						accountStyles.textLight,
+					]}
+				>
+					@{profile?.username}
+				</Text>
 			</View>
 		</SafeAreaView>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: colors.light.background,
-		marginBottom: 150,
-	},
-	profileUsername: {
-		fontSize: 18,
-		fontFamily: "Quicksand_400Regular",
-		fontWeight: "bold",
-		marginTop: 16,
-		textAlign: "center",
-		color: colors.light.black,
-	},
-});

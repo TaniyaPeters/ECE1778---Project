@@ -17,6 +17,7 @@ import { colors } from "@constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import OAuthSignInButton from "@app/components/OAuthSignIn";
+import { accountStyles } from "@app/styles/accountStyles";
 
 export default function AccountScreen() {
 	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
@@ -48,7 +49,7 @@ export default function AccountScreen() {
 
 	return (
 		<SafeAreaView style={globalStyles.container}>
-			<View style={styles.row}>
+			<View style={accountStyles.row}>
 				<Pressable onPress={() => setIsLightMode(!isLightMode)}>
 					<Image
 						source={isLightMode ? moon : sun}
@@ -59,15 +60,23 @@ export default function AccountScreen() {
 					<Pressable
 						style={{
 							alignSelf: "flex-end",
+							paddingBottom: 5,
 						}}
 						onPress={signOut}
 					>
-						<Text style={styles.text}>Log Out</Text>
+						<Text
+							style={[
+								accountStyles.text,
+								accountStyles.textLight,
+							]}
+						>
+							Log Out
+						</Text>
 					</Pressable>
 				)}
 			</View>
 			{isLoggedIn ? (
-				<View style={styles.container}>
+				<View style={[accountStyles.container, accountStyles.bgLight]}>
 					<Image
 						source={{
 							uri:
@@ -76,13 +85,19 @@ export default function AccountScreen() {
 						}}
 						style={globalStyles.profileImage}
 					/>
-					<Text style={styles.profileUsername}>
+					<Text
+						style={[
+							accountStyles.profileUsername,
+							accountStyles.textLight,
+						]}
+					>
 						@{profile?.username}
 					</Text>
-					<View style={styles.row}>
+					<View style={[accountStyles.row, { gap: 10 }]}>
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
-								styles.button,
+								accountStyles.button,
+								accountStyles.primaryLight,
 								{
 									opacity: pressed ? 0.6 : 1,
 								},
@@ -91,32 +106,53 @@ export default function AccountScreen() {
 								router.push("/account/edit-account");
 							}}
 						>
-							<Text style={styles.text}>Edit Profile</Text>
+							<Text
+								style={[
+									accountStyles.text,
+									accountStyles.textLight,
+								]}
+							>
+								Edit Profile
+							</Text>
 						</Pressable>
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
-								styles.button,
+								accountStyles.button,
+								accountStyles.primaryLight,
 								{
 									opacity: pressed ? 0.6 : 1,
 								},
 							]}
 							onPress={async () => {}}
 						>
-							<Text style={styles.text}>Share Profile</Text>
+							<Text
+								style={[
+									accountStyles.text,
+									accountStyles.textLight,
+								]}
+							>
+								Share Profile
+							</Text>
 						</Pressable>
 					</View>
 					<Pressable
 						style={styles.hiddenButton}
-						onPress={async () => {}}
+						onPress={() => router.push("/account/edit-friends")}
 					>
-						<Text style={styles.text}>
+						<Text
+							style={[
+								accountStyles.text,
+								accountStyles.textLight,
+							]}
+						>
 							Friends:{" "}
 							<Text style={{ fontWeight: "bold" }}>0</Text>
 						</Text>
 					</Pressable>
 					<Pressable
 						style={({ pressed }: { pressed: boolean }) => [
-							styles.button,
+							accountStyles.button,
+							accountStyles.primaryLight,
 							{
 								opacity: pressed ? 0.6 : 1,
 							},
@@ -125,20 +161,30 @@ export default function AccountScreen() {
 							router.push("/account/collection/1");
 						}}
 					>
-						<Text style={styles.text}>
+						<Text
+							style={[
+								accountStyles.text,
+								accountStyles.textLight,
+							]}
+						>
 							Collections
 						</Text>
 					</Pressable>
 				</View>
 			) : (
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<View style={styles.container}>
-						<Text style={styles.header}>
+					<View
+						style={[accountStyles.container, accountStyles.bgLight]}
+					>
+						<Text style={[styles.header, accountStyles.textLight]}>
 							Welcome! Sign in or create an account.
 						</Text>
 						<Pressable>
 							<TextInput
-								style={styles.input}
+								style={[
+									styles.input,
+									{ borderColor: colors.light.secondary },
+								]}
 								placeholder="Email"
 								value={email}
 								onChangeText={setEmail}
@@ -146,28 +192,45 @@ export default function AccountScreen() {
 						</Pressable>
 						<Pressable>
 							<TextInput
-								style={styles.input}
+								style={[
+									styles.input,
+									{ borderColor: colors.light.secondary },
+								]}
 								placeholder="Password"
 								value={password}
 								onChangeText={setPassword}
 								secureTextEntry={true}
 							/>
 						</Pressable>
-						<View style={[styles.row, { marginBottom: 32 }]}>
+						<View
+							style={[
+								accountStyles.row,
+								{ marginBottom: 32, gap: 10 },
+							]}
+						>
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
-									styles.button,
+									accountStyles.button,
+									accountStyles.primaryLight,
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
 								]}
 								onPress={handleLogin}
 							>
-								<Text style={styles.text}>Login</Text>
+								<Text
+									style={[
+										accountStyles.text,
+										accountStyles.textLight,
+									]}
+								>
+									Login
+								</Text>
 							</Pressable>
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
-									styles.button,
+									accountStyles.button,
+									accountStyles.primaryLight,
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
@@ -176,7 +239,14 @@ export default function AccountScreen() {
 									router.push("/account/create-account");
 								}}
 							>
-								<Text style={styles.text}>Sign Up</Text>
+								<Text
+									style={[
+										accountStyles.text,
+										accountStyles.textLight,
+									]}
+								>
+									Sign Up
+								</Text>
 							</Pressable>
 						</View>
 						<OAuthSignInButton provider="github" />
@@ -190,21 +260,11 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-	button: {
-		paddingVertical: 8,
-		width: 120,
-		borderRadius: 10,
-		alignItems: "center",
-		justifyContent: "center",
-		marginTop: 16,
-		backgroundColor: colors.light.primary,
-	},
 	header: {
 		fontSize: 32,
 		fontFamily: "Quicksand_400Regular",
 		marginBottom: 20,
 		textAlign: "center",
-		color: colors.light.black,
 	},
 	hiddenButton: {
 		paddingVertical: 8,
@@ -215,36 +275,8 @@ const styles = StyleSheet.create({
 	input: {
 		width: 300,
 		borderWidth: 1,
-		borderColor: colors.light.secondary,
 		borderRadius: 10,
 		padding: 10,
 		marginVertical: 10,
-	},
-	text: {
-		fontFamily: "Barlow_500Medium",
-		fontSize: 12,
-		color: colors.light.black,
-	},
-	container: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: colors.light.background,
-		marginBottom: 150,
-	},
-	row: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-		gap: 10,
-		maxHeight: 100,
-	},
-	profileUsername: {
-		fontSize: 18,
-		fontFamily: "Quicksand_400Regular",
-		fontWeight: "bold",
-		marginTop: 16,
-		textAlign: "center",
-		color: colors.light.black,
 	},
 });
