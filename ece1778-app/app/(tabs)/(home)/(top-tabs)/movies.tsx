@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../../lib/supabase.web";
 import { Tables } from "../../../../types/database.types";
 import { colors } from "../../../../constants/colors";
+import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Movie = Tables<"movies">;
 
@@ -23,6 +24,7 @@ export default function TabMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { isLoggedIn } = useAuthContext();
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -49,7 +51,7 @@ export default function TabMovies() {
     };
 
     fetchMovies();
-  }, []);
+  }, [isLoggedIn]);
 
   if (loading) {
     return (
