@@ -21,12 +21,10 @@ export const MaterialTopTabs = withLayoutContext<
 
 export default function TopTabsLayout() {
   return (
-    <SafeAreaProvider>
-      <MaterialTopTabs>
-        <MaterialTopTabs.Screen name="index" options={{ title: "All" }} />
-        <MaterialTopTabs.Screen name="movies" options={{ title: "Movies Tab" }} />
-        <MaterialTopTabs.Screen name="books" options={{ title: "Books Tab" }} />
-      </MaterialTopTabs>
-    </SafeAreaProvider>
+    <MaterialTopTabs>
+      <MaterialTopTabs.Screen name="index" options={{ title: "All" }} />
+      <MaterialTopTabs.Screen name="movies" options={{ title: "Movies Tab" }} />
+      <MaterialTopTabs.Screen name="books" options={{ title: "Books Tab" }} />
+    </MaterialTopTabs>
   );
 }
