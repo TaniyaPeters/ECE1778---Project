@@ -292,7 +292,7 @@ export default function movieDetails() {
 					onPress={() => setPopupVisible(true)}
 					disabled={!reviewButtonEnabled}
 				>
-					<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Rating/Review" : "Add Rating/Review"}</Text>
+					<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
 				</Pressable>
 			</View>
 			<FlatList
@@ -347,9 +347,9 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		paddingVertical: 8,
-		width: 160,
+		width: 120,
 		height: 50,
-		borderRadius: 10,
+		borderRadius: 15,
 		alignItems: "center",
 		justifyContent: "center",
 		marginTop: 16,
