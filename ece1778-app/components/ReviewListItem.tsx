@@ -4,18 +4,21 @@ import Card from "./Card";
 import StarRating from "@components/starRating";
 import { colors } from "../constants/colors";
 import { globalStyles } from "../styles/globalStyles";
+import { useAuthContext } from "@contexts/AuthContext";
 
 type Props = {
 	review: Review;
 };
 
 export default function ReviewListItem({ review }: Props) {
+	const { profile } = useAuthContext();
+
 	return (
 		<Card style={styles.card}>
 			<View style={styles.content}>
 				<View style={styles.headerRow}>
 					{/* User who wrote review */}
-					<Text style={[globalStyles.paragraph, styles.text]}>
+					<Text style={profile?.id === review.user_id ? [globalStyles.paragraphBold, styles.text] : [globalStyles.paragraph, styles.text]}>
 						{review.username}
 					</Text>
 					{/* Rating associated to the review depicted out of 5 stars */}
@@ -26,7 +29,7 @@ export default function ReviewListItem({ review }: Props) {
 				{/* Divider line */}
 				<View style={styles.line} />
 				{/* Review text */}
-				<Text style={[globalStyles.paragraph, styles.text]}>
+				<Text style={profile?.id === review.user_id ? [globalStyles.paragraphBold, styles.text] : [globalStyles.paragraph, styles.text]}>
 					{review.review}
 				</Text>
 			</View>
