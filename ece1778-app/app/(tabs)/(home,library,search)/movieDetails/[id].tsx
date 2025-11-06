@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import {
 	FlatList,
 	Image,
+	Pressable,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -8,37 +10,224 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
-import { Review } from "@app/types";
+import { Review } from "@app/types/types";
 import ReviewListItem from "@components/ReviewListItem";
 import Card from "@components/Card";
+import RatingReviewPopup from "@components/RatingReviewPopup";
 import { colors } from "@constants/colors";
-import GeneralCard from "@components/generalCard";
+import { supabase } from "@lib/supabase.web";
+import { useAuthContext } from "@contexts/AuthContext";
 
 export default function movieDetails() {
+	const { profile } = useAuthContext();
 	const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
 
-  //Hardcoding for now - later retrieve using api
-  const title: string = "Harry Potter and the Sorcerer's Stone";
-  const release_year: number = 2001;
-  const description: string =
-    "An orphaned boy enrolls in a school of wizardry, where he learns the truth about himself, his family and the terrible evil that haunts the magical world.";
-  const rating: number = 3.85;
-  const num_ratings: number = 879;
-  const reviews: Review[] = [
-    {
-      id: 1,
-      user: "bob123",
-      text: "This movie is a delight for those of all ages. I have seen it several times and each time I am enchanted by the characters and magic. The cast is outstanding, the special effects delightful, everything most believable.",
-    },
-    {
-      id: 2,
-      user: "lesley67",
-      text: "I know I'm probably the only one that didn't care for this film, but I thought it was plain boring. The adaptation of the book is just OK and the acting is average.",
-    },
-  ];
-  const director: string = "Chris Columbus";
-  const cast: string[] = ["Daniel Radcliffe", "Rupert Grint", "Emma Watson"]; //could also be just a string depending on how the info is returned from api
-  const moviePoster = require("@assets/harry-potter-movie-poster.jpg"); //delete this image from assets folder later
+	//State variables for all movie info
+	const [title, setTitle] = useState<string>("Movie not found");
+	const [releaseYear, setReleaseYear] = useState<string>("");
+	const [description, setDescription] = useState<string>("");
+	const [rating, setRating] = useState<number | null>(null);
+	const [numRatings, setNumRatings] = useState<number | null>(null);
+	const [moviePoster, setMoviePoster] = useState<string | null>(null);
+	const [castMembers, setCastMembers] = useState<string[]>([]);
+	const [genres, setGenres] = useState<string[]>([]);
+	const [reviews, setReviews] = useState<Review[]>([]);
+
+	const [userReview, setUserReview] = useState<Review | null>(null); 
+	const [popupVisible, setPopupVisible] = useState<boolean>(false);
+	const [reviewButtonEnabled, setReviewButtonEnabled] = useState<boolean>(false);
+
+	async function retrieveMovieDetails(id_num: number) {
+		//Retrieve movie details from movies table
+		const { data, error } = await supabase
+		.from("movies")
+		.select("title,avg_rating,rating_count,description,release_date,poster_path,genres,cast_members")
+		.eq("id", id_num);
+
+		//If no error in retrieving movie, set all the movie details
+		if (!error && data && data.length > 0) {
+			setTitle(data[0].title);
+			setReleaseYear(data[0].release_date?.substring(0,4) ?? "");
+			setDescription(data[0].description ?? "");
+			setRating(data[0].avg_rating);
+			setNumRatings(data[0].rating_count);
+			setMoviePoster(data[0].poster_path ?? null);
+			setCastMembers(data[0].cast_members ?? []);
+			setGenres(data[0].genres ?? []);
+		}
+		else {
+			clearMovieDetails();
+		}
+	}
+
+	async function retrieveReviews(id_num: number) {
+		setReviews([]); //clear old reviews
+		setUserReview(null);
+
+		//Retrieve reviews for movie
+		const { data, error } = await supabase
+		.from("reviews")
+		.select(`id,rating,review,user_id,profiles (username)`)
+		.eq("movie_id", id_num)
+		.order("id", { ascending: true });
+
+		//If no error in retrieving reviews, set all the reviews
+		if (!error && data && data.length > 0) {
+			const filtered_reviews = data
+				.filter(r => r.review !== null || r.user_id === profile?.id)
+				.map(r => ({
+					id: r.id,
+					user_id: r.user_id,
+					username: r.profiles?.username ?? "Anonymous",
+					rating: r.rating,
+					review: r.review
+				}));
+
+			//Put the review of the logged-in user at the top of list
+			const ordered_reviews = profile ? [...filtered_reviews.filter(r => r.user_id === profile.id), ...filtered_reviews.filter(r=> r.user_id !== profile.id)] : filtered_reviews;
+			setReviews(ordered_reviews);
+			
+			//Also save the user's review (eg. for updating purposes)
+			if (profile) {
+				const userReviewIndex = ordered_reviews.findIndex(r => r.user_id === profile.id);
+				if (userReviewIndex !== -1) {
+					setUserReview(ordered_reviews[userReviewIndex]);
+				}
+			}
+		}
+		else {
+			setReviews([]);
+			setUserReview(null);
+			setReviewButtonEnabled(false);
+		}
+	}
+
+	//Set movie details to default values
+	const clearMovieDetails = () => {
+		setTitle("Movie not found");
+		setReleaseYear("");
+		setDescription("");
+		setRating(null);
+		setNumRatings(null);
+		setMoviePoster(null);
+		setCastMembers([]);
+		setGenres([]);
+		setReviewButtonEnabled(false);
+	};
+
+	useEffect(() => {
+		if (id) {
+			//id in db is a number so convert it and make sure it's valid
+			const id_num = Number(id);
+			if (!Number.isNaN(id_num)) {
+				setReviewButtonEnabled(true);
+				//Run both fetches
+				(async () => {
+					try {
+						await Promise.all([retrieveMovieDetails(id_num), retrieveReviews(id_num)]);
+					} catch (err) {
+						console.error("Error fetching movie details:", err);
+    					clearMovieDetails();
+						setReviews([]);
+					}
+				})();
+			}
+			else {
+				//Clear if id is not a number
+				clearMovieDetails();
+				setReviews([]);
+			}
+		}
+		else {
+			//Clear if id doesn't exist
+			clearMovieDetails();
+			setReviews([]);
+		}
+	}, [id, profile]);
+
+
+	const handleSubmitReview = async (ratingNew: number, reviewTextNew: string) => {
+		if (!id || Number.isNaN(Number(id))) {
+			console.error("Invalid movie id");
+			return;
+		}
+		
+		if (profile) {
+			const reviewValue = reviewTextNew === "" ? null : reviewTextNew;
+
+			if (userReview) { //update
+				try {
+					const { data, error } = await supabase
+						.from('reviews')
+						.update({rating: ratingNew, review: reviewValue})
+						.eq('id', userReview.id)
+						.select();
+
+					if (!data || data.length === 0) {
+						console.error("Error updating user review:");
+					}
+				} catch (err) {
+					console.error("Error updating user review", err);
+				}
+			}
+			else { //create
+				try {
+					const { data, error } = await supabase
+						.from ('reviews')
+						.insert([{movie_id: Number(id), user_id: profile?.id ?? "", rating: ratingNew, review: reviewValue}])
+						.select();
+
+					if (!data || data.length === 0) {
+						console.error("Error creating user review");
+					}
+				} catch (err) {
+					console.error("Error creating user review:", err);
+				}
+			}
+		}
+
+		//Recalculate and set the number of ratings and average rating for movie
+		try {
+			let { data: dataAgg, error: errorAgg } = await supabase
+				.from('reviews')
+				.select('rating')
+				.eq('movie_id', Number(id));
+
+			if (!errorAgg && dataAgg) {
+				const ratingValues = dataAgg
+					.map(r => r.rating)
+					.filter((r): r is number => r !== null && r !== undefined);
+				const rating_count = ratingValues.length;
+				const rating_avg = rating_count > 0 
+					? Math.round((ratingValues.reduce((sum, r) => sum + r, 0) / rating_count) * 10) / 10
+					: null;
+
+				const { data: dataUpdate, error: errorUpdate } = await supabase 
+					.from('movies')
+					.update({rating_count: rating_count, avg_rating: rating_avg})
+					.eq("id", Number(id))
+					.select();
+
+				if (errorUpdate) {
+					console.error("Error updating rating count and average for movie: ", errorUpdate);
+				}
+			}
+			else {
+				console.error("Error retrieving rating count and average for movie: ", errorAgg)
+			}
+		} catch (err) {
+			console.error("Error updating rating count and average for movie:", err);
+		}
+		
+		//Refresh 
+		try {
+			await Promise.all([retrieveMovieDetails(Number(id)), retrieveReviews(Number(id))]);
+		} catch (err) {
+			console.error("Error fetching movie details:", err);
+		}
+
+		setPopupVisible(false);
+	}
 
 	return (
 		<ScrollView style={globalStyles.container}>
@@ -47,23 +236,23 @@ export default function movieDetails() {
 
 			{/* Release year */}
 			<Text style={[globalStyles.paragraph, styles.year]}>
-				{release_year}
+				{releaseYear}
 			</Text>
 
 			{/* Rating out of 5 and number of ratings */}
 			<View style={styles.ratingContainer}>
 				<Text style={[globalStyles.paragraph, styles.rating]}>
-					⭐ {rating} / 5
+					⭐ {numRatings && numRatings > 0 ? `${rating?.toFixed(1) ?? "N/A"} / 5` : ""}
 				</Text>
 				<Text style={[globalStyles.paragraph, styles.num_ratings]}>
 					{" "}
-					({num_ratings} ratings)
+					({numRatings ?? 0} ratings)
 				</Text>
 			</View>
 
 			{/* Movie poster */}
 			<Image
-				source={moviePoster}
+				source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/no-image.jpg") }
 				style={globalStyles.detailsImage}
 				resizeMode="contain"
 			/>
@@ -72,25 +261,40 @@ export default function movieDetails() {
 				{/* Movie description */}
 				<Text style={globalStyles.paragraph}>{description}</Text>
 
-				{/* Director */}
-				<View style={styles.horizontalContainer}>
-					<Text style={globalStyles.paragraphBold}>Director: </Text>
-					<Text style={globalStyles.paragraph}>{director}</Text>
+				{/* Genres */}
+				<View style={styles.verticalContainer}>
+					<Text style={globalStyles.paragraphBold}>Genres: </Text>
+					{genres.map((genre, index) => (
+						<Text key={index} style={globalStyles.paragraph}>
+							• {genre}
+						</Text>
+					))}
 				</View>
 
 				{/* Cast */}
 				<View style={styles.verticalContainer}>
 					<Text style={globalStyles.paragraphBold}>Cast: </Text>
-					{cast.map((actor, index) => (
+					{castMembers.map((actor, index) => (
 						<Text key={index} style={globalStyles.paragraph}>
-							{actor}
+							• {actor}
 						</Text>
 					))}
 				</View>
 			</Card>
 
-			{/* Reviews by other users */}
-			<Text style={globalStyles.paragraphBold}>Reviews:</Text>
+			{/* Reviews */}
+			<View style={styles.horizontalContainer}>
+				<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+				<Pressable
+					style={({ pressed }: { pressed: boolean }) => [
+						styles.button, { opacity: pressed ? 0.6 : 1},
+					]}
+					onPress={() => setPopupVisible(true)}
+					disabled={!reviewButtonEnabled}
+				>
+					<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
+				</Pressable>
+			</View>
 			<FlatList
 				data={reviews}
 				keyExtractor={(item: Review) => item.id.toString()}
@@ -99,6 +303,14 @@ export default function movieDetails() {
 				)}
 				scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
 				contentContainerStyle={styles.reviewList}
+			/>
+
+			{/* Add/update review and rating popup*/}
+			<RatingReviewPopup
+				visible={popupVisible}
+				review={userReview}
+				onClose={() => setPopupVisible(false)}
+				onSubmit={handleSubmitReview}
 			/>
 		</ScrollView>
 	);
@@ -126,11 +338,26 @@ const styles = StyleSheet.create({
 	horizontalContainer: {
 		flexDirection: "row",
 		flexWrap: "wrap",
-		alignItems: "flex-start",
+		alignItems: "center",
 		marginTop: 14,
+		justifyContent: 'space-between',
 	},
 	verticalContainer: {
 		flexDirection: "column",
+	},
+	button: {
+		paddingVertical: 8,
+		width: 120,
+		height: 50,
+		borderRadius: 15,
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 16,
+		backgroundColor: colors.light.secondary,
+	},
+	buttonText: {
+		fontSize: 14,
+		color: colors.light.background
 	},
 	reviewList: {
 		paddingBottom: 20,

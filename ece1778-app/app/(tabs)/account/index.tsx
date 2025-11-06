@@ -122,7 +122,7 @@ export default function AccountScreen() {
 							},
 						]}
 						onPress={() => {
-							router.push("/collection/1");
+							router.push("/account/collection/1");
 						}}
 					>
 						<Text style={styles.text}>

@@ -6,7 +6,7 @@ export const colors = {
 		primary: "#AFC8FF",
 		secondary: "#213F71",
 		tertiary: "#d2e1ff",
-		danger: "#F44336",
+		danger: "#DD4F44",
 		discord: "#5865F2",
 	},
 	dark: {

@@ -4,8 +4,10 @@ import { Tables } from "./database.types";
 //Data type for reviews including the user who wrote it and their review text itself
 export type Review = {
 	id: number;
-	user: string;
-	text: string;
+	user_id: string;
+	username: string;
+	rating: number | null;
+	review: string | null;
 };
 
 export type AuthData = {
