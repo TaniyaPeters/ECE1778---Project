@@ -46,6 +46,10 @@ export const accountStyles = StyleSheet.create({
 		marginBottom: 20,
 		textAlign: "center",
 	},
+	icon: {
+		width: 24,
+		height: 24,
+	},
 	input: {
 		marginTop: 16,
 		paddingHorizontal: 32,

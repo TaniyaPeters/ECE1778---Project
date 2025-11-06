@@ -53,7 +53,7 @@ export default function AccountScreen() {
 				<Pressable onPress={() => setIsLightMode(!isLightMode)}>
 					<Image
 						source={isLightMode ? moon : sun}
-						style={{ width: 24, height: 24 }}
+						style={accountStyles.icon}
 					/>
 				</Pressable>
 				{isLoggedIn && (
