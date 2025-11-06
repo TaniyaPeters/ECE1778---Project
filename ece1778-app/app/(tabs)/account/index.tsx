@@ -114,6 +114,21 @@ export default function AccountScreen() {
 							<Text style={{ fontWeight: "bold" }}>0</Text>
 						</Text>
 					</Pressable>
+					<Pressable
+						style={({ pressed }: { pressed: boolean }) => [
+							styles.button,
+							{
+								opacity: pressed ? 0.6 : 1,
+							},
+						]}
+						onPress={() => {
+							router.push("/collection/1");
+						}}
+					>
+						<Text style={styles.text}>
+							Collections
+						</Text>
+					</Pressable>
 				</View>
 			) : (
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>

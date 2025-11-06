@@ -38,7 +38,7 @@ const GeneralCard = ({
         <Text style={styles.cardSubText}>{leftSubText}</Text>
       </View>
       <View style={styles.cardFooter}>
-        {starRating && (
+        {starRating !== undefined && (
           <StarRating rating={starRating} color={colors.light.background} />
         )}
 
@@ -46,10 +46,10 @@ const GeneralCard = ({
           {rightSubText}
           {views && (
             <>
-              {" "}
+              {"  "}
               <FontAwesome
                 name="eye"
-                size={24}
+                size={20}
                 color={colors.light.secondary}
               />
             </>
@@ -68,13 +68,16 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     backgroundColor: colors.light.primary,
-    borderRadius: 5,
-    width: dimentions.windowWidth * 0.95,
-    // height: dimentions.windowHeight * 0.1,
+    borderRadius: 8,
     padding: 10,
     justifyContent: "center",
-    // alignItems: 'center',
-    margin: 5,
+    shadowColor: colors.light.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
+    margin: 15,
+    marginTop:0,
   },
   cardHeader: {
     flex: 1,
