@@ -27,3 +27,8 @@ export type AuthData = {
 		username: Tables<"profiles">["username"]
 	) => Promise<{ error?: AuthError | null }>;
 };
+
+export type ThemeContextType = {
+	theme: "light" | "dark";
+	toggleTheme: () => void;
+};

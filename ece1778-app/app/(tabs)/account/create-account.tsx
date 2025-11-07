@@ -13,9 +13,11 @@ import { accountStyles } from "@app/styles/accountStyles";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { useTheme } from "@contexts/ThemeContext";
 
 export default function EditAccountScreen() {
 	const { signUpWithEmail } = useAuthContext();
+	const { theme } = useTheme();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [username, setUsername] = useState("");
@@ -73,43 +75,117 @@ export default function EditAccountScreen() {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView
-				style={[globalStyles.container, accountStyles.container]}
+				style={[
+					globalStyles.container,
+					accountStyles.container,
+					theme === "light"
+						? accountStyles.bgLight
+						: accountStyles.bgDark,
+				]}
 			>
 				<View style={accountStyles.input}>
-					<Text style={[accountStyles.text, accountStyles.textLight]}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
 						Name
 					</Text>
 					<TextInput
+						style={
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark
+						}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
 						placeholder="Name"
 						value={name}
 						onChangeText={setName}
 					/>
 				</View>
 				<View style={accountStyles.input}>
-					<Text style={[accountStyles.text, accountStyles.textLight]}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
 						Username
 					</Text>
 					<TextInput
+						style={
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark
+						}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
 						placeholder="Username"
 						value={username}
 						onChangeText={setUsername}
 					/>
 				</View>
 				<View style={accountStyles.input}>
-					<Text style={[accountStyles.text, accountStyles.textLight]}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
 						Email
 					</Text>
 					<TextInput
+						style={
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark
+						}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
 						placeholder="Email"
 						value={email}
 						onChangeText={setEmail}
 					/>
 				</View>
 				<View style={accountStyles.input}>
-					<Text style={[accountStyles.text, accountStyles.textLight]}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
 						Password
 					</Text>
 					<TextInput
+						style={
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark
+						}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
 						placeholder="***********"
 						value={password}
 						onChangeText={setPassword}
@@ -119,14 +195,23 @@ export default function EditAccountScreen() {
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						accountStyles.button,
-						accountStyles.primaryLight,
+						theme === "light"
+							? accountStyles.primaryLight
+							: accountStyles.primaryDark,
 						{
 							opacity: pressed ? 0.6 : 1,
 						},
 					]}
 					onPress={() => handleSubmit()}
 				>
-					<Text style={[accountStyles.text, accountStyles.textLight]}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
 						Create Account
 					</Text>
 				</Pressable>

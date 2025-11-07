@@ -11,15 +11,15 @@ export const accountStyles = StyleSheet.create({
 	textLight: {
 		color: colors.light.black,
 	},
-	// textDark: {
-	// 	color: colors.dark.white,
-	// },
+	textDark: {
+		color: "white",
+	},
 	primaryLight: {
 		backgroundColor: colors.light.primary,
 	},
-	// primaryDark: {
-	// 	backgroundColor: colors.dark.primary,
-	// },
+	primaryDark: {
+		backgroundColor: colors.dark.secondary,
+	},
 	secondaryLight: {
 		backgroundColor: colors.light.secondary,
 	},

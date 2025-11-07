@@ -1,13 +1,27 @@
 import { Stack } from "expo-router";
 import { colors } from "@constants/colors";
+import { useTheme } from "@contexts/ThemeContext";
 
 export default function AccountLayout() {
+	const { theme } = useTheme();
+
 	return (
 		<Stack
 			screenOptions={{
-				headerStyle: { backgroundColor: colors.light.primary },
+				headerStyle: {
+					backgroundColor:
+						theme === "light"
+							? colors.light.background
+							: colors.dark.background,
+				},
 				headerTitleAlign: "center",
-				headerTitleStyle: { color: colors.light.secondary },
+				headerTitleStyle: {
+					color:
+						theme === "light"
+							? colors.light.secondary
+							: colors.dark.secondary,
+					fontFamily: "Quicksand_400Regular",
+				},
 				headerBackTitle: "Back",
 			}}
 		>

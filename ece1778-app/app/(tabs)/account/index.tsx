@@ -18,13 +18,14 @@ import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import OAuthSignInButton from "@app/components/OAuthSignIn";
 import { accountStyles } from "@app/styles/accountStyles";
+import { useTheme } from "@contexts/ThemeContext";
 
 export default function AccountScreen() {
 	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
+	const { theme, toggleTheme } = useTheme();
 	const params = useLocalSearchParams();
 	const [email, setEmail] = useState((params.email as string) || "");
 	const [password, setPassword] = useState((params.password as string) || "");
-	const [isLightMode, setIsLightMode] = useState(true);
 	const sun = require("@assets/sun.png");
 	const moon = require("@assets/moon.png");
 
@@ -48,26 +49,48 @@ export default function AccountScreen() {
 	}, [isLoggedIn]);
 
 	return (
-		<SafeAreaView style={globalStyles.container}>
+		<SafeAreaView
+			style={[
+				globalStyles.container,
+				{
+					backgroundColor:
+						theme === "light"
+							? colors.light.background
+							: colors.dark.background,
+				},
+			]}
+		>
 			<View style={accountStyles.row}>
-				<Pressable onPress={() => setIsLightMode(!isLightMode)}>
+				<Pressable
+					style={({ pressed }) => [
+						{
+							opacity: pressed ? 0.6 : 1,
+						},
+					]}
+					onPress={toggleTheme}
+				>
 					<Image
-						source={isLightMode ? moon : sun}
+						source={theme === "light" ? moon : sun}
 						style={accountStyles.icon}
 					/>
 				</Pressable>
 				{isLoggedIn && (
 					<Pressable
-						style={{
-							alignSelf: "flex-end",
-							paddingBottom: 5,
-						}}
+						style={({ pressed }) => [
+							{
+								alignSelf: "flex-end",
+								paddingBottom: 5,
+								opacity: pressed ? 0.6 : 1,
+							},
+						]}
 						onPress={signOut}
 					>
 						<Text
 							style={[
 								accountStyles.text,
-								accountStyles.textLight,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
 							]}
 						>
 							Log Out
@@ -76,7 +99,14 @@ export default function AccountScreen() {
 				)}
 			</View>
 			{isLoggedIn ? (
-				<View style={[accountStyles.container, accountStyles.bgLight]}>
+				<View
+					style={[
+						accountStyles.container,
+						theme === "light"
+							? accountStyles.bgLight
+							: accountStyles.bgDark,
+					]}
+				>
 					<Image
 						source={{
 							uri:
@@ -88,7 +118,9 @@ export default function AccountScreen() {
 					<Text
 						style={[
 							accountStyles.profileUsername,
-							accountStyles.textLight,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
 						]}
 					>
 						@{profile?.username}
@@ -97,7 +129,9 @@ export default function AccountScreen() {
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
 								accountStyles.button,
-								accountStyles.primaryLight,
+								theme === "light"
+									? accountStyles.primaryLight
+									: accountStyles.primaryDark,
 								{
 									opacity: pressed ? 0.6 : 1,
 								},
@@ -109,7 +143,9 @@ export default function AccountScreen() {
 							<Text
 								style={[
 									accountStyles.text,
-									accountStyles.textLight,
+									theme === "light"
+										? accountStyles.textLight
+										: accountStyles.textDark,
 								]}
 							>
 								Edit Profile
@@ -118,7 +154,9 @@ export default function AccountScreen() {
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
 								accountStyles.button,
-								accountStyles.primaryLight,
+								theme === "light"
+									? accountStyles.primaryLight
+									: accountStyles.primaryDark,
 								{
 									opacity: pressed ? 0.6 : 1,
 								},
@@ -128,7 +166,9 @@ export default function AccountScreen() {
 							<Text
 								style={[
 									accountStyles.text,
-									accountStyles.textLight,
+									theme === "light"
+										? accountStyles.textLight
+										: accountStyles.textDark,
 								]}
 							>
 								Share Profile
@@ -136,13 +176,18 @@ export default function AccountScreen() {
 						</Pressable>
 					</View>
 					<Pressable
-						style={styles.hiddenButton}
+						style={({ pressed }) => [
+							styles.hiddenButton,
+							{ opacity: pressed ? 0.6 : 1 },
+						]}
 						onPress={() => router.push("/account/edit-friends")}
 					>
 						<Text
 							style={[
 								accountStyles.text,
-								accountStyles.textLight,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
 							]}
 						>
 							Friends:{" "}
@@ -152,7 +197,9 @@ export default function AccountScreen() {
 					<Pressable
 						style={({ pressed }: { pressed: boolean }) => [
 							accountStyles.button,
-							accountStyles.primaryLight,
+							theme === "light"
+								? accountStyles.primaryLight
+								: accountStyles.primaryDark,
 							{
 								opacity: pressed ? 0.6 : 1,
 							},
@@ -164,7 +211,9 @@ export default function AccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								accountStyles.textLight,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
 							]}
 						>
 							Collections
@@ -174,12 +223,19 @@ export default function AccountScreen() {
 			) : (
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<View
-						style={[accountStyles.container, accountStyles.bgLight]}
+						style={[
+							accountStyles.container,
+							theme === "light"
+								? accountStyles.bgLight
+								: accountStyles.bgDark,
+						]}
 					>
 						<Text
 							style={[
 								accountStyles.header,
-								accountStyles.textLight,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
 							]}
 						>
 							Welcome! Sign in or create an account.
@@ -188,8 +244,18 @@ export default function AccountScreen() {
 							<TextInput
 								style={[
 									styles.input,
-									{ borderColor: colors.light.secondary },
+									{
+										borderColor: colors.light.secondary,
+									},
+									theme === "light"
+										? accountStyles.textLight
+										: accountStyles.textDark,
 								]}
+								placeholderTextColor={
+									theme === "light"
+										? accountStyles.textLight.color
+										: accountStyles.textDark.color
+								}
 								placeholder="Email"
 								value={email}
 								onChangeText={setEmail}
@@ -199,8 +265,19 @@ export default function AccountScreen() {
 							<TextInput
 								style={[
 									styles.input,
-									{ borderColor: colors.light.secondary },
+									{
+										borderColor: colors.light.secondary,
+										color:
+											theme === "light"
+												? accountStyles.textLight.color
+												: accountStyles.textDark.color,
+									},
 								]}
+								placeholderTextColor={
+									theme === "light"
+										? accountStyles.textLight.color
+										: accountStyles.textDark.color
+								}
 								placeholder="Password"
 								value={password}
 								onChangeText={setPassword}
@@ -216,7 +293,9 @@ export default function AccountScreen() {
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									accountStyles.button,
-									accountStyles.primaryLight,
+									theme === "light"
+										? accountStyles.primaryLight
+										: accountStyles.primaryDark,
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
@@ -226,7 +305,9 @@ export default function AccountScreen() {
 								<Text
 									style={[
 										accountStyles.text,
-										accountStyles.textLight,
+										theme === "light"
+											? accountStyles.textLight
+											: accountStyles.textDark,
 									]}
 								>
 									Login
@@ -235,7 +316,9 @@ export default function AccountScreen() {
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									accountStyles.button,
-									accountStyles.primaryLight,
+									theme === "light"
+										? accountStyles.primaryLight
+										: accountStyles.primaryDark,
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
@@ -247,7 +330,9 @@ export default function AccountScreen() {
 								<Text
 									style={[
 										accountStyles.text,
-										accountStyles.textLight,
+										theme === "light"
+											? accountStyles.textLight
+											: accountStyles.textDark,
 									]}
 								>
 									Sign Up

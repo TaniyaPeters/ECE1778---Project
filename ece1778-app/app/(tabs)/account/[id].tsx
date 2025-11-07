@@ -6,8 +6,10 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Image, Text, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "@contexts/ThemeContext";
 
 export default function ProfileScreen() {
+	const { theme } = useTheme();
 	const { id } = useLocalSearchParams();
 	const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
 	const [collections, setCollections] = useState<Tables<"collections">[]>([]);
@@ -50,8 +52,22 @@ export default function ProfileScreen() {
 	}, [id]);
 
 	return (
-		<SafeAreaView style={globalStyles.container}>
-			<View style={[accountStyles.container, accountStyles.bgLight]}>
+		<SafeAreaView
+			style={[
+				globalStyles.container,
+				theme === "light"
+					? accountStyles.bgLight
+					: accountStyles.bgDark,
+			]}
+		>
+			<View
+				style={[
+					accountStyles.container,
+					theme === "light"
+						? accountStyles.bgLight
+						: accountStyles.bgDark,
+				]}
+			>
 				<Image
 					source={{
 						uri:
@@ -63,7 +79,9 @@ export default function ProfileScreen() {
 				<Text
 					style={[
 						accountStyles.profileUsername,
-						accountStyles.textLight,
+						theme === "light"
+							? accountStyles.textLight
+							: accountStyles.textDark,
 					]}
 				>
 					@{profile?.username}

@@ -19,6 +19,7 @@ import ProfileCard from "@app/components/ProfileCard";
 import { useEffect, useState } from "react";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@app/contexts/AuthContext";
+import { useTheme } from "@contexts/ThemeContext";
 
 type Friend = {
 	id: string;
@@ -28,6 +29,7 @@ type Friend = {
 
 export default function EditFriendsScreen() {
 	const { session } = useAuthContext();
+	const { theme } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [addFriendInput, setAddFriendInput] = useState("");
 	const [friends, setFriends] = useState<Array<Friend>>([]);
@@ -127,8 +129,26 @@ export default function EditFriendsScreen() {
 	}, [session]);
 
 	return (
-		<SafeAreaView style={[globalStyles.container, { paddingTop: 0 }]}>
-			<View style={[accountStyles.container, accountStyles.bgLight]}>
+		<SafeAreaView
+			style={[
+				globalStyles.container,
+				{
+					paddingTop: 0,
+					backgroundColor:
+						theme === "light"
+							? accountStyles.bgLight.backgroundColor
+							: accountStyles.bgDark.backgroundColor,
+				},
+			]}
+		>
+			<View
+				style={[
+					accountStyles.container,
+					theme === "light"
+						? accountStyles.bgLight
+						: accountStyles.bgDark,
+				]}
+			>
 				<Modal
 					animationType="slide"
 					transparent={true}
@@ -151,7 +171,12 @@ export default function EditFriendsScreen() {
 									value={addFriendInput}
 									onChangeText={setAddFriendInput}
 								/>
-								<Pressable onPress={addFriend}>
+								<Pressable
+									style={({ pressed }) => [
+										{ opacity: pressed ? 0.6 : 1 },
+									]}
+									onPress={addFriend}
+								>
 									<Image
 										source={require("@assets/plus.png")}
 										style={accountStyles.icon}
@@ -167,22 +192,31 @@ export default function EditFriendsScreen() {
 					<Text
 						style={[
 							accountStyles.header,
-							accountStyles.textLight,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
 							{ flex: 3 },
 						]}
 					>
 						Friends
 					</Text>
 					<Pressable
-						style={{
-							flex: 1,
-							alignItems: "flex-end",
-							paddingBottom: 10,
-						}}
+						style={({ pressed }) => [
+							{
+								flex: 1,
+								alignItems: "flex-end",
+								paddingBottom: 10,
+								opacity: pressed ? 0.6 : 1,
+							},
+						]}
 						onPress={() => setModalVisible(true)}
 					>
 						<Image
-							source={require("@assets/add-friend.png")}
+							source={
+								theme === "light"
+									? require("@assets/add-friend-dark.png")
+									: require("@assets/add-friend-white.png")
+							}
 							style={accountStyles.icon}
 						/>
 					</Pressable>
@@ -192,6 +226,9 @@ export default function EditFriendsScreen() {
 					contentContainerStyle={styles.list}
 					renderItem={({ item }) => (
 						<Pressable
+							style={({ pressed }) => [
+								{ opacity: pressed ? 0.6 : 1 },
+							]}
 							onPress={() => router.push(`/account/${item.id}`)}
 						>
 							<ProfileCard
