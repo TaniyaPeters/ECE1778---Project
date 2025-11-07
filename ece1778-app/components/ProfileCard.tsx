@@ -5,9 +5,11 @@ import { View, Text, Image, StyleSheet, Pressable } from "react-native";
 export default function ProfileCard({
 	avatar_url,
 	username,
+	removeFriend,
 }: {
 	avatar_url: string;
 	username: string;
+	removeFriend: () => void;
 }) {
 	return (
 		<View style={[styles.card, accountStyles.bgLight]}>
@@ -16,7 +18,7 @@ export default function ProfileCard({
 				style={[globalStyles.profileImage, { width: 50, height: 50 }]}
 			/>
 			<Text style={[accountStyles.profileUsername]}>{username}</Text>
-			<Pressable style={{ marginLeft: "auto" }} onPress={() => {}}>
+			<Pressable style={{ marginLeft: "auto" }} onPress={removeFriend}>
 				<Image
 					source={require("@assets/minus.png")}
 					style={[accountStyles.icon, { opacity: 0.4 }]}

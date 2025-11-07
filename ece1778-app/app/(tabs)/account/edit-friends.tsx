@@ -22,7 +22,7 @@ import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Friend = {
 	id: string;
-	avatar_url: string;
+	avatar_url: string | null;
 	username: string;
 };
 
@@ -32,19 +32,18 @@ export default function EditFriendsScreen() {
 	const [addFriendInput, setAddFriendInput] = useState("");
 	const [friends, setFriends] = useState<Array<Friend>>([]);
 
-	const getProfileById = async (id: string) => {
+	const getProfileByIds = async (ids: string[]) => {
 		let { data, error } = await supabase
 			.from("profiles")
-			.select("*")
-			.eq("id", id)
-			.single();
+			.select("id, avatar_url, username")
+			.in("id", ids);
 
 		if (error) {
 			Alert.alert("Error", error.message);
-			return;
+			return [];
 		}
 
-		return data;
+		return data ?? [];
 	};
 
 	const getFriends = async () => {
@@ -60,22 +59,11 @@ export default function EditFriendsScreen() {
 			return [];
 		}
 
-		const friendsList: Array<Friend> = [];
-		friends.forEach(async (f) => {
-			const friendData = await getProfileById(f.id);
-			if (!friendData) return;
+		const friendsList = await getProfileByIds(
+			data.map((friend) => friend.friend_id)
+		);
 
-			friendsList.push({
-				id: friendData.id,
-				avatar_url: friendData.avatar_url ?? "",
-				username: friendData.username,
-			});
-		});
-
-		// const data = await Promise.all(friendsList);
 		setFriends(friendsList);
-
-		return data;
 	};
 
 	const getUserByUsername = async (username: string) => {
@@ -86,7 +74,6 @@ export default function EditFriendsScreen() {
 			.single();
 
 		if (error) {
-			Alert.alert("Error", error.message);
 			return null;
 		}
 
@@ -98,6 +85,7 @@ export default function EditFriendsScreen() {
 
 		const friend = await getUserByUsername(addFriendInput);
 		if (!friend) {
+			Alert.alert("Error", "User not found");
 			return;
 		}
 
@@ -113,6 +101,24 @@ export default function EditFriendsScreen() {
 
 		setAddFriendInput("");
 		setModalVisible(false);
+		getFriends();
+	};
+
+	const removeFriend = async (friend_id: string) => {
+		if (!session) return;
+
+		const { data, error } = await supabase
+			.from("friends")
+			.delete()
+			.eq("id", session.user.id)
+			.eq("friend_id", friend_id)
+			.select();
+
+		if (error) {
+			Alert.alert("Error", error.message);
+			return;
+		}
+
 		getFriends();
 	};
 
@@ -189,8 +195,9 @@ export default function EditFriendsScreen() {
 							onPress={() => router.push(`/account/${item.id}`)}
 						>
 							<ProfileCard
-								avatar_url={item.avatar_url}
+								avatar_url={item.avatar_url ?? ""}
 								username={item.username}
+								removeFriend={() => removeFriend(item.id)}
 							/>
 						</Pressable>
 					)}
