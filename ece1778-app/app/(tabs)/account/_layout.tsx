@@ -27,10 +27,6 @@ export default function AccountLayout() {
 				name="create-account"
 				options={{ title: "Create Account" }}
 			/>
-			<Stack.Screen
-				name="collection/[id]"
-				options={{ title: "Name of Collection" }}
-			/>
 		</Stack>
 	);
 }
