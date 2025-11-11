@@ -51,20 +51,33 @@ export default function Search() {
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.titleText}>Search Screen</Text>
       <View style={styles.horizontalContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Search for movies..."
-          value={searchString}
-          onChangeText={setSearchString}
-          placeholderTextColor={colors.light.black}
-        />
+        <View style={styles.searchWrapper}>
+          <TextInput
+            style={styles.input}
+            placeholder="Search for movies..."
+            value={searchString}
+            onChangeText={setSearchString}
+            placeholderTextColor={colors.light.black}
+          />
+          {searchString.length > 0 && (
+            <Pressable
+              style={({ pressed }: { pressed: boolean }) => [
+                styles.clearButton, { opacity: pressed ? 0.6 : 1},
+              ]}
+              onPress={() => setSearchString("")}
+            >
+              <Text style={styles.clearButtonText}>x</Text>
+            </Pressable>
+          )}
+        </View>
+
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
-            styles.button, { opacity: pressed ? 0.6 : 1},
+            styles.searchButton, { opacity: pressed ? 0.6 : 1},
           ]}
           onPress={retrieveMovies}
         >
-          <Text style={[globalStyles.paragraphBold, styles.buttonText]}>Search</Text>
+          <Text style={[globalStyles.paragraphBold, styles.searchButtonText]}>Search</Text>
         </Pressable>
       </View>
 
@@ -150,28 +163,48 @@ const styles = StyleSheet.create({
 		marginTop: 14,
     paddingBottom: 15,
 	},
-  input: {
+  searchWrapper: {
     flex: 4,
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.light.background,
     borderWidth: 1,
     borderColor: colors.light.secondary,
     borderRadius: 8,
-    padding: 10,
+    paddingHorizontal: 10,
+    height: 50,
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
     fontSize: 16,
     color: colors.light.black,
-    marginRight: 8,
-    height: 50,
   },
-  button: {
+  clearButton: {
+    marginLeft: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#929292ff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clearButtonText: {
+    color: colors.light.background,
+    fontSize: 14,
+    fontWeight: "bold",
+    lineHeight: 16,
+  },
+  searchButton: {
     flex: 1,
-		paddingVertical: 8,
 		height: 50,
 		borderRadius: 15,
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: colors.light.secondary,
+    paddingHorizontal: 10,
 	},
-	buttonText: {
+	searchButtonText: {
 		fontSize: 14,
 		color: colors.light.background
 	},
