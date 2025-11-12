@@ -7,6 +7,10 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Modal,
+  TextInput,
+  Pressable,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,107 +19,157 @@ import { Tables } from "../../../types/database.types";
 import GeneralCard from "../../../components/generalCard";
 import { globalStyles } from "../../../styles/globalStyles";
 import { colors } from "../../../constants/colors";
+import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Collection = Tables<"collections">;
 type Movie = Tables<"movies">;
 
 export default function Library() {
+  const { isLoggedIn } = useAuthContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionThumbnails, setCollectionThumbnails] = useState<
     Map<number, { imageSource: string; localPath: boolean }>
   >(new Map());
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [collectionName, setCollectionName] = useState<string>("");
+  const [creating, setCreating] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchCollections = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    fetchCollections();
+  }, [isLoggedIn]);
 
-        // Get user ID from session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  const fetchCollections = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        if (sessionError) {
-          throw sessionError;
-        }
+      // Get user ID from session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-        if (!session?.user?.id) {
-          throw new Error("User not authenticated");
-        }
+      if (sessionError) {
+        throw sessionError;
+      }
 
-        const userId = session.user.id;
+      if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+      }
 
-        // Fetch collections for the user
-        const { data: collectionsData, error: collectionsError } = await supabase
-          .from("collections")
-          .select("*")
-          .eq("user_id", userId)
-          .order("updated_at", { ascending: false });
+      const userId = session.user.id;
 
-        if (collectionsError) {
-          throw collectionsError;
-        }
+      // Fetch collections for the user
+      const { data: collectionsData, error: collectionsError } = await supabase
+        .from("collections")
+        .select("*")
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false });
 
-        setCollections(collectionsData || []);
+      if (collectionsError) {
+        throw collectionsError;
+      }
 
-        // Fetch thumbnails for each collection (first movie's poster)
-        if (collectionsData && collectionsData.length > 0) {
-          const thumbnailsMap = new Map<
-            number,
-            { imageSource: string; localPath: boolean }
-          >();
+      setCollections(collectionsData || []);
 
-          for (const collection of collectionsData) {
-            if (collection.movie_list && collection.movie_list.length > 0) {
-              // Get the first movie's poster
-              const firstMovieId = collection.movie_list[0];
-              const { data: movieData, error: movieError } = await supabase
-                .from("movies")
-                .select("poster_path")
-                .eq("id", firstMovieId)
-                .maybeSingle();
+      // Fetch thumbnails for each collection (first movie's poster)
+      if (collectionsData && collectionsData.length > 0) {
+        const thumbnailsMap = new Map<
+          number,
+          { imageSource: string; localPath: boolean }
+        >();
 
-              if (!movieError && movieData?.poster_path) {
-                const posterPath = movieData.poster_path.startsWith("/")
-                  ? movieData.poster_path
-                  : `/${movieData.poster_path}`;
-                thumbnailsMap.set(collection.id, {
-                  imageSource: `https://image.tmdb.org/t/p/w500${posterPath}`,
-                  localPath: false,
-                });
-              } else {
-                // Fallback to local image
-                thumbnailsMap.set(collection.id, {
-                  imageSource: "brokenImage",
-                  localPath: true,
-                });
-              }
+        for (const collection of collectionsData) {
+          if (collection.movie_list && collection.movie_list.length > 0) {
+            // Get the first movie's poster
+            const firstMovieId = collection.movie_list[0];
+            const { data: movieData, error: movieError } = await supabase
+              .from("movies")
+              .select("poster_path")
+              .eq("id", firstMovieId)
+              .maybeSingle();
+
+            if (!movieError && movieData?.poster_path) {
+              const posterPath = movieData.poster_path.startsWith("/")
+                ? movieData.poster_path
+                : `/${movieData.poster_path}`;
+              thumbnailsMap.set(collection.id, {
+                imageSource: `https://image.tmdb.org/t/p/w500${posterPath}`,
+                localPath: false,
+              });
             } else {
-              // No movies in collection, use fallback
+              // Fallback to local image
               thumbnailsMap.set(collection.id, {
                 imageSource: "brokenImage",
                 localPath: true,
               });
             }
+          } else {
+            // No movies in collection, use fallback
+            thumbnailsMap.set(collection.id, {
+              imageSource: "brokenImage",
+              localPath: true,
+            });
           }
-
-          setCollectionThumbnails(thumbnailsMap);
         }
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch collections");
-        console.error("Error fetching collections:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchCollections();
-  }, []);
+        setCollectionThumbnails(thumbnailsMap);
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch collections");
+      console.log("Error fetching collections:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateCollection = async () => {
+    if (!collectionName.trim()) {
+      Alert.alert("Error", "Please enter a collection name");
+      return;
+    }
+
+    try {
+      setCreating(true);
+
+      // Get user ID from session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+
+      // Create the collection
+      const { data, error: createError } = await supabase
+        .from("collections")
+        .insert({
+          name: collectionName.trim(),
+          user_id: session.user.id,
+          movie_list: [],
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        throw createError;
+      }
+
+      // Close modal and reset form
+      setModalVisible(false);
+      setCollectionName("");
+
+      // Refresh collections list
+      await fetchCollections();
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to create collection");
+      console.log("Error creating collection:", err);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]} edges={['bottom', 'left', 'right']}>
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
         <ActivityIndicator size="large" color={colors.light.secondary} />
         <Text style={styles.loadingText}>Loading collections...</Text>
       </SafeAreaView>
@@ -124,8 +178,22 @@ export default function Library() {
 
   if (error) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={styles.errorText}>{error}</Text>
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={globalStyles.errorText}>Error: {error}</Text>
+        {!isLoggedIn && 
+        <>
+          <Text style={globalStyles.errorDescriptionText}>Please login to view your saved collections.</Text>
+          <Pressable
+            style={({ pressed }: { pressed: boolean }) => [
+              globalStyles.errorLoginButton,
+              { opacity: pressed ? 0.6 : 1, },
+            ]}
+            onPress={() => router.push('/account')}
+          >
+            <Text style={globalStyles.errorDescriptionText}>Login</Text>
+          </Pressable>
+        </>
+        }
       </SafeAreaView>
     );
   }
@@ -134,6 +202,13 @@ export default function Library() {
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         <Text style={globalStyles.titleText}>Collections</Text>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.createButtonText}>+ New Collection</Text>
+        </TouchableOpacity>
 
         {collections.length > 0 ? (
           <View style={styles.collectionsContainer}>
@@ -171,30 +246,71 @@ export default function Library() {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+            <Text style={globalStyles.errorDescriptionText}>
               No collections found.
             </Text>
           </View>
         )}
       </ScrollView>
+
+      {/* Create New Collection Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Create New Collection</Text>
+            
+            <Text style={styles.modalLabel}>Collection Name</Text>
+            <TextInput
+              placeholder="Enter collection name"
+              value={collectionName}
+              onChangeText={setCollectionName}
+              style={styles.modalInput}
+              autoFocus
+            />
+
+            <View style={styles.modalButtonContainer}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonCancel,
+                  { opacity: pressed ? 0.6 : 1 },
+                ]}
+                onPress={() => {
+                  setModalVisible(false);
+                  setCollectionName("");
+                }}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonSave,
+                  { opacity: pressed ? 0.6 : 1 },
+                ]}
+                onPress={handleCreateCollection}
+                disabled={creating}
+              >
+                <Text style={styles.modalButtonText}>
+                  {creating ? "Creating..." : "Save"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
     color: colors.light.secondary,
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.light.danger,
-    textAlign: "center",
   },
   collectionsContainer: {
     marginTop: 20,
@@ -207,9 +323,89 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 40,
   },
-  emptyText: {
-    fontSize: 18,
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  createButton: {
+    backgroundColor: colors.light.secondary,
+    alignItems: "center",
+    paddingVertical: 10,
+    marginTop: 15,
+    borderRadius: 8,
+  },
+  createButtonText: {
+    color: colors.light.background,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    backgroundColor: colors.light.background,
+    width: "85%",
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: colors.light.black,
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
     color: colors.light.secondary,
+    marginBottom: 20,
     textAlign: "center",
+  },
+  modalLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: colors.light.secondary,
+    marginBottom: 8,
+  },
+  modalInput: {
+    width: "100%",
+    backgroundColor: colors.light.background,
+    borderWidth: 1,
+    borderColor: colors.light.black,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
+    fontSize: 16,
+    color: colors.light.black,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  modalButtonCancel: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.light.danger,
+  },
+  modalButtonSave: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.light.secondary,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: colors.light.background,
   },
 });

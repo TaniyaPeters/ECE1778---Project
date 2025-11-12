@@ -8,7 +8,7 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../../lib/supabase.web";
 import { Tables } from "../../../../types/database.types";
@@ -24,6 +24,7 @@ type Movie = Tables<"movies">;
 
 export default function CollectionScreen() {
   const { id } = useLocalSearchParams();
+  const navigation = useNavigation();
   const [collection, setCollection] = useState<Collection | null>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -71,6 +72,13 @@ export default function CollectionScreen() {
 
         setCollection(collectionData);
 
+        // Update navigation header title with collection name
+        if (collectionData?.name) {
+          navigation.setOptions({
+            title: collectionData.name,
+          });
+        }
+
         // Fetch movies if collection has a movie_list
         if (collectionData?.movie_list && collectionData.movie_list.length > 0) {
           const { data: moviesData, error: moviesError } = await supabase
@@ -106,7 +114,6 @@ export default function CollectionScreen() {
 
   // Get collection thumbnail (use first movie's poster or default)
   const getCollectionThumbnail = () => {
-    console.log("movies[0].poster_path", movies[0].poster_path);
     if (movies.length > 0 && movies[0].poster_path) {
       // Use TMDB poster URL - poster_path should be a poster path (e.g., "/abc123.jpg")
       const posterPath = movies[0].poster_path.startsWith("/")
@@ -129,7 +136,7 @@ export default function CollectionScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]} edges={['bottom', 'left', 'right']}>
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
         <ActivityIndicator size="large" color={colors.light.secondary} />
         <Text style={styles.loadingText}>Loading collection...</Text>
       </SafeAreaView>
@@ -138,8 +145,8 @@ export default function CollectionScreen() {
 
   if (error || !collection) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={styles.errorText}>
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={globalStyles.errorText}>
           {error || "Collection not found"}
         </Text>
       </SafeAreaView>
@@ -236,7 +243,7 @@ export default function CollectionScreen() {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+            <Text style={globalStyles.errorDescriptionText}>
               This collection doesn't have any movies yet.
             </Text>
           </View>
@@ -247,19 +254,10 @@ export default function CollectionScreen() {
 }
 
 const styles = StyleSheet.create({
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
     color: colors.light.secondary,
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.light.danger,
-    textAlign: "center",
   },
   headerContainer: {
     alignItems: "center",
@@ -309,11 +307,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     marginTop: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: colors.light.secondary,
-    textAlign: "center",
   },
 });
 

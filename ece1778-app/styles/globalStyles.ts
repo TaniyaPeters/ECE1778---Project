@@ -49,4 +49,27 @@ export const globalStyles = StyleSheet.create({
 		borderRadius: 50,
 		alignSelf: "center",
 	},
+	center: {
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	errorText: {
+		fontSize: 18,
+		color: colors.light.danger,
+		textAlign: "center",
+	},
+	errorDescriptionText: {
+		fontSize: 18,
+		color: colors.light.secondary,
+		textAlign: "center",
+	},
+	errorLoginButton: {
+		paddingVertical: 8,
+		width: 120,
+		borderRadius: 10,
+		alignItems: "center",
+		justifyContent: "center",
+		marginTop: 16,
+		backgroundColor: colors.light.primary,
+	},
 });
