@@ -65,7 +65,7 @@ export default function EditAccountScreen() {
 				"Check your email to verify your account, then sign in."
 			);
 			router.push({
-				pathname: "../(account)",
+				pathname: "/account",
 				params: { email: email, password: password },
 			});
 		});

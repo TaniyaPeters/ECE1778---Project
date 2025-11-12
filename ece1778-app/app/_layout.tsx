@@ -65,7 +65,7 @@ export default function RootLayout() {
 						),
 					})}
 				</NativeTabs.Trigger>
-				<NativeTabs.Trigger name="(tabs)/(account)">
+				<NativeTabs.Trigger name="(tabs)/account">
 					<Label>Account</Label>
 					{Platform.select({
 						ios: <Icon sf="person.bust.fill" />,

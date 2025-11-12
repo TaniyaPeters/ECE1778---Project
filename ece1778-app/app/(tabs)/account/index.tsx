@@ -88,7 +88,7 @@ export default function AccountScreen() {
 								},
 							]}
 							onPress={() => {
-								router.push("./(account)/edit-account");
+								router.push("/account/edit-account");
 							}}
 						>
 							<Text style={styles.text}>Edit Profile</Text>
@@ -122,7 +122,7 @@ export default function AccountScreen() {
 							},
 						]}
 						onPress={() => {
-							router.push("./(account)/collection/1");
+							router.push("/account/collection/1");
 						}}
 					>
 						<Text style={styles.text}>
@@ -173,7 +173,7 @@ export default function AccountScreen() {
 									},
 								]}
 								onPress={() => {
-									router.push("./(account)/create-account");
+									router.push("/account/create-account");
 								}}
 							>
 								<Text style={styles.text}>Sign Up</Text>

@@ -144,7 +144,7 @@ export default function EditAccountScreen() {
 				session!.user.user_metadata.username = username;
 
 				Alert.alert("Success", "Profile updated successfully!");
-				router.push("../(account)");
+				router.push("/account");
 			});
 	};
 
