@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import GeneralCard from "@app/components/generalCard";
 import MonthlyRecap from "@app/components/MonthlyRecap";
+import AddToCollection, { AddToCollectionHandle } from "@app/components/AddToCollection";
 import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
 import { 
@@ -26,10 +27,11 @@ export default function TabMovies() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
+  const addToCollectionRef = useRef<AddToCollectionHandle>(null);
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    
+
     const fetchMovies = async () => {
       try {
         setLoading(true);
@@ -91,6 +93,10 @@ export default function TabMovies() {
     );
   }
 
+  const handleAddToCollection = (movieId: number) => {
+    addToCollectionRef.current?.open(movieId);
+  };
+
   return (
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
@@ -141,6 +147,8 @@ export default function TabMovies() {
                           ? item.rating_count.toFixed(1)
                           : '0'
                       }
+                      add
+                      addFunction={() => handleAddToCollection(item.id)}
                       starRating={item.avg_rating ? item.avg_rating : 0}
                     />
                   </TouchableOpacity>
@@ -156,6 +164,8 @@ export default function TabMovies() {
           </View>
         )}
       </ScrollView>
+
+      <AddToCollection ref={addToCollectionRef} />
     </SafeAreaView>
   );
 }

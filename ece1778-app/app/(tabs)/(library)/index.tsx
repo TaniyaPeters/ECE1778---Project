@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../lib/supabase.web";
 import { Tables } from "../../../types/database.types";
@@ -40,9 +40,11 @@ export default function Library() {
   const [collectionToDelete, setCollectionToDelete] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
 
-  useEffect(() => {
-    fetchCollections();
-  }, [isLoggedIn]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchCollections(); // re-fetch from Supabase
+    }, [isLoggedIn])
+  );
 
   const fetchCollections = async () => {
     try {
