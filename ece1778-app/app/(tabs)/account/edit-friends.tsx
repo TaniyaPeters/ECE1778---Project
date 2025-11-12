@@ -28,7 +28,7 @@ type Friend = {
 };
 
 export default function EditFriendsScreen() {
-	const { session } = useAuthContext();
+	const { fetchProfile, session } = useAuthContext();
 	const { theme } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [addFriendInput, setAddFriendInput] = useState("");
@@ -101,8 +101,20 @@ export default function EditFriendsScreen() {
 			return;
 		}
 
+		const { data: data2, error: error2 } = await supabase
+			.from("profiles")
+			.update({ friends: friends.length + 1 })
+			.eq("id", session.user.id)
+			.select();
+
+		if (error2) {
+			Alert.alert("Error", error2.message);
+			return;
+		}
+
 		setAddFriendInput("");
 		setModalVisible(false);
+		fetchProfile();
 		getFriends();
 	};
 
@@ -121,6 +133,18 @@ export default function EditFriendsScreen() {
 			return;
 		}
 
+		const { data: data2, error: error2 } = await supabase
+			.from("profiles")
+			.update({ friends: friends.length - 1 })
+			.eq("id", session.user.id)
+			.select();
+
+		if (error2) {
+			Alert.alert("Error", error2.message);
+			return;
+		}
+
+		fetchProfile();
 		getFriends();
 	};
 

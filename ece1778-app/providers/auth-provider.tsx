@@ -47,25 +47,25 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 	}, []);
 
 	// Fetch the profile when the session changes
+	const fetchProfile = async () => {
+		setIsLoading(true);
+
+		if (session) {
+			const { data } = await supabase
+				.from("profiles")
+				.select("*")
+				.eq("id", session.user.id)
+				.single();
+
+			setProfile(data);
+		} else {
+			setProfile(null);
+		}
+
+		setIsLoading(false);
+	};
+
 	useEffect(() => {
-		const fetchProfile = async () => {
-			setIsLoading(true);
-
-			if (session) {
-				const { data } = await supabase
-					.from("profiles")
-					.select("*")
-					.eq("id", session.user.id)
-					.single();
-
-				setProfile(data);
-			} else {
-				setProfile(null);
-			}
-
-			setIsLoading(false);
-		};
-
 		fetchProfile();
 	}, [session]);
 
@@ -106,7 +106,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 					full_name: name ?? "",
 					username: username,
 					avatar_url:
-						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
+						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzYyOTc5NDIzLCJleHAiOjE3OTQ1MTU0MjN9.Ax6ONyGoqi7EZJUceWpyuHhxD0RoYwajNTfjWp4Pvus",
 				},
 			},
 		});
@@ -127,6 +127,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 				signInWithEmail,
 				signOut,
 				signUpWithEmail,
+				fetchProfile,
 				isLoggedIn: session != undefined,
 			}}
 		>

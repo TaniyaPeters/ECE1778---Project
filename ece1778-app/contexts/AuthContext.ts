@@ -15,6 +15,9 @@ export const AuthContext = createContext<AuthData | undefined>({
 	signUpWithEmail: async () => {
 		return {};
 	},
+	fetchProfile: async () => {
+		return;
+	},
 });
 
 export const useAuthContext = () => {
