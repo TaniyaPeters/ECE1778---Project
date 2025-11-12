@@ -7,8 +7,9 @@ import {
   StyleSheet,
   Image,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../../lib/supabase.web";
 import { Tables } from "../../../../types/database.types";
@@ -79,25 +80,86 @@ export default function CollectionScreen() {
           });
         }
 
-        // Fetch movies if collection has a movie_list
-        if (collectionData?.movie_list && collectionData.movie_list.length > 0) {
-          const { data: moviesData, error: moviesError } = await supabase
-            .from("movies")
-            .select("*")
-            .in("id", collectionData.movie_list);
+        // If collection is "Watched", fetch movies from reviews table
+        if (collectionData.name === "Watched") {
+          // Get user ID from session
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-          if (moviesError) {
-            throw moviesError;
+          if (sessionError || !session?.user?.id) {
+            throw new Error("User not authenticated");
           }
 
-          // Sort movies to match the order in movie_list
-          const sortedMovies = collectionData.movie_list
-            .map((movieId) => moviesData?.find((m) => m.id === movieId))
-            .filter((m): m is Movie => m !== undefined);
+          const userId = session.user.id;
 
-          setMovies(sortedMovies);
+          // Fetch reviews for this user to get movie IDs with updated_at dates
+          const { data: reviewsData, error: reviewsError } = await supabase
+            .from("reviews")
+            .select("movie_id, updated_at")
+            .eq("user_id", userId)
+            .order("updated_at", { ascending: false });
+
+          if (reviewsError) {
+            throw reviewsError;
+          }
+
+          if (!reviewsData || reviewsData.length === 0) {
+            setMovies([]);
+          } else {
+            // Create a map of movie_id to latest updated_at
+            const movieReviewMap = new Map<number, string>();
+            for (const review of reviewsData) {
+              if (review.movie_id !== null && review.updated_at) {
+                movieReviewMap.set(review.movie_id, review.updated_at);
+              }
+            }
+
+            // Get unique movie IDs sorted by latest review date
+            const movieIds = Array.from(movieReviewMap.keys());
+
+            if (movieIds.length > 0) {
+              // Fetch movies
+              const { data: moviesData, error: moviesError } = await supabase
+                .from("movies")
+                .select("*")
+                .in("id", movieIds);
+
+              if (moviesError) {
+                throw moviesError;
+              }
+
+              // Sort movies by latest review date (most recent first)
+              const sortedMovies = moviesData?.sort((a, b) => {
+                const dateA = movieReviewMap.get(a.id) || "";
+                const dateB = movieReviewMap.get(b.id) || "";
+                return dateB.localeCompare(dateA); // Descending order (newest first)
+              }) || [];
+
+              setMovies(sortedMovies);
+            } else {
+              setMovies([]);
+            }
+          }
         } else {
-          setMovies([]);
+          // Fetch movies if collection has a movie_list
+          if (collectionData?.movie_list && collectionData.movie_list.length > 0) {
+            const { data: moviesData, error: moviesError } = await supabase
+              .from("movies")
+              .select("*")
+              .in("id", collectionData.movie_list);
+
+            if (moviesError) {
+              throw moviesError;
+            }
+
+            // Sort movies to match the order in movie_list
+            const sortedMovies = collectionData.movie_list
+              .map((movieId) => moviesData?.find((m) => m.id === movieId))
+              .filter((m): m is Movie => m !== undefined);
+
+            setMovies(sortedMovies);
+          } else {
+            setMovies([]);
+          }
         }
       } catch (err: any) {
         setError(err.message || "Failed to fetch collection");
@@ -114,24 +176,15 @@ export default function CollectionScreen() {
 
   // Get collection thumbnail (use first movie's poster or default)
   const getCollectionThumbnail = () => {
-    if (movies.length > 0 && movies[0].poster_path) {
+    const index = collection?.name === 'Watched' ? movies.length-1 : 0
+    if (movies.length > 0 && movies[index].poster_path) {
       // Use TMDB poster URL - poster_path should be a poster path (e.g., "/abc123.jpg")
-      const posterPath = movies[0].poster_path.startsWith("/")
-        ? movies[0].poster_path
-        : `/${movies[0].poster_path}`;
-      return {
-        uri: `https://image.tmdb.org/t/p/w500${posterPath}`,
-        localPath: false,
-      };
-    } else if (movies.length > 0) {
-      // Fallback to local image
-      return {
-        uri: null,
-        localPath: true,
-        key: "brokenImage.png", // Default fallback
-      };
-    }
-    return null;
+      const posterPath = movies[index].poster_path.startsWith("/")
+        ? movies[index].poster_path
+        : `/${movies[index].poster_path}`;
+      return `https://image.tmdb.org/t/p/w500${posterPath}`;
+    } 
+    return undefined;
   };
 
   if (loading) {
@@ -154,7 +207,7 @@ export default function CollectionScreen() {
   }
 
   const thumbnail = getCollectionThumbnail();
-  const numberOfItems = collection.movie_list?.length || 0;
+  const numberOfItems = collection.name === "Watched" ? movies.length : (collection.movie_list?.length || 0);
 
   return (
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
@@ -164,22 +217,11 @@ export default function CollectionScreen() {
           {/* Collection Thumbnail */}
           {thumbnail && (
             <View style={styles.thumbnailContainer}>
-              {thumbnail.localPath ? (
-                <AutoImage
-                  style={styles.thumbnail}
-                  source={
-                    thumbnail.key
-                      ? getLocalImage(thumbnail.key)
-                      : getLocalImage("brokenImage.png")
-                  }
-                />
-              ) : (
                 <Image
                   style={styles.thumbnail}
-                  source={{ uri: thumbnail.uri! }}
+                  source={{ uri: thumbnail }}
                   resizeMode="cover"
                 />
-              )}
             </View>
           )}
 
@@ -202,8 +244,7 @@ export default function CollectionScreen() {
               scrollEnabled={false} // Use ScrollView's scrolling instead
               renderItem={({ item }) => {
                 // Determine image source for the movie
-                let imageSource: string;
-                let localPath: boolean = false;
+                let imageSource: string | undefined;
 
                 if (item.poster_path) {
                   // Use TMDB poster URL - poster_path should be a poster path (e.g., "/abc123.jpg")
@@ -211,31 +252,32 @@ export default function CollectionScreen() {
                     ? item.poster_path
                     : `/${item.poster_path}`;
                   imageSource = `https://image.tmdb.org/t/p/w500${posterPath}`;
-                  localPath = false;
                 } else {
-                  // Fallback to local image
-                  imageSource = "interstellar";
-                  localPath = true;
+                  imageSource = undefined;
                 }
 
                 return (
-                  <GeneralCard
-                    image={imageSource}
-                    localPath={localPath}
-                    name={item.title}
-                    views={true}
-                    leftSubText={
-                      item.release_date
-                        ? item.release_date
-                        : undefined
-                    }
-                    rightSubText={
-                      item.rating_count
-                        ? item.rating_count.toFixed(1)
-                        : '0'
-                    }
-                    starRating={item.avg_rating ? item.avg_rating : 0}
-                  />
+                  <TouchableOpacity
+                    onPress={() => router.push(`../../movieDetails/${item.id}`)}
+                    activeOpacity={0.7}
+                  >
+                    <GeneralCard
+                      image={imageSource}
+                      name={item.title}
+                      views={true}
+                      leftSubText={
+                        item.release_date
+                          ? item.release_date
+                          : undefined
+                      }
+                      rightSubText={
+                        item.rating_count
+                          ? item.rating_count.toFixed(1)
+                          : '0'
+                      }
+                      starRating={item.avg_rating ? item.avg_rating : 0}
+                    />
+                  </TouchableOpacity>
                 );
               }}
               contentContainerStyle={styles.moviesList}

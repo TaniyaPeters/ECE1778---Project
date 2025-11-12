@@ -9,8 +9,8 @@ import { getLocalImage } from "../constants/postersMap";
 import { globalStyles } from "@app/styles/globalStyles";
 
 type GeneralCardProps = {
-  image: string;
-  localPath: boolean;
+  image: string | undefined;
+  localPath?: boolean;
   name: string;
   leftSubText?: string;
   rightSubText?: string;
@@ -25,7 +25,7 @@ type GeneralCardProps = {
 
 const GeneralCard = ({
   image,
-  localPath,
+  localPath = false,
   name,
   leftSubText = "",
   rightSubText = "",
@@ -45,7 +45,7 @@ const GeneralCard = ({
     ]}>
       <AutoImage
         style={{ width: 60 }}
-        source={localPath ? getLocalImage(image) : { uri: image }}
+        source={image ? localPath ? getLocalImage(image) : { uri: image } : null}
       />
       <View style={styles.cardHeader}>
         <Text 

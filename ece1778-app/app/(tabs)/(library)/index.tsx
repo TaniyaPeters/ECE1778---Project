@@ -22,14 +22,12 @@ import { colors } from "../../../constants/colors";
 import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Collection = Tables<"collections">;
-type Movie = Tables<"movies">;
 
 export default function Library() {
   const { isLoggedIn } = useAuthContext();
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [collectionThumbnails, setCollectionThumbnails] = useState<
-    Map<number, { imageSource: string; localPath: boolean }>
-  >(new Map());
+  const [collectionThumbnails, setCollectionThumbnails] = useState<Map<number, string>>(new Map());
+  const [watchedMoviesCount, setWatchedMoviesCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -89,14 +87,75 @@ export default function Library() {
 
       setCollections(sortedCollections);
 
-      // Fetch thumbnails for each collection (first movie's poster)
+      // Fetch thumbnails and counts for each collection
       if (sortedCollections && sortedCollections.length > 0) {
-        const thumbnailsMap = new Map<
-          number,
-          { imageSource: string; localPath: boolean }
-        >();
+        const thumbnailsMap = new Map<number, string>();
 
+        // Check if there's a "Watched" collection
+        const watchedCollection = sortedCollections.find(c => c.name === "Watched");
+        let watchedCount = 0;
+        let watchedFirstMovieId: number | null = null;
+
+        if (watchedCollection) {
+          // Fetch reviews for this user to get movie IDs with updated_at dates
+          const { data: reviewsData, error: reviewsError } = await supabase
+            .from("reviews")
+            .select("movie_id, updated_at")
+            .eq("user_id", userId);
+
+          if (!reviewsError && reviewsData) {
+            // Create a map of movie_id to earliest updated_at
+            const movieReviewMap = new Map<number, string>();
+            for (const review of reviewsData) {
+              if (review.movie_id !== null && review.updated_at) {
+                movieReviewMap.set(review.movie_id, review.updated_at);
+              }
+            }
+
+            // Get unique movie IDs
+            const movieIds = Array.from(movieReviewMap.keys());
+            watchedCount = movieIds.length;
+
+            if (movieIds.length > 0) {
+              // Find the movie with the earliest review date
+              let oldestDate = "";
+              let oldestMovieId: number | null = null;
+              for (const [movieId, date] of movieReviewMap.entries()) {
+                if (!oldestDate || date < oldestDate) {
+                  oldestDate = date;
+                  oldestMovieId = movieId;
+                }
+              }
+
+              watchedFirstMovieId = oldestMovieId;
+              // Get the first movie's poster
+              if (watchedFirstMovieId !== null) {
+                const { data: movieData, error: movieError } = await supabase
+                  .from("movies")
+                  .select("poster_path")
+                  .eq("id", watchedFirstMovieId)
+                  .maybeSingle();
+
+                if (!movieError && movieData?.poster_path) {
+                  const posterPath = movieData.poster_path.startsWith("/")
+                    ? movieData.poster_path
+                    : `/${movieData.poster_path}`;
+                  thumbnailsMap.set(watchedCollection.id, `https://image.tmdb.org/t/p/w500${posterPath}`);
+                }
+              }
+            }
+          }
+        }
+
+        setWatchedMoviesCount(watchedCount);
+
+        // Fetch thumbnails for other collections (first movie's poster)
         for (const collection of sortedCollections) {
+          // Skip "Watched" collection as we already handled it
+          if (collection.name === "Watched") {
+            continue;
+          }
+
           if (collection.movie_list && collection.movie_list.length > 0) {
             // Get the first movie's poster
             const firstMovieId = collection.movie_list[0];
@@ -110,23 +169,8 @@ export default function Library() {
               const posterPath = movieData.poster_path.startsWith("/")
                 ? movieData.poster_path
                 : `/${movieData.poster_path}`;
-              thumbnailsMap.set(collection.id, {
-                imageSource: `https://image.tmdb.org/t/p/w500${posterPath}`,
-                localPath: false,
-              });
-            } else {
-              // Fallback to local image
-              thumbnailsMap.set(collection.id, {
-                imageSource: "brokenImage",
-                localPath: true,
-              });
+              thumbnailsMap.set(collection.id, `https://image.tmdb.org/t/p/w500${posterPath}`);
             }
-          } else {
-            // No movies in collection, use fallback
-            thumbnailsMap.set(collection.id, {
-              imageSource: "brokenImage",
-              localPath: true,
-            });
           }
         }
 
@@ -279,7 +323,7 @@ export default function Library() {
           onPress={() => setModalVisible(true)}
           activeOpacity={0.7}
         >
-          <Text style={styles.createButtonText}>+ New Collection</Text>
+          <Text style={styles.modalButtonText}>+  New Collection</Text>
         </TouchableOpacity>
 
         {collections.length > 0 ? (
@@ -290,7 +334,9 @@ export default function Library() {
               scrollEnabled={false} // Use ScrollView's scrolling instead
               renderItem={({ item }) => {
                 const thumbnail = collectionThumbnails.get(item.id);
-                const numberOfItems = item.movie_list?.length || 0;
+                const numberOfItems = item.name === "Watched" 
+                  ? watchedMoviesCount 
+                  : (item.movie_list?.length || 0);
 
                 return (
                   <TouchableOpacity
@@ -298,10 +344,7 @@ export default function Library() {
                     activeOpacity={0.7}
                   >
                     <GeneralCard
-                      image={
-                        thumbnail?.imageSource || "brokenImage"
-                      }
-                      localPath={thumbnail?.localPath ?? true}
+                      image={thumbnail}
                       name={item.name}
                       leftSubText={`${numberOfItems} ${numberOfItems === 1 ? "item" : "items"}`}
                       rightSubText={
@@ -472,11 +515,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginHorizontal: 15,
     borderRadius: 8,
-  },
-  createButtonText: {
-    color: colors.light.background,
-    fontSize: 16,
-    fontWeight: "bold",
   },
   modalOverlay: {
     flex: 1,
