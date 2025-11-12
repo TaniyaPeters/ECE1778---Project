@@ -27,25 +27,9 @@ export default function TabMovies() {
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
 
-  if (!isLoggedIn) {
-    return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
-        <Text style={globalStyles.errorDescriptionText}>Please login to view the available movies.</Text>
-        <Pressable
-          style={({ pressed }: { pressed: boolean }) => [
-            globalStyles.errorLoginButton,
-            { opacity: pressed ? 0.6 : 1, },
-          ]}
-          onPress={() => router.push('/account')}
-        >
-          <Text style={globalStyles.errorDescriptionText}>Login</Text>
-        </Pressable>
-      </SafeAreaView>
-    );
-  }
-
   useEffect(() => {
+    if (!isLoggedIn) return;
+    
     const fetchMovies = async () => {
       try {
         setLoading(true);
@@ -71,6 +55,24 @@ export default function TabMovies() {
 
     fetchMovies();
   }, [isLoggedIn]);
+
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={globalStyles.errorDescriptionText}>Please login to view the available movies.</Text>
+        <Pressable
+          style={({ pressed }: { pressed: boolean }) => [
+            globalStyles.errorLoginButton,
+            { opacity: pressed ? 0.6 : 1, },
+          ]}
+          onPress={() => router.push('/account')}
+        >
+          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   if (loading) {
     return (
