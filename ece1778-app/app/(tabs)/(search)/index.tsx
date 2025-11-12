@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView, Text, TextInput, Pressable, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import { Dropdown } from 'react-native-element-dropdown';
 import { router } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
 import GeneralCard from "@app/components/generalCard";
@@ -14,6 +15,9 @@ export default function Search() {
   const [searchString, setSearchString] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [availableGenres, setAvailableGenres] = useState<string[]>([]);
+  const [genreFilter, setGenreFilter] = useState<string | null>(null);
+  const [dateSort, setDateSort] = useState<'asc' | 'desc' | null>(null);
 
   //Retrieve movies from movies table
   async function retrieveMovies() {
@@ -23,10 +27,20 @@ export default function Search() {
 
       //Retrieves all movies with title containing the search string (case insensitive)
       //Note: if search string is empty ("") then all movies are returned
-      const { data: moviesData, error: moviesError } = await supabase
+      let query = supabase
         .from("movies")
         .select("*")
         .ilike('title', `%${searchString.trim()}%`);
+
+      if (genreFilter) {
+        query = query.contains("genres", [genreFilter]);
+      }
+
+      if (dateSort) {
+        query = query.order("release_date", { ascending: dateSort === "asc"});
+      }
+      
+      const { data: moviesData, error: moviesError } = await query;
 
       if (moviesError) {
         setMovies([]);
@@ -42,15 +56,35 @@ export default function Search() {
     }
   }
 
+  //Get all unique genres in database
+  async function retrieveGenres() {
+    const { data, error } = await supabase
+      .from("movies")
+      .select("genres");
+    if (data) {
+      const allGenres = Array.from(
+        new Set(data.flatMap((movie) => movie.genres || []))
+      );
+      setAvailableGenres(allGenres.sort());
+    }
+  }
+
   //Display all movies when screen is first opened
   useEffect(() => {
     retrieveMovies(); 
+    retrieveGenres();
   }, []);
+
+  //Update results when filter/sort is updated
+  useEffect(() => {
+    retrieveMovies(); 
+  }, [genreFilter, dateSort]);
 
   return (
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.titleText}>Search Screen</Text>
       <View style={styles.horizontalContainer}>
+        {/* Search bar */}
         <View style={styles.searchWrapper}>
           <TextInput
             style={styles.input}
@@ -79,6 +113,39 @@ export default function Search() {
         >
           <Text style={[globalStyles.paragraphBold, styles.searchButtonText]}>Search</Text>
         </Pressable>
+      </View>
+
+      <View style={styles.filterContainer}>
+        {/* Genre filter */}
+        <Text style={[globalStyles.paragraph, styles.dropdownLabel]}>Genre: </Text>
+        <Dropdown
+          style={styles.dropdown}
+          data={[
+            { label: "All Genres", value: null },
+            ...availableGenres.map((g) => ({ label: g, value: g})),
+          ]}
+          labelField="label"
+          valueField="value"
+          placeholder="All Genres"
+          value={genreFilter}
+          onChange={(item) => setGenreFilter(item.value)}
+        />
+
+        {/* Sort by release date */}
+        <Text style={[globalStyles.paragraph, styles.dropdownLabel]}>Sort: </Text>
+        <Dropdown
+          style={styles.dropdown}
+          data={[
+            { label: 'No Sorting', value: null},
+            { label: 'Newest → Oldest', value: 'desc' },
+            { label: 'Oldest → Newest', value: 'asc'},
+          ]}
+          labelField="label"
+          valueField="value"
+          placeholder="No Sorting"
+          value={dateSort}
+          onChange={(item) => setDateSort(item.value)}
+        />
       </View>
 
       {loading && (
@@ -208,6 +275,26 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		color: colors.light.background
 	},
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+    paddingVertical: 4,
+    backgroundColor: colors.light.background,
+  },
+  dropdownLabel: {
+    fontSize: 15,
+  },
+  dropdown: {
+    flex: 1,
+    height: 45,
+    borderColor: colors.light.secondary,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
   center: {
     justifyContent: "center",
     alignItems: "center",
