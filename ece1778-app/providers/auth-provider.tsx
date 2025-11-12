@@ -59,6 +59,27 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 					.single();
 
 				setProfile(data);
+
+				// Ensure "Watched" collection exists for this user (fallback if trigger didn't run)
+				if (data) {
+					const { data: watchedCollection, error: checkError } = await supabase
+						.from("collections")
+						.select("id")
+						.eq("user_id", session.user.id)
+						.eq("name", "Watched")
+						.maybeSingle();
+
+					if (!checkError && !watchedCollection) {
+						// Create "Watched" collection if it doesn't exist
+						await supabase
+							.from("collections")
+							.insert({
+								name: "Watched",
+								user_id: session.user.id,
+								movie_list: [],
+							});
+					}
+				}
 			} else {
 				setProfile(null);
 			}
