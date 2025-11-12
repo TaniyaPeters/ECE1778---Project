@@ -1,3 +1,5 @@
+import { NotificationJson } from "./types"
+
 export type Json =
   | string
   | number
@@ -170,6 +172,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tokens: {
+        Row: {
+          user_id: string  
+          token:string
+        }
+        Insert: {
+          user_id: string  
+          token:string
+        }
+        Update: {
+          user_id: string  
+          token:string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "token_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webpayload: {
+        Row: {
+          table: string  
+          record_id:NotificationJson
+          old_record:NotificationJson
+        }
+        Insert: {
+          table: string  
+          record_id:NotificationJson
+          schema: 'public'  
+          old_record?:NotificationJson
+        }
+        Update: {
+          table: string  
+          record_id:NotificationJson
+          schema: 'public'  
+          old_record?:NotificationJson
+        }
+        Relationships: []
+      }
+       notification: {
+         Row: {
+          id: string  
+          user_id:string
+          body:string
+        } 
+        Insert: {
+          id: string  
+          user_id:string
+          body:string
+        }
+        Update: {
+          table: string  
+          record_id:NotificationJson
+          schema: 'public'  
+          old_record?:NotificationJson
+        }
+        Relationships: []
       }
     }
     Views: {

@@ -27,3 +27,9 @@ export type AuthData = {
 		username: Tables<"profiles">["username"]
 	) => Promise<{ error?: AuthError | null }>;
 };
+
+export type NotificationJson ={
+	id:string
+	user_id: string
+	body:string
+}

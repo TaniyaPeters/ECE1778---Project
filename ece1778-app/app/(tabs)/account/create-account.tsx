@@ -10,7 +10,7 @@ import {
 	Keyboard,
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
-import { useAuthContext } from "../../../contexts/AuthContext";
+import { useAuthContext } from "@contexts/AuthContext";
 import { colors } from "@constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
