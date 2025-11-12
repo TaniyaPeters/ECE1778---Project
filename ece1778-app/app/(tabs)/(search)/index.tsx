@@ -82,7 +82,6 @@ export default function Search() {
 
   return (
     <ScrollView style={globalStyles.container}>
-      <Text style={globalStyles.titleText}>Search Screen</Text>
       <View style={styles.horizontalContainer}>
         {/* Search bar */}
         <View style={styles.searchWrapper}>
