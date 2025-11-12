@@ -11,7 +11,7 @@ export default function DynamicLayout({segment}:any) {
         <Stack.Screen name="(top-tabs)" options={{ title:'Home'}}/>
         <Stack.Screen name="movieDetails/[id]" options={{title:"Movie Details"}}/>
       </Stack>
-      <SafeAreaView style={{height:90}} />
+      <SafeAreaView style={{height:95}} />
     </SafeAreaProvider>
     )
   }

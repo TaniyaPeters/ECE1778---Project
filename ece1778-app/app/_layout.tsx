@@ -2,8 +2,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useEffect } from 'react';
+import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
 
 export default function RootLayout() {
+  useNotificationObserver();
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="(tabs)/(home)">
@@ -37,3 +41,27 @@ export default function RootLayout() {
     </NativeTabs>
   );
 }
+
+function useNotificationObserver() {
+  useEffect(() => {
+    function redirect(notification: Notifications.Notification) {
+       if(notification.request.content.data?.url){
+        router.push('/(tabs)/(home)/(top-tabs)')
+      }
+    }
+
+    const response = Notifications.getLastNotificationResponse();
+    if (response?.notification) {
+      redirect(response.notification);
+    }
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      redirect(response.notification);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+}
+

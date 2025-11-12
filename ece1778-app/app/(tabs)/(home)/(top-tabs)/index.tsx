@@ -1,143 +1,33 @@
 import MonthlyRecap from "@app/components/MonthlyRecap";
 import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
-import { Button, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
-import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import Constants from 'expo-constants';import { useEffect, useState } from "react";
+import {Button, ScrollView, Text } from "react-native";
+import * as Notifications from "expo-notifications"
+import { useEffect } from "react";
 
+export default function TabAll() {
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
-
-export default function TabMovies() {
-  const [expoPushToken, setExpoPushToken] = useState('');
-    const [channels, setChannels] = useState<Notifications.NotificationChannel[]>([]);
-    const [notification, setNotification] = useState<Notifications.Notification | undefined>(
-      undefined
-    );
-  
-    useEffect(() => {
-      registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
-  
-      if (Platform.OS === 'android') {
-        Notifications.getNotificationChannelsAsync().then(value => setChannels(value ?? []));
+  useEffect(() => {registerForNotifications();}, []);
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        console.log(
+          "User tapped notification:",
+          response.notification.request.content
+        );
       }
-      const notificationListener = Notifications.addNotificationReceivedListener(notification => {
-        setNotification(notification);
-      });
+    );
+    return () => subscription.remove();
+  }, []);
   
-      const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-        console.log(response);
-      });
-  
-      return () => {
-        notificationListener.remove();
-        responseListener.remove();
-      };
-    }, []);
+  async function registerForNotifications(){ await Notifications.requestPermissionsAsync();}
+
   return (
     <ScrollView style={globalStyles.container}>
       <Text style={globalStyles.titleText}>All Media</Text>
       <Button title="Go to Movie Details" onPress={() => router.push("../movieDetails/1")}/>
       <MonthlyRecap user="User" type="Movie" action="Watched"></MonthlyRecap>
       <MonthlyRecap user="User" type="Book" action="Read"></MonthlyRecap>
-      <View
-            style={{
-              flex: 1,
-              alignItems: 'center',
-              justifyContent: 'space-around',
-            }}>
-            <Text>Your expo push token: {expoPushToken}</Text>
-            <Text>{`Channels: ${JSON.stringify(
-              channels.map(c => c.id),
-              null,
-              2
-            )}`}</Text>
-            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-              <Text>Title: {notification && notification.request.content.title} </Text>
-              <Text>Body: {notification && notification.request.content.body}</Text>
-              <Text>Data: {notification && JSON.stringify(notification.request.content.data)}</Text>
-            </View>
-            <Button
-              title="Press to schedule a notification"
-              onPress={async () => {
-                await schedulePushNotification();
-              }}
-            />
-          </View>
     </ScrollView>
   );
-}
-
-
-
-
-async function schedulePushNotification() {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "You've got mail! 📬",
-      body: 'Here is the notification body',
-      data: { data: 'goes here', test: { test1: 'more data' } },
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 2,
-    },
-  });
-}
-
-async function registerForPushNotificationsAsync() {
-  let token;
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('myNotificationChannel', {
-      name: 'A channel is needed for the permissions prompt to appear',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
-    });
-  }
-
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== 'granted') {
-      alert('Failed to get push token for push notification!');
-      return;
-    }
-    // Learn more about projectId:
-    // https://docs.expo.dev/push-notifications/push-notifications-setup/#configure-projectid
-    // EAS projectId is used here.
-    try {
-      const projectId =
-        Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-      if (!projectId) {
-        throw new Error('Project ID not found');
-      }
-      token = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      console.log(token);
-    } catch (e) {
-      token = `${e}`;
-    }
-  } else {
-    alert('Must use physical device for Push Notifications');
-  }
-
-  return token;
 }
