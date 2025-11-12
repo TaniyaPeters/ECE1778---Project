@@ -61,7 +61,7 @@ const GeneralCard = ({
         {add && (
           <Pressable onPress={addFunction}>
             <Image
-              source={require("../assets/addIcon.png")}
+              source={require("../assets/addIconWhite.png")}
               style={{ width: 24, height: 24 }}
             />
           </Pressable>
