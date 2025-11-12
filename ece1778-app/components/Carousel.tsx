@@ -27,6 +27,7 @@ export default function Carousel({ cards, style, ...props }: Props) {
               keyExtractor={(item) => item.id.toString()}
               scrollEnabled={false} // Use ScrollView's scrolling instead
               horizontal={true}
+              style={styles.flatlist}
               renderItem={({ item }) => {
                 // Determine image source for the movie
                 let imageSource: string;
@@ -68,12 +69,13 @@ export default function Carousel({ cards, style, ...props }: Props) {
 const styles = StyleSheet.create({
   carousel:{
     flexDirection:'row',
-    backgroundColor:colors.light.background,
+    backgroundColor:colors.light.tertiary,
     padding:5,
   },
   cardCollection:{
-    borderWidth :1,
-    margin:5,
+    borderWidth :0,
     padding:5,
+    margin:5,
+    elevation:3
   },
 });
