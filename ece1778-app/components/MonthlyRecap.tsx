@@ -57,13 +57,12 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.light.tertiary,
     borderRadius: 8,
-    marginTop:5,
     shadowColor: colors.light.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 3,
-    marginBottom:5,
+    margin:15,
     padding:15,
   },
   headerText:{

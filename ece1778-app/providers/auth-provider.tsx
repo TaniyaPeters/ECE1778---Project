@@ -1,83 +1,136 @@
 // code adapted from https://supabase.com/docs/guides/auth/quickstarts/with-expo-react-native-social-auth
-import { Tables } from "../database.types";
-import { AuthContext } from "../hooks/use-auth-context";
+import { Tables } from "../types/database.types";
+import { AuthContext } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase.web";
 import type { Session } from "@supabase/supabase-js";
 import { PropsWithChildren, useEffect, useState } from "react";
+import { createURL } from "expo-linking";
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | undefined | null>();
-  const [profile, setProfile] = useState<Tables<"profiles"> | null>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [session, setSession] = useState<Session | undefined | null>();
+	const [profile, setProfile] = useState<Tables<"profiles"> | null>();
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch the session once, and subscribe to auth state changes
-  useEffect(() => {
-    const fetchSession = async () => {
-      setIsLoading(true);
+	const redirectToAccount = createURL("/account");
 
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+	// Fetch the session once, and subscribe to auth state changes
+	useEffect(() => {
+		const fetchSession = async () => {
+			setIsLoading(true);
 
-      if (error) {
-        console.error("Error fetching session:", error);
-      }
+			const {
+				data: { session },
+				error,
+			} = await supabase.auth.getSession();
 
-      setSession(session);
-      setIsLoading(false);
-    };
+			if (error) {
+				console.error("Error fetching session:", error);
+			}
 
-    fetchSession();
+			setSession(session);
+			setIsLoading(false);
+		};
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", { event: _event, session });
-      setSession(session);
-    });
+		fetchSession();
 
-    // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+		const {
+			data: { subscription },
+		} = supabase.auth.onAuthStateChange(async (event, session) => {
+			console.log("Auth state changed:", { event: event, session });
+			setSession(session);
+		});
 
-  // Fetch the profile when the session changes
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true);
+		// Cleanup subscription on unmount
+		return () => {
+			subscription.unsubscribe();
+		};
+	}, []);
 
-      if (session) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
+	// Fetch the profile when the session changes
+	useEffect(() => {
+		const fetchProfile = async () => {
+			setIsLoading(true);
 
-        setProfile(data);
-      } else {
-        setProfile(null);
-      }
+			if (session) {
+				const { data } = await supabase
+					.from("profiles")
+					.select("*")
+					.eq("id", session.user.id)
+					.single();
 
-      setIsLoading(false);
-    };
+				setProfile(data);
+			} else {
+				setProfile(null);
+			}
 
-    fetchProfile();
-  }, [session]);
+			setIsLoading(false);
+		};
 
-  // TODO: add login and logout functions?
+		fetchProfile();
+	}, [session]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        session,
-        isLoading,
-        profile,
-        isLoggedIn: session != undefined,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+	const signInWithEmail = async (email: string, password: string) => {
+		const { data, error } = await supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
+
+		if (error) {
+			return { error };
+		}
+
+		return {};
+	};
+
+	const signOut = async () => {
+		const { error } = await supabase.auth.signOut();
+
+		if (error) {
+			return { error };
+		}
+		return {};
+	};
+
+	const signUpWithEmail = async (
+		email: string,
+		password: string,
+		name: Tables<"profiles">["full_name"],
+		username: Tables<"profiles">["username"]
+	) => {
+		const { data, error } = await supabase.auth.signUp({
+			email,
+			password,
+			options: {
+				emailRedirectTo: redirectToAccount,
+				data: {
+					full_name: name ?? "",
+					username: username,
+					avatar_url:
+						"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
+				},
+			},
+		});
+
+		if (error) {
+			return { error };
+		}
+
+		return {};
+	};
+
+	return (
+		<AuthContext.Provider
+			value={{
+				session,
+				isLoading,
+				profile,
+				signInWithEmail,
+				signOut,
+				signUpWithEmail,
+				isLoggedIn: session != undefined,
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
+	);
 }
