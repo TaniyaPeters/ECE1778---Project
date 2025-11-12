@@ -1,9 +1,7 @@
-import {View, StyleSheet, ViewProps, Text, ScrollView} from "react-native";
+import {View, StyleSheet, ViewProps, Text, TouchableOpacity, FlatList} from "react-native";
 import { colors } from "../constants/colors";
 import { globalStyles } from "@app/styles/globalStyles";
-import { Review } from "@app/types";
-import Card from "./Card";
-import StarRating from "./starRating";
+import { Review } from "@app/types/types";
 import Carousel from "./Carousel";
 import ReviewListItem from "./ReviewListItem";
 
@@ -12,25 +10,20 @@ type MonthlyRecapProps = ViewProps & {
   type:"Movie"|"Book";
   action:"Watched"|"Read";
   review?:Review,
+  data?:any
 };
 
 
-export default function MonthlyRecap({type, action, review}: MonthlyRecapProps) {
-  const views=[
-    <View key={0} style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>, 
-    <View key={1} style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>,
-    <View key={2}style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>,
-    <View key={3}style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>,
-    <View key={4}style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>,
-    <View key={5}style={styles.cardCollection}><Text style={globalStyles.paragraph}>{type} Name</Text><Text style={globalStyles.paragraph}>{type} Image</Text><StarRating rating={5}></StarRating></View>,
-  ]
+export default function MonthlyRecap({type, action, review, data}: MonthlyRecapProps) {
   const previousMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1)
   const monthToString = new Intl.DateTimeFormat("en-US", { month: "long", year:'numeric'}).format(previousMonth);
   if(!review){
     review = {
       id: 1,
-      user: "bob123",
-      text: "This movie is a delight for those of all ages. I have seen it several times and each time I am enchanted by the characters and magic. The cast is outstanding, the special effects delightful, everything most believable.",
+      user_id: "bob123",
+      username: "bob123",
+      rating:2,
+      review: "This movie is a delight for those of all ages. I have seen it several times and each time I am enchanted by the characters and magic. The cast is outstanding, the special effects delightful, everything most believable.",
     }
   }
   return (
@@ -42,7 +35,7 @@ export default function MonthlyRecap({type, action, review}: MonthlyRecapProps) 
       <Text style={[globalStyles.paragraph,{alignItems:"flex-end"}]}>{type}s {action}:</Text>
       <Text style={styles.emphasisText}>25</Text>
       <Text style={[globalStyles.paragraph,{alignItems:"flex-end"}]}>Highest Rated {type}(s): </Text>
-      <Carousel children={views}></Carousel>
+      <Carousel cards={data}></Carousel>
       <Text style={[globalStyles.paragraph,{alignItems:"flex-end"}]}>Number of Reviews Left:</Text>
       <Text style={styles.emphasisText}>25</Text>
       <Text style={[globalStyles.paragraph,{alignItems:"flex-end"}]}>Last Reviewed {type}:</Text>

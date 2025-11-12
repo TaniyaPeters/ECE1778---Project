@@ -9,6 +9,8 @@ import {
 	StyleSheet,
 	TouchableWithoutFeedback,
 	Keyboard,
+	Switch,
+	Platform,
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
 import { useAuthContext } from "@contexts/AuthContext";
@@ -16,6 +18,8 @@ import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import * as Notifications from 'expo-notifications';
+import { registerForPushNotificationsAsync } from "@app/components/Notifications";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -27,6 +31,21 @@ export default function EditAccountScreen() {
 	const lock = require("@assets/lock.png");
 	const unlock = require("@assets/unlock.png");
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
+	const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+	async function checkPermissions(){
+		const { status: existingStatus } = await Notifications.getPermissionsAsync();
+		let finalStatus = existingStatus;
+		if (existingStatus !== 'granted') {
+			const { status } = await Notifications.requestPermissionsAsync();
+			finalStatus = status;
+		}
+		if (finalStatus !== 'granted') {
+			Alert.alert("Enable Permissions in App Settings!");
+			return
+		}
+        setNotificationsEnabled(previousState => !previousState);
+	}
 
 	// Update profile in public.profiles table
 	const updateProfileInDatabase = async () => {
@@ -55,6 +74,14 @@ export default function EditAccountScreen() {
 
 	// Input validation
 	const handleSubmit = () => {
+		if(!notificationsEnabled){
+			Notifications.unregisterForNotificationsAsync()
+			Notifications.cancelAllScheduledNotificationsAsync()
+		}
+		else {
+			createNotification()
+		}
+
 		if (username.trim() === "" || email.trim() === "") {
 			Alert.alert("Error", "Cannot leave fields empty.");
 			return;
@@ -117,7 +144,7 @@ export default function EditAccountScreen() {
 				session!.user.user_metadata.username = username;
 
 				Alert.alert("Success", "Profile updated successfully!");
-				router.push("/account");
+				router.push("../(account)");
 			});
 	};
 
@@ -187,6 +214,18 @@ export default function EditAccountScreen() {
 						</View>
 					</View>
 				)}
+				<View style={styles.input}>
+					<View style={styles.row}>
+						<Text>Enable Notifications</Text>
+						<Switch
+							trackColor={{false: "gray", true: colors.light.primary}}
+							thumbColor={notificationsEnabled ? colors.light.secondary : 'white'}
+							ios_backgroundColor={colors.light.black}
+							onValueChange={checkPermissions}
+							value={notificationsEnabled}
+						/>
+					</View>
+				</View>
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						styles.button,
@@ -237,4 +276,26 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		color: colors.light.black,
 	},
+});
+
+
+async function createNotification() {
+	Notifications.scheduleNotificationAsync({
+		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
+		trigger: {
+			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+			seconds: 5,
+			repeats:true
+		},
+	});
+	registerForPushNotificationsAsync()
+}
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+	shouldPlaySound: true,
+	shouldSetBadge: false,
+	shouldShowBanner: true,
+	shouldShowList: true,
+  }),
 });

@@ -10,7 +10,7 @@ import {
 	Keyboard,
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
-import { useAuthContext } from "../../../contexts/AuthContext";
+import { useAuthContext } from "@contexts/AuthContext";
 import { colors } from "@constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -65,7 +65,7 @@ export default function EditAccountScreen() {
 				"Check your email to verify your account, then sign in."
 			);
 			router.push({
-				pathname: "/account",
+				pathname: "../(account)",
 				params: { email: email, password: password },
 			});
 		});
