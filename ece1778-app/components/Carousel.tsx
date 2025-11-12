@@ -27,7 +27,6 @@ export default function Carousel({ cards, style, ...props }: Props) {
               keyExtractor={(item) => item.id.toString()}
               scrollEnabled={false} // Use ScrollView's scrolling instead
               horizontal={true}
-              style={styles.flatlist}
               renderItem={({ item }) => {
                 // Determine image source for the movie
                 let imageSource: string;
