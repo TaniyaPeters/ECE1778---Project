@@ -2,16 +2,17 @@ import AuthProvider from "@app/providers/auth-provider";
 import { Barlow_500Medium } from "@expo-google-fonts/barlow";
 import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-	NativeTabs,
-	Icon,
-	Label,
-	VectorIcon,
-} from "expo-router/unstable-native-tabs";
 import { Platform } from "react-native";
+import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useEffect } from 'react';
+import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
 
 export default function RootLayout() {
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
+	useNotificationObserver();
+
 
 	return (
 		<AuthProvider>
@@ -84,3 +85,27 @@ export default function RootLayout() {
 		</AuthProvider>
 	);
 }
+
+function useNotificationObserver() {
+  useEffect(() => {
+    function redirect(notification: Notifications.Notification) {
+       if(notification.request.content.data?.url){
+        router.push('/(tabs)/(home)/(top-tabs)')
+      }
+    }
+
+    const response = Notifications.getLastNotificationResponse();
+    if (response?.notification) {
+      redirect(response.notification);
+    }
+
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      redirect(response.notification);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+}
+

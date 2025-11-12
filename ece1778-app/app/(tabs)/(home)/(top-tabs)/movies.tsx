@@ -101,7 +101,7 @@ export default function TabMovies() {
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         <Text style={globalStyles.titleText}>Movies Tab</Text>
-        <MonthlyRecap user="User" type="Movie" action="Watched"></MonthlyRecap>
+        <MonthlyRecap user="User" type="Movie" action="Watched" data={movies}></MonthlyRecap>
         
         {movies.length > 0 ? (
           <View>
