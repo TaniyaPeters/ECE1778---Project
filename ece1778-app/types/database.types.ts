@@ -52,14 +52,17 @@ export type Database = {
         Row: {
           friend_id: string
           id: string
+          record_id: number
         }
         Insert: {
           friend_id: string
           id: string
+          record_id?: number
         }
         Update: {
           friend_id?: string
           id?: string
+          record_id?: number
         }
         Relationships: [
           {
@@ -72,7 +75,7 @@ export type Database = {
           {
             foreignKeyName: "friends_id_fkey"
             columns: ["id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -93,24 +96,61 @@ export type Database = {
         }
         Insert: {
           avg_rating?: number | null
+          cast_members?: string[] | null
+          description?: string | null
+          genres?: string[] | null
           id?: number
+          poster_path?: string | null
           rating_count?: number | null
+          release_date?: string | null
           title: string
           tmdb_id?: string | null
         }
         Update: {
           avg_rating?: number | null
+          cast_members?: string[] | null
+          description?: string | null
+          genres?: string[] | null
           id?: number
+          poster_path?: string | null
           rating_count?: number | null
+          release_date?: string | null
           title?: string
           tmdb_id?: string | null
         }
         Relationships: []
       }
+      notification: {
+        Row: {
+          body: string | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "tokens"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           email: string
+          friends: number
           full_name: string | null
           id: string
           username: string
@@ -118,6 +158,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           email: string
+          friends?: number
           full_name?: string | null
           id: string
           username: string
@@ -125,6 +166,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           email?: string
+          friends?: number
           full_name?: string | null
           id?: string
           username?: string
@@ -175,22 +217,22 @@ export type Database = {
       }
       tokens: {
         Row: {
-          user_id: string  
-          token:string
+          token: string | null
+          user_id: string
         }
         Insert: {
-          user_id: string  
-          token:string
+          token?: string | null
+          user_id: string
         }
         Update: {
-          user_id: string  
-          token:string
+          token?: string | null
+          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "token_user_id_fkey"
+            foreignKeyName: "tokens_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -198,40 +240,22 @@ export type Database = {
       }
       webpayload: {
         Row: {
-          table: string  
-          record_id:NotificationJson
-          old_record:NotificationJson
+          id: number
+          old_record: string | null
+          record_id: string | null
+          table: string
         }
         Insert: {
-          table: string  
-          record_id:NotificationJson
-          schema: 'public'  
-          old_record?:NotificationJson
+          id?: number
+          old_record?: string | null
+          record_id?: string | null
+          table: string
         }
         Update: {
-          table: string  
-          record_id:NotificationJson
-          schema: 'public'  
-          old_record?:NotificationJson
-        }
-        Relationships: []
-      }
-       notification: {
-         Row: {
-          id: string  
-          user_id:string
-          body:string
-        } 
-        Insert: {
-          id: string  
-          user_id:string
-          body:string
-        }
-        Update: {
-          table: string  
-          record_id:NotificationJson
-          schema: 'public'  
-          old_record?:NotificationJson
+          id?: number
+          old_record?: string | null
+          record_id?: string | null
+          table?: string
         }
         Relationships: []
       }

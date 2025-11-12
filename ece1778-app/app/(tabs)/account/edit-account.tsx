@@ -14,22 +14,26 @@ import {
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
 import { useAuthContext } from "@contexts/AuthContext";
-import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { accountStyles } from "@app/styles/accountStyles";
+import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from "@app/components/Notifications";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
+	const { theme } = useTheme();
 	const [email, setEmail] = useState(profile?.email || "");
 	const [password, setPassword] = useState("");
 	const [passwordLocked, setPasswordLocked] = useState(true);
 	const [username, setUsername] = useState(profile?.username || "");
 	const [name, setName] = useState(profile?.full_name || "");
-	const lock = require("@assets/lock.png");
-	const unlock = require("@assets/unlock.png");
+	const lockDark = require("@assets/lock-dark.png");
+	const unlockDark = require("@assets/unlock-dark.png");
+	const lockWhite = require("@assets/lock-white.png");
+	const unlockWhite = require("@assets/unlock-white.png");
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
 	const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
@@ -154,7 +158,15 @@ export default function EditAccountScreen() {
 
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-			<SafeAreaView style={[globalStyles.container, styles.container]}>
+			<SafeAreaView
+				style={[
+					globalStyles.container,
+					accountStyles.container,
+					theme === "light"
+						? accountStyles.bgLight
+						: accountStyles.bgDark,
+				]}
+			>
 				<Image
 					source={{
 						uri:
@@ -164,42 +176,118 @@ export default function EditAccountScreen() {
 					style={globalStyles.profileImage}
 				/>
 
-				<View style={styles.input}>
-					<Text style={styles.text}>Name</Text>
+				<View style={accountStyles.input}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
+						Name
+					</Text>
 					<TextInput
 						placeholder="Name"
 						value={name}
 						onChangeText={setName}
+						style={[
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
 					/>
 				</View>
-				<View style={styles.input}>
-					<Text style={styles.text}>Username</Text>
+				<View style={accountStyles.input}>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
+						Username
+					</Text>
 					<TextInput
-						placeholder="Username"
 						value={username}
 						onChangeText={setUsername}
+						style={[
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+						placeholderTextColor={
+							theme === "light"
+								? accountStyles.textLight.color
+								: accountStyles.textDark.color
+						}
+						placeholder="Username"
 					/>
 				</View>
 				{!isOAuth && (
-					<View style={styles.input}>
-						<Text style={styles.text}>Email</Text>
+					<View style={accountStyles.input}>
+						<Text
+							style={[
+								accountStyles.text,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
+							]}
+						>
+							Email
+						</Text>
 						<TextInput
 							placeholder="Email"
 							value={email}
 							onChangeText={setEmail}
+							style={[
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
+							]}
+							placeholderTextColor={
+								theme === "light"
+									? accountStyles.textLight.color
+									: accountStyles.textDark.color
+							}
 						/>
 					</View>
 				)}
 				{!isOAuth && (
-					<View style={styles.input}>
-						<Text style={styles.text}>Password</Text>
-						<View style={styles.row}>
+					<View style={accountStyles.input}>
+						<Text
+							style={[
+								accountStyles.text,
+								theme === "light"
+									? accountStyles.textLight
+									: accountStyles.textDark,
+							]}
+						>
+							Password
+						</Text>
+						<View style={accountStyles.row}>
 							<TextInput
 								placeholder="***********"
 								value={password}
 								onChangeText={setPassword}
 								secureTextEntry={true}
 								editable={passwordLocked ? false : true}
+								style={[
+									theme === "light"
+										? accountStyles.textLight
+										: accountStyles.textDark,
+								]}
+								placeholderTextColor={
+									theme === "light"
+										? accountStyles.textLight.color
+										: accountStyles.textDark.color
+								}
 							/>
 							<Pressable
 								onPress={() =>
@@ -207,7 +295,15 @@ export default function EditAccountScreen() {
 								}
 							>
 								<Image
-									source={passwordLocked ? lock : unlock}
+									source={
+										passwordLocked
+											? theme === "light"
+												? lockDark
+												: lockWhite
+											: theme === "light"
+											? unlockDark
+											: unlockWhite
+									}
 									style={styles.icon}
 								/>
 							</Pressable>
@@ -228,14 +324,26 @@ export default function EditAccountScreen() {
 				</View>
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
-						styles.button,
+						accountStyles.button,
+						theme === "light"
+							? accountStyles.primaryLight
+							: accountStyles.primaryDark,
 						{
 							opacity: pressed ? 0.6 : 1,
 						},
 					]}
 					onPress={handleSubmit}
 				>
-					<Text style={styles.text}>Save Changes</Text>
+					<Text
+						style={[
+							accountStyles.text,
+							theme === "light"
+								? accountStyles.textLight
+								: accountStyles.textDark,
+						]}
+					>
+						Save Changes
+					</Text>
 				</Pressable>
 			</SafeAreaView>
 		</TouchableWithoutFeedback>
@@ -243,38 +351,9 @@ export default function EditAccountScreen() {
 }
 
 const styles = StyleSheet.create({
-	button: {
-		paddingVertical: 8,
-		width: 120,
-		borderRadius: 10,
-		alignItems: "center",
-		justifyContent: "center",
-		marginTop: 10,
-		backgroundColor: colors.light.primary,
-	},
-	container: {
-		flex: 1,
-		backgroundColor: colors.light.background,
-		alignItems: "center",
-	},
 	icon: {
 		width: 20,
 		height: 20,
-	},
-	input: {
-		marginTop: 16,
-		paddingHorizontal: 32,
-		width: "90%",
-	},
-	row: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
-	},
-	text: {
-		fontFamily: "Barlow_500Medium",
-		fontSize: 12,
-		color: colors.light.black,
 	},
 });
 

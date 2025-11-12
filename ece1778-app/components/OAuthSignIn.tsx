@@ -90,7 +90,7 @@ export default function OAuthSignInButton({
 	return (
 		<Pressable
 			onPress={signInWithOAuth}
-			style={[
+			style={({ pressed }) => [
 				styles.button,
 				{
 					backgroundColor:
@@ -98,6 +98,7 @@ export default function OAuthSignInButton({
 							? colors.light.primary
 							: colors.light.discord,
 				},
+				{ opacity: pressed ? 0.6 : 1 },
 			]}
 		>
 			<View style={styles.row}>
