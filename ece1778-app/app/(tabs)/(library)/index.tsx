@@ -35,6 +35,10 @@ export default function Library() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [collectionName, setCollectionName] = useState<string>("");
   const [creating, setCreating] = useState<boolean>(false);
+  const [duplicateNameError, setDuplicateNameError] = useState<string | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   useEffect(() => {
     fetchCollections();
@@ -69,16 +73,28 @@ export default function Library() {
         throw collectionsError;
       }
 
-      setCollections(collectionsData || []);
+      // Sort collections: "Watched" first (if exists), then by updated_at descending
+      const sortedCollections = (collectionsData || []).sort((a, b) => {
+        // "Watched" collection always comes first
+        if (a.name === "Watched") return -1;
+        if (b.name === "Watched") return 1;
+        
+        // Both are not "Watched", sort by updated_at descending
+        const dateA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const dateB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return dateB - dateA; // Descending order (most recent first)
+      });
+
+      setCollections(sortedCollections);
 
       // Fetch thumbnails for each collection (first movie's poster)
-      if (collectionsData && collectionsData.length > 0) {
+      if (sortedCollections && sortedCollections.length > 0) {
         const thumbnailsMap = new Map<
           number,
           { imageSource: string; localPath: boolean }
         >();
 
-        for (const collection of collectionsData) {
+        for (const collection of sortedCollections) {
           if (collection.movie_list && collection.movie_list.length > 0) {
             // Get the first movie's poster
             const firstMovieId = collection.movie_list[0];
@@ -123,13 +139,26 @@ export default function Library() {
   };
 
   const handleCreateCollection = async () => {
-    if (!collectionName.trim()) {
-      Alert.alert("Error", "Please enter a collection name");
+    const trimmedName = collectionName.trim();
+    
+    if (!trimmedName) {
+      setDuplicateNameError("Please enter a collection name");
+      return;
+    }
+
+    // Check if collection name already exists
+    const nameExists = collections.some(
+      (collection) => collection.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (nameExists) {
+      setDuplicateNameError("A collection with this name already exists");
       return;
     }
 
     try {
       setCreating(true);
+      setDuplicateNameError(null);
 
       // Get user ID from session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -142,7 +171,7 @@ export default function Library() {
       const { data, error: createError } = await supabase
         .from("collections")
         .insert({
-          name: collectionName.trim(),
+          name: trimmedName,
           user_id: session.user.id,
           movie_list: [],
         })
@@ -156,14 +185,55 @@ export default function Library() {
       // Close modal and reset form
       setModalVisible(false);
       setCollectionName("");
+      setDuplicateNameError(null);
 
       // Refresh collections list
       await fetchCollections();
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Failed to create collection");
+      setDuplicateNameError(err.message || "Failed to create collection");
       console.log("Error creating collection:", err);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDeleteCollection = (collectionId: number) => {
+    // Find the collection to get its name for the confirmation
+    const collection = collections.find(c => c.id === collectionId);
+    if (collection) {
+      setCollectionToDelete({ id: collectionId, name: collection.name });
+      setDeleteModalVisible(true);
+    }
+  };
+
+  const confirmDeleteCollection = async () => {
+    if (!collectionToDelete) return;
+
+    try {
+      setDeleting(true);
+
+      // Delete the collection from the database
+      const { error: deleteError } = await supabase
+        .from("collections")
+        .delete()
+        .eq("id", collectionToDelete.id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      // Remove thumbnail from map
+      collectionThumbnails.delete(collectionToDelete.id);
+      setCollectionThumbnails(new Map(collectionThumbnails));
+
+      setDeleteModalVisible(false);
+      setCollectionToDelete(null);
+      await fetchCollections();
+    } catch (err: any) {
+      Alert.alert("Error", err.message || "Failed to delete collection");
+      console.log("Error deleting collection:", err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -237,6 +307,8 @@ export default function Library() {
                           ? new Date(item.updated_at).toLocaleDateString()
                           : undefined
                       }
+                      del={item.name === 'Watched' ? false : true}
+                      delFunction={async() => await handleDeleteCollection(item.id)}
                     />
                   </TouchableOpacity>
                 );
@@ -268,27 +340,38 @@ export default function Library() {
             <TextInput
               placeholder="Enter collection name"
               value={collectionName}
-              onChangeText={setCollectionName}
+              onChangeText={(text) => {
+                setCollectionName(text);
+                // Clear error when user starts typing
+                if (duplicateNameError) {
+                  setDuplicateNameError(null);
+                }
+              }}
               style={styles.modalInput}
               autoFocus
             />
 
+            {duplicateNameError && (
+              <Text style={styles.modalErrorText}>{duplicateNameError}</Text>
+            )}
+
             <View style={styles.modalButtonContainer}>
               <Pressable
                 style={({ pressed }) => [
-                  styles.modalButtonCancel,
+                  styles.modalButtonDanger,
                   { opacity: pressed ? 0.6 : 1 },
                 ]}
                 onPress={() => {
                   setModalVisible(false);
                   setCollectionName("");
+                  setDuplicateNameError(null);
                 }}
               >
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
-                  styles.modalButtonSave,
+                  styles.modalButtonSecondary,
                   { opacity: pressed ? 0.6 : 1 },
                 ]}
                 onPress={handleCreateCollection}
@@ -296,6 +379,57 @@ export default function Library() {
               >
                 <Text style={styles.modalButtonText}>
                   {creating ? "Creating..." : "Save"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Collection Confirmation Modal */}
+      <Modal
+        visible={deleteModalVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => {
+          setDeleteModalVisible(false);
+          setCollectionToDelete(null);
+        }}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Delete Collection</Text>
+            
+            <Text style={styles.modalLabel}>
+              Are you sure you want to delete "{collectionToDelete?.name}"?
+            </Text>
+            <Text style={styles.modalWarningText}>
+              This action cannot be undone.
+            </Text>
+
+            <View style={styles.modalButtonContainer}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonSecondary,
+                  { opacity: pressed ? 0.6 : 1 },
+                ]}
+                onPress={() => {
+                  setDeleteModalVisible(false);
+                  setCollectionToDelete(null);
+                }}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.modalButtonDanger,
+                  { opacity: pressed ? 0.6 : 1 },
+                ]}
+                onPress={confirmDeleteCollection}
+                disabled={deleting}
+              >
+                <Text style={styles.modalButtonText}>
+                  {deleting ? "Deleting..." : "Delete"}
                 </Text>
               </Pressable>
             </View>
@@ -334,6 +468,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     marginTop: 15,
+    marginHorizontal: 15,
     borderRadius: 8,
   },
   createButtonText: {
@@ -387,7 +522,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
   },
-  modalButtonCancel: {
+  modalButtonDanger: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
@@ -395,7 +530,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.light.danger,
   },
-  modalButtonSave: {
+  modalButtonSecondary: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
@@ -407,5 +542,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: colors.light.background,
+  },
+  modalWarningText: {
+    fontSize: 14,
+    color: colors.light.danger,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalErrorText: {
+    fontSize: 14,
+    color: colors.light.danger,
+    marginBottom: 10,
+    textAlign: "center",
   },
 });

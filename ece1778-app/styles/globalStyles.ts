@@ -1,5 +1,6 @@
 import { Platform, StyleSheet } from "react-native";
 import { colors } from "../constants/colors";
+import { dimentions } from "@app/constants/dimentions";
 
 const defaultSerif = Platform.OS === "ios" ? "Times New Roman" : "serif";
 const defaultSans = Platform.OS === "ios" ? "Helvetica" : "sans-serif";
@@ -8,6 +9,8 @@ export const globalStyles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 16,
+		paddingBottom: 0,
+		marginBottom: Platform.OS === "ios" ? 50 : 85,
 		backgroundColor: colors.light.background,
 	},
 	titleText: {
@@ -31,17 +34,9 @@ export const globalStyles = StyleSheet.create({
 		fontFamily: defaultSans,
 	},
 	detailsImage: {
-		width: "100%",
-		height: 400,
-		aspectRatio: 1,
-		alignSelf: "center",
-		paddingBottom: 10,
-		paddingTop: 10,
-		borderRadius: 16,
-		shadowColor: "#000",
-		shadowOpacity: 0.55,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 4 },
+		width: dimentions.windowWidth * 0.6,
+		height: dimentions.windowWidth * 0.6 * 1.5, // 2:3 poster aspect ratio
+		borderRadius: 12,
 	},
 	profileImage: {
 		width: 100,

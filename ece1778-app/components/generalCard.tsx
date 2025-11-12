@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import StarRating from "./starRating";
 import AutoImage from "./autoScaledImage";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
-import { StyleSheet } from "react-native";
-import { dimentions } from "../constants/dimentions";
+import { StyleSheet, Image } from "react-native";
 import { getLocalImage } from "../constants/postersMap";
 
 type GeneralCardProps = {
@@ -15,6 +14,8 @@ type GeneralCardProps = {
   leftSubText?: string;
   rightSubText?: string;
   views?: boolean;
+  del?: boolean;
+  delFunction?: () => void;
   starRating?: number;
 };
 
@@ -25,6 +26,8 @@ const GeneralCard = ({
   leftSubText = "",
   rightSubText = "",
   views = false,
+  del = false,
+  delFunction = () => {},
   starRating,
 }: GeneralCardProps) => {
   return (
@@ -40,6 +43,14 @@ const GeneralCard = ({
       <View style={styles.cardFooter}>
         {starRating !== undefined && (
           <StarRating rating={starRating} color={colors.light.background} />
+        )}
+        {del && (
+          <Pressable onPress={delFunction}>
+            <Image
+              source={require("../assets/trashIcon.png")}
+              style={{ width: 24, height: 24 }}
+            />
+          </Pressable>
         )}
 
         <Text style={styles.cardSubText}>

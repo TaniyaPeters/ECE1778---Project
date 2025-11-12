@@ -17,6 +17,7 @@ import RatingReviewPopup from "@components/RatingReviewPopup";
 import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@contexts/AuthContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function movieDetails() {
 	const { profile } = useAuthContext();
@@ -230,89 +231,93 @@ export default function movieDetails() {
 	}
 
 	return (
-		<ScrollView style={globalStyles.container}>
-			{/* Movie title */}
-			<Text style={globalStyles.titleText}>{title}</Text>
+		<SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+			<ScrollView>			
+				{/* Movie title */}
+				<Text style={globalStyles.titleText}>{title}</Text>
 
-			{/* Release year */}
-			<Text style={[globalStyles.paragraph, styles.year]}>
-				{releaseYear}
-			</Text>
-
-			{/* Rating out of 5 and number of ratings */}
-			<View style={styles.ratingContainer}>
-				<Text style={[globalStyles.paragraph, styles.rating]}>
-					⭐ {numRatings && numRatings > 0 ? `${rating?.toFixed(1) ?? "N/A"} / 5` : ""}
+				{/* Release year */}
+				<Text style={[globalStyles.paragraph, styles.year]}>
+					{releaseYear}
 				</Text>
-				<Text style={[globalStyles.paragraph, styles.num_ratings]}>
-					{" "}
-					({numRatings ?? 0} ratings)
-				</Text>
-			</View>
 
-			{/* Movie poster */}
-			<Image
-				source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/no-image.jpg") }
-				style={globalStyles.detailsImage}
-				resizeMode="contain"
-			/>
-
-			<Card style={styles.card}>
-				{/* Movie description */}
-				<Text style={globalStyles.paragraph}>{description}</Text>
-
-				{/* Genres */}
-				<View style={styles.verticalContainer}>
-					<Text style={globalStyles.paragraphBold}>Genres: </Text>
-					{genres.map((genre, index) => (
-						<Text key={index} style={globalStyles.paragraph}>
-							• {genre}
-						</Text>
-					))}
+				{/* Rating out of 5 and number of ratings */}
+				<View style={styles.ratingContainer}>
+					<Text style={[globalStyles.paragraph, styles.rating]}>
+						⭐ {numRatings && numRatings > 0 ? `${rating?.toFixed(1) ?? "N/A"} / 5` : ""}
+					</Text>
+					<Text style={[globalStyles.paragraph, styles.num_ratings]}>
+						{" "}
+						({numRatings ?? 0} ratings)
+					</Text>
 				</View>
 
-				{/* Cast */}
-				<View style={styles.verticalContainer}>
-					<Text style={globalStyles.paragraphBold}>Cast: </Text>
-					{castMembers.map((actor, index) => (
-						<Text key={index} style={globalStyles.paragraph}>
-							• {actor}
-						</Text>
-					))}
+				{/* Movie poster */}
+				<View style={styles.imageContainer}>
+					<Image
+						source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/no-image.jpg") }
+						style={globalStyles.detailsImage}
+						resizeMode="contain"
+					/>
 				</View>
-			</Card>
 
-			{/* Reviews */}
-			<View style={styles.horizontalContainer}>
-				<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
-				<Pressable
-					style={({ pressed }: { pressed: boolean }) => [
-						styles.button, { opacity: pressed ? 0.6 : 1},
-					]}
-					onPress={() => setPopupVisible(true)}
-					disabled={!reviewButtonEnabled}
-				>
-					<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
-				</Pressable>
-			</View>
-			<FlatList
-				data={reviews}
-				keyExtractor={(item: Review) => item.id.toString()}
-				renderItem={({ item }) => (
-					<ReviewListItem review={item}></ReviewListItem>
-				)}
-				scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
-				contentContainerStyle={styles.reviewList}
-			/>
+				<Card style={styles.card}>
+					{/* Movie description */}
+					<Text style={globalStyles.paragraph}>{description}</Text>
 
-			{/* Add/update review and rating popup*/}
-			<RatingReviewPopup
-				visible={popupVisible}
-				review={userReview}
-				onClose={() => setPopupVisible(false)}
-				onSubmit={handleSubmitReview}
-			/>
-		</ScrollView>
+					{/* Genres */}
+					<View style={styles.verticalContainer}>
+						<Text style={globalStyles.paragraphBold}>Genres: </Text>
+						{genres.map((genre, index) => (
+							<Text key={index} style={globalStyles.paragraph}>
+								• {genre}
+							</Text>
+						))}
+					</View>
+
+					{/* Cast */}
+					<View style={styles.verticalContainer}>
+						<Text style={globalStyles.paragraphBold}>Cast: </Text>
+						{castMembers.map((actor, index) => (
+							<Text key={index} style={globalStyles.paragraph}>
+								• {actor}
+							</Text>
+						))}
+					</View>
+				</Card>
+
+				{/* Reviews */}
+				<View style={styles.horizontalContainer}>
+					<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+					<Pressable
+						style={({ pressed }: { pressed: boolean }) => [
+							styles.button, { opacity: pressed ? 0.6 : 1},
+						]}
+						onPress={() => setPopupVisible(true)}
+						disabled={!reviewButtonEnabled}
+					>
+						<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
+					</Pressable>
+				</View>
+				<FlatList
+					data={reviews}
+					keyExtractor={(item: Review) => item.id.toString()}
+					renderItem={({ item }) => (
+						<ReviewListItem review={item}></ReviewListItem>
+					)}
+					scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
+					contentContainerStyle={styles.reviewList}
+				/>
+
+				{/* Add/update review and rating popup*/}
+				<RatingReviewPopup
+					visible={popupVisible}
+					review={userReview}
+					onClose={() => setPopupVisible(false)}
+					onSubmit={handleSubmitReview}
+				/>
+			</ScrollView>
+		</SafeAreaView>
 	);
 }
 
@@ -339,7 +344,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		flexWrap: "wrap",
 		alignItems: "center",
+		marginHorizontal: 15,
 		marginTop: 14,
+		marginBottom: 5,
 		justifyContent: 'space-between',
 	},
 	verticalContainer: {
@@ -365,7 +372,16 @@ const styles = StyleSheet.create({
 	},
 	card: {
 		backgroundColor: colors.light.background,
-		marginTop: 10,
-		marginBottom: 10,
+	},
+	imageContainer: {
+		alignSelf: "center", // center container itself
+		alignItems: 'center',
+		marginBottom: 16,
+		borderRadius: 12,
+		shadowColor: "#000",
+		shadowOpacity: 0.3,
+		shadowRadius: 8,
+		shadowOffset: { width: 0, height: 4 },
+		elevation: 5,
 	},
 });
