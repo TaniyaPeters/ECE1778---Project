@@ -33,3 +33,9 @@ export type ThemeContextType = {
 	theme: "light" | "dark";
 	toggleTheme: () => void;
 };
+
+export type NotificationJson ={
+	id:string
+	user_id: string
+	body:string
+}

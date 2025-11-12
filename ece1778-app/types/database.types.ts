@@ -1,3 +1,5 @@
+import { NotificationJson } from "./types"
+
 export type Json =
   | string
   | number

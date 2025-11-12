@@ -5,5 +5,10 @@ begin
           when (new.raw_user_meta_data->>'iss' = 'https://api.github.com') then new.raw_user_meta_data->>'user_name'
           when (new.raw_user_meta_data->>'iss' = 'https://discord.com/api') then new.raw_user_meta_data->>'full_name'
           else new.raw_user_meta_data->>'username' END));
+  
+  -- Create "Watched" collection for the new user
+  insert into public.collections (name, user_id, movie_list)
+  values ('Watched', new.id, '[]'::jsonb);
+  
   return new;
 end;

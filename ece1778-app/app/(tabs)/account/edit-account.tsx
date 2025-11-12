@@ -9,6 +9,8 @@ import {
 	StyleSheet,
 	TouchableWithoutFeedback,
 	Keyboard,
+	Switch,
+	Platform,
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
 import { useAuthContext } from "@contexts/AuthContext";
@@ -17,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
+import * as Notifications from 'expo-notifications';
+import { registerForPushNotificationsAsync } from "@app/components/Notifications";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -31,6 +35,21 @@ export default function EditAccountScreen() {
 	const lockWhite = require("@assets/lock-white.png");
 	const unlockWhite = require("@assets/unlock-white.png");
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
+	const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+	async function checkPermissions(){
+		const { status: existingStatus } = await Notifications.getPermissionsAsync();
+		let finalStatus = existingStatus;
+		if (existingStatus !== 'granted') {
+			const { status } = await Notifications.requestPermissionsAsync();
+			finalStatus = status;
+		}
+		if (finalStatus !== 'granted') {
+			Alert.alert("Enable Permissions in App Settings!");
+			return
+		}
+        setNotificationsEnabled(previousState => !previousState);
+	}
 
 	// Update profile in public.profiles table
 	const updateProfileInDatabase = async () => {
@@ -59,6 +78,14 @@ export default function EditAccountScreen() {
 
 	// Input validation
 	const handleSubmit = () => {
+		if(!notificationsEnabled){
+			Notifications.unregisterForNotificationsAsync()
+			Notifications.cancelAllScheduledNotificationsAsync()
+		}
+		else {
+			createNotification()
+		}
+
 		if (username.trim() === "" || email.trim() === "") {
 			Alert.alert("Error", "Cannot leave fields empty.");
 			return;
@@ -283,6 +310,18 @@ export default function EditAccountScreen() {
 						</View>
 					</View>
 				)}
+				<View style={styles.input}>
+					<View style={styles.row}>
+						<Text>Enable Notifications</Text>
+						<Switch
+							trackColor={{false: "gray", true: colors.light.primary}}
+							thumbColor={notificationsEnabled ? colors.light.secondary : 'white'}
+							ios_backgroundColor={colors.light.black}
+							onValueChange={checkPermissions}
+							value={notificationsEnabled}
+						/>
+					</View>
+				</View>
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						accountStyles.button,
@@ -316,4 +355,26 @@ const styles = StyleSheet.create({
 		width: 20,
 		height: 20,
 	},
+});
+
+
+async function createNotification() {
+	Notifications.scheduleNotificationAsync({
+		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
+		trigger: {
+			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+			seconds: 5,
+			repeats:true
+		},
+	});
+	registerForPushNotificationsAsync()
+}
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+	shouldPlaySound: true,
+	shouldSetBadge: false,
+	shouldShowBanner: true,
+	shouldShowList: true,
+  }),
 });

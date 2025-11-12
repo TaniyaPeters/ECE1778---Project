@@ -1,45 +1,81 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import StarRating from "./starRating";
 import AutoImage from "./autoScaledImage";
 import { FontAwesome } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
-import { StyleSheet } from "react-native";
-import { dimentions } from "../constants/dimentions";
+import { StyleSheet, Image } from "react-native";
 import { getLocalImage } from "../constants/postersMap";
+import { globalStyles } from "@app/styles/globalStyles";
 
 type GeneralCardProps = {
-  image: string;
-  localPath: boolean;
+  image: string | undefined;
+  localPath?: boolean;
   name: string;
   leftSubText?: string;
   rightSubText?: string;
   views?: boolean;
+  del?: boolean;
+  delFunction?: () => void;
+  add?: boolean;
+  addFunction?: () => void;
   starRating?: number;
+  backgroundColor?: string;
 };
 
 const GeneralCard = ({
   image,
-  localPath,
+  localPath = false,
   name,
   leftSubText = "",
   rightSubText = "",
   views = false,
+  del = false,
+  delFunction = () => {},
+  add = false,
+  addFunction = () => {},
   starRating,
+  backgroundColor,
 }: GeneralCardProps) => {
   return (
-    <View style={styles.card}>
+    <View style={[
+      styles.card, 
+      globalStyles.center,
+      backgroundColor ? { backgroundColor } : {}
+    ]}>
       <AutoImage
         style={{ width: 60 }}
-        source={localPath ? getLocalImage(image) : { uri: image }}
+        source={image ? localPath ? getLocalImage(image) : { uri: image } : null}
       />
       <View style={styles.cardHeader}>
-        <Text style={styles.cardHeaderText}>{name}</Text>
+        <Text 
+          style={styles.cardHeaderText}
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
+          {name}
+        </Text>
         <Text style={styles.cardSubText}>{leftSubText}</Text>
       </View>
       <View style={styles.cardFooter}>
+        {add && (
+          <Pressable onPress={addFunction}>
+            <Image
+              source={require("../assets/addIconWhite.png")}
+              style={{ width: 24, height: 24 }}
+            />
+          </Pressable>
+        )}
         {starRating !== undefined && (
           <StarRating rating={starRating} color={colors.light.background} />
+        )}
+        {del && (
+          <Pressable onPress={delFunction}>
+            <Image
+              source={require("../assets/trashIcon.png")}
+              style={{ width: 24, height: 24 }}
+            />
+          </Pressable>
         )}
 
         <Text style={styles.cardSubText}>

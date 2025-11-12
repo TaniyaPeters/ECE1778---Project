@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
 import { accountStyles } from "@app/styles/accountStyles";
-import { useAuthContext } from "../../../contexts/AuthContext";
+import { useAuthContext } from "@contexts/AuthContext";
+import { colors } from "@constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTheme } from "@contexts/ThemeContext";
