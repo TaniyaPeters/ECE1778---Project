@@ -23,12 +23,12 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.light.primary,
     borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
+    padding: 10,
     shadowColor: colors.light.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 3,
+    margin: 15,
   },
 });

@@ -1,24 +1,64 @@
+import { colors } from "@app/constants/colors";
 import { Stack } from "expo-router";
 import React from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function DynamicLayout({segment}:any) {
-  
   if(segment == '(tabs)/(home)'){
     return(
-      <Stack>        
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.light.background },
+          headerTitleAlign: "center",
+          headerTitleStyle: { color: colors.light.secondary },
+          headerBackTitle: "Back",
+        }}
+      >        
         <Stack.Screen name="(top-tabs)" options={{ title:'Home'}}/>
-        <Stack.Screen name="movieDetails/[id]" options={{title:"Movie Details"}}/>
+        <Stack.Screen name="movieDetails/[id]" options={{
+          title:"Movie Details",
+          headerStyle: { backgroundColor: colors.light.primary },
+          }}/>
       </Stack>
     )
   }
-  const seg = ((segment.toString()).split('(')[2])
-  const titleSeg = seg[0].toUpperCase() + seg.substr(1,seg.length-2)
   
-  return (    
-    <Stack>        
-      <Stack.Screen name="index" options={{ title:titleSeg}}/>
-      <Stack.Screen name="movieDetails/[id]" options={{title:"Movie Details"}}/>
-    </Stack>
-  )
+  if(segment == '(tabs)/(search)'){
+    return (    
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.light.background },
+          headerTitleAlign: "center",
+          headerTitleStyle: { color: colors.light.secondary },
+          headerBackTitle: "Back",
+        }}
+      >        
+        <Stack.Screen name="index" options={{ title:"Search"}}/>
+        <Stack.Screen name="movieDetails/[id]" options={{
+          title:"Movie Details",
+          headerStyle: { backgroundColor: colors.light.primary },
+        }}/>
+      </Stack>
+    )
+  }
+  
+  if(segment == '(tabs)/(library)'){
+    return (    
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.light.background },
+          headerTitleAlign: "center",
+          headerTitleStyle: { color: colors.light.secondary },
+          headerBackTitle: "Back",
+        }}
+      >        
+        <Stack.Screen name="index" options={{ title:"Library"}}/>
+        <Stack.Screen name="collection/[id]" options={{
+          title:"",
+          headerStyle: { backgroundColor: colors.light.primary },
+        }}/>
+      </Stack>
+    )
+  }
+  
+  return null;
 }

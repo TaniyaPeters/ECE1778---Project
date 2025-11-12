@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import GeneralCard from "@app/components/generalCard";
 import MonthlyRecap from "@app/components/MonthlyRecap";
+import AddToCollection, { AddToCollectionHandle } from "@app/components/AddToCollection";
 import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
 import { 
@@ -10,7 +11,8 @@ import {
   View, 
   FlatList, 
   ActivityIndicator, 
-  TouchableOpacity 
+  TouchableOpacity, 
+  Pressable
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../../lib/supabase.web";
@@ -25,8 +27,11 @@ export default function TabMovies() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
+  const addToCollectionRef = useRef<AddToCollectionHandle>(null);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const fetchMovies = async () => {
       try {
         setLoading(true);
@@ -53,6 +58,24 @@ export default function TabMovies() {
     fetchMovies();
   }, [isLoggedIn]);
 
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={globalStyles.errorDescriptionText}>Please login to view the available movies.</Text>
+        <Pressable
+          style={({ pressed }: { pressed: boolean }) => [
+            globalStyles.errorLoginButton,
+            { opacity: pressed ? 0.6 : 1, },
+          ]}
+          onPress={() => router.push('/account')}
+        >
+          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
+
   if (loading) {
     return (
       <SafeAreaView style={[globalStyles.container, styles.center]}>
@@ -70,8 +93,13 @@ export default function TabMovies() {
     );
   }
 
+  const handleAddToCollection = (movieId: number) => {
+    addToCollectionRef.current?.open(movieId);
+  };
+
   return (
-      <ScrollView style={globalStyles.container}>
+    <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
+      <ScrollView>
         <Text style={globalStyles.titleText}>Movies Tab</Text>
         <MonthlyRecap user="User" type="Movie" action="Watched" data={movies}></MonthlyRecap>
         
@@ -119,6 +147,8 @@ export default function TabMovies() {
                           ? item.rating_count.toFixed(1)
                           : '0'
                       }
+                      add
+                      addFunction={() => handleAddToCollection(item.id)}
                       starRating={item.avg_rating ? item.avg_rating : 0}
                     />
                   </TouchableOpacity>
@@ -134,6 +164,9 @@ export default function TabMovies() {
           </View>
         )}
       </ScrollView>
+
+      <AddToCollection ref={addToCollectionRef} />
+    </SafeAreaView>
   );
 }
 
