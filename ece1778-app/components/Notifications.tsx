@@ -46,32 +46,5 @@ export async function registerForPushNotificationsAsync() {
   } else {
     alert('Must use physical device for Push Notifications');
   }
-
   return token;
 }
-
-// process.serve(
-// async (req: any) => { 
-// 	const access = 	process.env.EXPO_ACCESS_TOKEN ?? "" 
-// 	const payload: Database['public']['Tables']['webpayload']['Row'] = await req.json()  
-// 	const { data } = await supabase    
-// 		.from('tokens')    
-// 		.select('token')    
-// 		.eq('id', payload.record_id.user_id)    
-// 		.single()  
-  
-// 	const res = await fetch('https://exp.host/--/api/v2/push/send', {    
-// 		method: 'POST',    
-// 		headers: {      
-// 			'Content-Type': 'application/json',      
-// 			Authorization: `Bearer ${access}`,    
-// 		},
-// 		body: JSON.stringify({      
-// 			to: data?.token,      
-// 			sound: 'default',      
-// 			body: payload.record_id.body,    
-// 		}),  
-// 	}).then((res) => res.json())  
-// 	return new Response(JSON.stringify(res), {    
-// 	headers: { 'Content-Type': 'application/json' },  
-// })})
