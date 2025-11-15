@@ -20,8 +20,9 @@ import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from "@app/components/Notifications";
 import { colors } from "@app/constants/colors";
+import createNotification from "@app/components/Notifications";
+
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
 	const { theme } = useTheme();
@@ -83,7 +84,7 @@ export default function EditAccountScreen() {
 			Notifications.cancelAllScheduledNotificationsAsync()
 		}
 		else {
-			createNotification()
+			createNotification(profile)
 		}
 
 		if (username.trim() === "" || email.trim() === "") {
@@ -355,26 +356,4 @@ const styles = StyleSheet.create({
 		width: 20,
 		height: 20,
 	},
-});
-
-
-async function createNotification() {
-	Notifications.scheduleNotificationAsync({
-		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
-		trigger: {
-			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-			seconds: 5,
-			repeats:true
-		},
-	});
-	registerForPushNotificationsAsync()
-}
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-	shouldPlaySound: true,
-	shouldSetBadge: false,
-	shouldShowBanner: true,
-	shouldShowList: true,
-  }),
 });

@@ -2,12 +2,35 @@ import {Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { Database } from '@app/types/database.types';
 import { supabase } from '@app/lib/supabase.web';
-import { NotificationJson } from '@app/types/types';
-let token: string;
+import { Tables } from '@app/types/database.types';
 
-export async function registerForPushNotificationsAsync() {
+
+export default async function createNotification(profile:Tables<"profiles">|null|undefined) {
+	// await createPushNotification()
+	const token = await registerForPushNotificationsAsync()
+  if (token && profile){
+    console.log(profile.username)
+    console.log(token)
+    await savePushToken(token, profile);
+  }
+
+}
+
+// async function createPushNotification(){
+//   Notifications.scheduleNotificationAsync({
+// 		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
+// 		trigger: {
+// 			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+// 			seconds: 100,
+// 			repeats:true
+// 		},
+// 	});
+// }
+
+
+async function registerForPushNotificationsAsync() {
+  let token;
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('myNotificationChannel', {
       name: 'A channel is needed for the permissions prompt to appear',
@@ -47,4 +70,34 @@ export async function registerForPushNotificationsAsync() {
     alert('Must use physical device for Push Notifications');
   }
   return token;
+}
+
+async function savePushToken(token:string, profile:Tables<"profiles">){
+  
+  try {
+    const { data, error } = await supabase
+      .from ('tokens')
+      .insert([{user_id: profile.id, token: token}])
+    console.log(data)
+    console.log(error)
+  } catch (err) {
+    console.error("Error!", err);
+  }
+}
+
+export async function sendPushNotification(id:number, profile:Tables<"profiles">|undefined|null){
+  if (!profile) {return}
+  const username = profile.username;
+  const body = JSON.stringify({id})
+  console.log('movieID')
+  console.log(id)
+  try {
+    const { data, error } = await supabase
+      .from ('notification')
+      .insert([{user_id: profile.id, body:body}])
+    console.log(data)
+    console.log(error)
+  } catch (err) {
+    console.error("Error!", err);
+  }
 }
