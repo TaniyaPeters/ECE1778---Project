@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable, Image } from "react-native";
 import { Review } from "../types/types";
 import Card from "./Card";
 import StarRating from "@components/starRating";
@@ -8,9 +8,10 @@ import { useAuthContext } from "@contexts/AuthContext";
 
 type Props = {
 	review: Review;
+	delFunction?: () => void;
 };
 
-export default function ReviewListItem({ review }: Props) {
+export default function ReviewListItem({ review, delFunction = () => {} }: Props) {
 	const { profile } = useAuthContext();
 
 	return (
@@ -22,9 +23,19 @@ export default function ReviewListItem({ review }: Props) {
 						{review.username}
 					</Text>
 					{/* Rating associated to the review depicted out of 5 stars */}
-					{review.rating && (
-						<StarRating rating={review.rating} color={colors.light.background} />
-					)}
+					<View style={styles.starAndDeleteContainer}>
+						{review.rating && (
+							<StarRating rating={review.rating} color={colors.light.background} />
+						)}
+						{profile?.id === review.user_id && (
+							<Pressable onPress={delFunction}>
+								<Image
+								source={require("../assets/trashIcon.png")}
+								style={{ width: 24, height: 24 }}
+								/>
+							</Pressable>
+						)}
+					</View>
 				</View>
 				{/* Divider line */}
 				<View style={styles.line} />
@@ -62,4 +73,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 		marginVertical: 10,
 	},
-});
+	starAndDeleteContainer: {
+		flexDirection:"row", 
+		alignItems: "center", 
+		gap: 4}
+	},
+);

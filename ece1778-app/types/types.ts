@@ -26,6 +26,12 @@ export type AuthData = {
 		name: Tables<"profiles">["full_name"],
 		username: Tables<"profiles">["username"]
 	) => Promise<{ error?: AuthError | null }>;
+	fetchProfile: () => Promise<void>;
+};
+
+export type ThemeContextType = {
+	theme: "light" | "dark";
+	toggleTheme: () => void;
 };
 
 export type NotificationJson ={
