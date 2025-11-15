@@ -21,7 +21,7 @@ import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from "@app/components/Notifications";
-
+import { colors } from "@app/constants/colors";
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
 	const { theme } = useTheme();
@@ -310,8 +310,8 @@ export default function EditAccountScreen() {
 						</View>
 					</View>
 				)}
-				<View style={styles.input}>
-					<View style={styles.row}>
+				<View style={accountStyles.input}>
+					<View style={accountStyles.row}>
 						<Text>Enable Notifications</Text>
 						<Switch
 							trackColor={{false: "gray", true: colors.light.primary}}
