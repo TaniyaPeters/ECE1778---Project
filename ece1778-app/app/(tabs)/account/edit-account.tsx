@@ -21,6 +21,11 @@ import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from "@app/components/Notifications";
+import { useDispatch, UseDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@app/store/store";
+import { selectPreferences } from "@app/features/preferences/preferencesSlice";
+import { colors } from "@app/constants/colors";
+import { setPreferences } from "@app/features/preferences/preferencesSlice";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -35,7 +40,10 @@ export default function EditAccountScreen() {
 	const lockWhite = require("@assets/lock-white.png");
 	const unlockWhite = require("@assets/unlock-white.png");
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
-	const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+	const dispatch:AppDispatch = useDispatch<AppDispatch>()
+  	const preference = useSelector((state:RootState)=>selectPreferences(state));
+	const [notificationsEnabled, setNotificationsEnabled] = useState(preference);
+
 
 	async function checkPermissions(){
 		const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -81,9 +89,11 @@ export default function EditAccountScreen() {
 		if(!notificationsEnabled){
 			Notifications.unregisterForNotificationsAsync()
 			Notifications.cancelAllScheduledNotificationsAsync()
+      		dispatch(setPreferences(false));
 		}
 		else {
 			createNotification()
+      		dispatch(setPreferences(true));
 		}
 
 		if (username.trim() === "" || email.trim() === "") {
@@ -310,8 +320,8 @@ export default function EditAccountScreen() {
 						</View>
 					</View>
 				)}
-				<View style={styles.input}>
-					<View style={styles.row}>
+				<View style={accountStyles.input}>
+					<View style={accountStyles.row}>
 						<Text>Enable Notifications</Text>
 						<Switch
 							trackColor={{false: "gray", true: colors.light.primary}}
