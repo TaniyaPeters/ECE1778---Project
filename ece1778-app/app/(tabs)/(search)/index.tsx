@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView, Text, TextInput, Pressable, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from 'react-native-element-dropdown';
 import { router } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
@@ -7,6 +8,7 @@ import GeneralCard from "@app/components/generalCard";
 import { Tables } from "../../../types/database.types";
 import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
+import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Movie = Tables<"movies">;
 
@@ -18,6 +20,7 @@ export default function Search() {
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   const [genreFilter, setGenreFilter] = useState<string | null>(null);
   const [dateSort, setDateSort] = useState<'asc' | 'desc' | null>(null);
+  const { isLoggedIn } = useAuthContext();
 
   //Retrieve movies from movies table
   async function retrieveMovies() {
@@ -71,14 +74,33 @@ export default function Search() {
 
   //Display all movies when screen is first opened
   useEffect(() => {
+    if (!isLoggedIn) return;
     retrieveMovies(); 
     retrieveGenres();
-  }, []);
+  }, [isLoggedIn]);
 
   //Update results when filter/sort is updated
   useEffect(() => {
     retrieveMovies(); 
   }, [genreFilter, dateSort]);
+
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={globalStyles.errorDescriptionText}>Please login to search for movies.</Text>
+        <Pressable
+          style={({ pressed }: { pressed: boolean }) => [
+            globalStyles.errorLoginButton,
+            { opacity: pressed ? 0.6 : 1, },
+          ]}
+          onPress={() => router.push('/account')}
+        >
+          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <ScrollView style={globalStyles.container}>
