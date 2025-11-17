@@ -20,12 +20,11 @@ import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from "@app/components/Notifications";
-import { useDispatch, UseDispatch, useSelector } from "react-redux";
-import { RootState, AppDispatch } from "@app/store/store";
-import { selectPreferences } from "@app/features/preferences/preferencesSlice";
 import { colors } from "@app/constants/colors";
-import { setPreferences } from "@app/features/preferences/preferencesSlice";
+import {createNotification, deleteNotification} from "@app/components/Notifications";
+import { AppDispatch, RootState } from "@app/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { selectPreferences } from "@app/features/preferences/preferencesSlice";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -87,13 +86,10 @@ export default function EditAccountScreen() {
 	// Input validation
 	const handleSubmit = () => {
 		if(!notificationsEnabled){
-			Notifications.unregisterForNotificationsAsync()
-			Notifications.cancelAllScheduledNotificationsAsync()
-      		dispatch(setPreferences(false));
+			deleteNotification(profile)
 		}
 		else {
-			createNotification()
-      		dispatch(setPreferences(true));
+			createNotification(profile)
 		}
 
 		if (username.trim() === "" || email.trim() === "") {
@@ -365,26 +361,4 @@ const styles = StyleSheet.create({
 		width: 20,
 		height: 20,
 	},
-});
-
-
-async function createNotification() {
-	Notifications.scheduleNotificationAsync({
-		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
-		trigger: {
-			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-			seconds: 5,
-			repeats:true
-		},
-	});
-	registerForPushNotificationsAsync()
-}
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-	shouldPlaySound: true,
-	shouldSetBadge: false,
-	shouldShowBanner: true,
-	shouldShowList: true,
-  }),
 });
