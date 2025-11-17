@@ -21,6 +21,7 @@ import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@contexts/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { sendPushNotification } from "@app/components/Notifications";
 
 export default function movieDetails() {
 	const { profile } = useAuthContext();
@@ -119,7 +120,6 @@ export default function movieDetails() {
 		setCastMembers([]);
 		setGenres([]);
 	};
-
 	useEffect(() => {
 		if (id) {
 			//id in db is a number so convert it and make sure it's valid
@@ -151,6 +151,9 @@ export default function movieDetails() {
 
 
 	const handleSubmitReview = async (ratingNew: number, reviewTextNew: string) => {
+		if (ratingNew == 5){
+			sendPushNotification(Number(id), profile)
+		}
 		if (!id || Number.isNaN(Number(id))) {
 			console.error("Invalid movie id");
 			return;

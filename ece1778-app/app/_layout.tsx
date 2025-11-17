@@ -13,8 +13,6 @@ import { router } from 'expo-router';
 export default function RootLayout() {
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 	useNotificationObserver();
-
-
 	return (
 		<AuthProvider>
 			<ThemeProvider>
@@ -112,3 +110,11 @@ function useNotificationObserver() {
   }, []);
 }
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+	shouldPlaySound: true,
+	shouldSetBadge: false,
+	shouldShowBanner: true,
+	shouldShowList: true,
+  }),
+});

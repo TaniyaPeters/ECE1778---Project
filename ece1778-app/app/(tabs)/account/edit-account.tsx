@@ -20,7 +20,8 @@ import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from "@app/components/Notifications";
+import { colors } from "@app/constants/colors";
+import {createNotification, deleteNotification} from "@app/components/Notifications";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -79,11 +80,10 @@ export default function EditAccountScreen() {
 	// Input validation
 	const handleSubmit = () => {
 		if(!notificationsEnabled){
-			Notifications.unregisterForNotificationsAsync()
-			Notifications.cancelAllScheduledNotificationsAsync()
+			deleteNotification(profile)
 		}
 		else {
-			createNotification()
+			createNotification(profile)
 		}
 
 		if (username.trim() === "" || email.trim() === "") {
@@ -310,8 +310,8 @@ export default function EditAccountScreen() {
 						</View>
 					</View>
 				)}
-				<View style={styles.input}>
-					<View style={styles.row}>
+				<View style={accountStyles.input}>
+					<View style={accountStyles.row}>
 						<Text>Enable Notifications</Text>
 						<Switch
 							trackColor={{false: "gray", true: colors.light.primary}}
@@ -355,26 +355,4 @@ const styles = StyleSheet.create({
 		width: 20,
 		height: 20,
 	},
-});
-
-
-async function createNotification() {
-	Notifications.scheduleNotificationAsync({
-		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
-		trigger: {
-			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-			seconds: 5,
-			repeats:true
-		},
-	});
-	registerForPushNotificationsAsync()
-}
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-	shouldPlaySound: true,
-	shouldSetBadge: false,
-	shouldShowBanner: true,
-	shouldShowList: true,
-  }),
 });
