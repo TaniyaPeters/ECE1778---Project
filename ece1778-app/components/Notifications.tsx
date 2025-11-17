@@ -4,10 +4,10 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { supabase } from '@app/lib/supabase.web';
 import { Tables } from '@app/types/database.types';
-
+import React, { useEffect, useState, useRef } from "react";
 
 export default async function createNotification(profile:Tables<"profiles">|null|undefined) {
-	// await createPushNotification()
+	await createPushNotification()
 	const token = await registerForPushNotificationsAsync()
   if (token && profile){
     console.log(profile.username)
@@ -17,16 +17,16 @@ export default async function createNotification(profile:Tables<"profiles">|null
 
 }
 
-// async function createPushNotification(){
-//   Notifications.scheduleNotificationAsync({
-// 		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
-// 		trigger: {
-// 			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-// 			seconds: 100,
-// 			repeats:true
-// 		},
-// 	});
-// }
+async function createPushNotification(){
+  Notifications.scheduleNotificationAsync({
+		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
+		trigger: {
+			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+			seconds: 100,
+			repeats:true
+		},
+	});
+}
 
 
 async function registerForPushNotificationsAsync() {
@@ -78,25 +78,42 @@ async function savePushToken(token:string, profile:Tables<"profiles">){
     const { data, error } = await supabase
       .from ('tokens')
       .insert([{user_id: profile.id, token: token}])
-    console.log(data)
-    console.log(error)
   } catch (err) {
     console.error("Error!", err);
   }
 }
 
+
 export async function sendPushNotification(id:number, profile:Tables<"profiles">|undefined|null){
   if (!profile) {return}
-  const username = profile.username;
+  const friends = await getFriends(profile).then((friends)=>sendUpdate(id, friends))
+}
+
+export async function getFriends(profile:Tables<"profiles">){
+  let friends:string[]= [];
+ try {
+    const { data:list} = await supabase
+      .from ('friends')
+      .select('friend_id')
+      .eq('id', profile.id)
+    if(list){
+      friends = list.map(item => item.friend_id);
+    }
+  } catch (err) {
+    console.error("Error!", err);
+    return [];
+  }
+  return friends
+}
+
+export async function sendUpdate(id:number, friends:string[]){
+  console.log(friends)
   const body = JSON.stringify({id})
-  console.log('movieID')
-  console.log(id)
   try {
-    const { data, error } = await supabase
+    const a = await supabase
       .from ('notification')
-      .insert([{user_id: profile.id, body:body}])
-    console.log(data)
-    console.log(error)
+      .insert([{user_id: friends, body:body}])
+    console.log(a)
   } catch (err) {
     console.error("Error!", err);
   }

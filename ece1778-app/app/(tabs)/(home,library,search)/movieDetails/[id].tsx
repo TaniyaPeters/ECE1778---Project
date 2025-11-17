@@ -121,7 +121,15 @@ export default function movieDetails() {
 		setGenres([]);
 	};
 
+// 	async function testArray(){
+// 				const array = ["31e79dfe-0756-4b87-b36d-e438a99e7da2","fa1455f2-45b7-4a3e-806e-5b8af0fcf879","8832ce59-a4f2-453a-b0ad-e052c7b51c04"]
+//   const { data } = await supabase.from('tokens').select('token').in(array)
+//   console.log(data)
+
+// 	}
+
 	useEffect(() => {
+		// testArray()
 		if (id) {
 			//id in db is a number so convert it and make sure it's valid
 			const id_num = Number(id);

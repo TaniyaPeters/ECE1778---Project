@@ -5,6 +5,7 @@ export type Json =
   | number
   | boolean
   | null
+  | string[]
   | { [key: string]: Json | undefined }
   | Json[]
 
@@ -129,7 +130,7 @@ export type Database = {
         Insert: {
           body?: string | null
           id?: number
-          user_id: string
+          user_id: string[]
         }
         Update: {
           body?: string | null
