@@ -2,17 +2,11 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { savePreferences } from "../../storage/preferencesStorage";
 import { RootState } from "@app/store/store";
 
-// TODO: Define the preferencesState interface
-// - Include 'preferences' as Activity[] and 'loaded' as boolean
 interface preferencesState {
   preferences:boolean,
   loaded:boolean
 }
 
-// TODO: Define the initialState
-// - Set 'preferences' to an empty array []
-// - Set 'loaded' to false
-// Hint: Type it as preferencesState for safety
 const initialState:preferencesState = {
   preferences:false,
   loaded:false

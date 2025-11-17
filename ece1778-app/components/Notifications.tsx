@@ -14,7 +14,7 @@ export async function createNotification(profile:Tables<"profiles">|null|undefin
     content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 5,
+      seconds: 100,
       repeats:true
     },
   });
@@ -96,9 +96,9 @@ async function savePushToken(token:string, profile:Tables<"profiles">){
 }
 
 
-export async function sendPushNotification(id:number, profile:Tables<"profiles">|undefined|null){
+export async function sendPushNotification(title:string, id:number, profile:Tables<"profiles">|undefined|null){
   if (!profile) {return}
-  await getFriends(profile).then((friends)=>sendUpdate(id, friends))
+  await getFriends(profile).then((friends)=>sendUpdate(title, id, friends, profile))
 }
 
 export async function getFriends(profile:Tables<"profiles">){
@@ -118,13 +118,14 @@ export async function getFriends(profile:Tables<"profiles">){
   return friends
 }
 
-export async function sendUpdate(id:number, friends:string[]){
+export async function sendUpdate(title:string, id:number, friends:string[], profile:Tables<"profiles">){
   console.log(friends)
-  const body = JSON.stringify({id})
+  const body = profile.username + " just left a FIVE star review on '"+title+"'.";
   try {
     const a = await supabase
       .from ('notification')
-      .insert([{user_id: friends, body:body}])
+      .insert([{user_id: friends, body:body, title:"Five Star Review ⭐⭐⭐⭐⭐", data:id}])
+      // .insert([{user_id: friends, body:body}])
     console.log(a)
   } catch (err) {
     console.error("Error!", err);

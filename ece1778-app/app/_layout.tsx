@@ -8,8 +8,16 @@ import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native
 import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
+import { loadPreference } from "@app/storage/preferencesStorage";
+import { store } from "@app/store/store";
+import { setPreferences } from "@app/features/preferences/preferencesSlice";
 
 export default function RootLayout() {
+	useEffect(() => {
+      loadPreference().then((prefernce) => {
+        store.dispatch(setPreferences(prefernce));
+      });
+    }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 	useNotificationObserver();
 	return (
@@ -89,9 +97,12 @@ export default function RootLayout() {
 function useNotificationObserver() {
   useEffect(() => {
     function redirect(notification: Notifications.Notification) {
-       if(notification.request.content.data?.url){
+       if(notification.request.content.data?.url =='(tabs)/(home)'){
         router.push('/(tabs)/(home)/(top-tabs)')
       }
+	  else{
+		router.push(`/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
+	  }
     }
 
     const response = Notifications.getLastNotificationResponse();
