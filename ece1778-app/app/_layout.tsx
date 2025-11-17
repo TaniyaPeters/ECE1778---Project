@@ -5,7 +5,6 @@ import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
