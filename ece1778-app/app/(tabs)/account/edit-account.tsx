@@ -22,9 +22,9 @@ import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import { colors } from "@app/constants/colors";
 import {createNotification, deleteNotification} from "@app/components/Notifications";
-import { AppDispatch, RootState } from "@app/store/store";
+import { selectPreferences, setPreferences } from "@app/features/preferences/preferencesSlice";
+import { RootState, AppDispatch } from "@app/store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { selectPreferences } from "@app/features/preferences/preferencesSlice";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -39,23 +39,23 @@ export default function EditAccountScreen() {
 	const lockWhite = require("@assets/lock-white.png");
 	const unlockWhite = require("@assets/unlock-white.png");
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
-	const dispatch:AppDispatch = useDispatch<AppDispatch>()
-  	const preference = useSelector((state:RootState)=>selectPreferences(state));
+	const preference = useSelector((state:RootState)=>selectPreferences(state));
 	const [notificationsEnabled, setNotificationsEnabled] = useState(preference);
-
-
+	const dispatch:AppDispatch = useDispatch<AppDispatch>()
+	
 	async function checkPermissions(){
 		const { status: existingStatus } = await Notifications.getPermissionsAsync();
 		let finalStatus = existingStatus;
 		if (existingStatus !== 'granted') {
 			const { status } = await Notifications.requestPermissionsAsync();
-			finalStatus = status;
+			finalStatus = status;	
 		}
 		if (finalStatus !== 'granted') {
 			Alert.alert("Enable Permissions in App Settings!");
 			return
 		}
-        setNotificationsEnabled(previousState => !previousState);
+		setNotificationsEnabled(previousState => !previousState);
+
 	}
 
 	// Update profile in public.profiles table
@@ -85,13 +85,6 @@ export default function EditAccountScreen() {
 
 	// Input validation
 	const handleSubmit = () => {
-		if(!notificationsEnabled){
-			deleteNotification(profile)
-		}
-		else {
-			createNotification(profile)
-		}
-
 		if (username.trim() === "" || email.trim() === "") {
 			Alert.alert("Error", "Cannot leave fields empty.");
 			return;
@@ -130,6 +123,15 @@ export default function EditAccountScreen() {
 		if (!passwordLocked) {
 			updatedPassword.password = password;
 		}
+		if(!notificationsEnabled){
+			deleteNotification(profile);
+      		dispatch(setPreferences(false));		
+		}
+		else {
+			createNotification(profile);
+			dispatch(setPreferences(true));
+		}
+
 
 		// Update protected user fields in auth.users table
 		supabase.auth
