@@ -20,8 +20,6 @@ export async function createNotification(profile:Tables<"profiles">|null|undefin
   });
 }
 
-
-
 export async function deleteNotification(profile:Tables<"profiles">|null|undefined) {
   Notifications.unregisterForNotificationsAsync()
   Notifications.cancelAllScheduledNotificationsAsync()
@@ -108,10 +106,10 @@ export async function getFriends(profile:Tables<"profiles">){
  try {
     const { data:list} = await supabase
       .from ('friends')
-      .select('friend_id')
-      .eq('id', profile.id)
+      .select('id')
+      .eq('friend_id', profile.id)
     if(list){
-      friends = list.map(item => item.friend_id);
+      friends = list.map(item => item.id);
     }
   } catch (err) {
     console.error("Error!", err);
