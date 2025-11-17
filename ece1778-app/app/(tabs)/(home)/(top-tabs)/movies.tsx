@@ -25,6 +25,12 @@ type Movie = Tables<"movies">;
 export default function TabMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [monthlyLoading, setMonthlyLoading] = useState<boolean>(true);
+  const [monthlyError, setMonthlyError] = useState<string | null>(null);
+  const [monthlyMovies, setMonthlyMovies] = useState<Movie[]>([]);
+  const [monthlyReviews, setMonthlyReviews] = useState<any[]>([]);
+  const lastDay = new Date(new Date().getFullYear(),new Date().getMonth(),0).toISOString()
+  const firstDay = new Date(new Date().getFullYear(),new Date().getMonth() - 1, 1).toISOString()
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
   const addToCollectionRef = useRef<AddToCollectionHandle>(null);
@@ -54,8 +60,58 @@ export default function TabMovies() {
         setLoading(false);
       }
     };
+    const fetchData = async () => {
+        try {
+          setMonthlyLoading(true);
+          setMonthlyError(null);  
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+          if (sessionError || !session?.user?.id) {
+            throw new Error("User not authenticated");
+          }
+  
+          const { data: reviewData, error: reviewError } = await supabase
+            .from("reviews")
+            .select(`movie_id, id,rating,review,user_id,profiles (username)`)
+            .eq("user_id", session.user.id)
+            .gt('updated_at',firstDay)
+            .lt('updated_at',lastDay)
+            .order("updated_at", { ascending: false });        
 
+          if (reviewError) {
+            throw (reviewError);
+          }
+          const movieIds = reviewData.map((item)=>{return item.movie_id})
+          const { data: moviesData, error: moviesError } = await supabase
+            .from("movies")
+            .select("*")
+            .in('id', movieIds);
+  
+          if (moviesError) {
+            throw moviesError;
+          }
+          const filtered_reviews = reviewData
+            .filter(r => r.review !== null || r.user_id === session.user.id)
+            .map(r => ({
+            id: r.id,
+            user_id: r.user_id,
+            username: r.profiles?.username ?? "Anonymous",
+            rating: r.rating,
+            review: r.review
+          }));
+
+          setMonthlyReviews(filtered_reviews || []);
+          setMonthlyMovies(moviesData || []);
+        } catch (err: any) {
+          setError(err.message || "Failed to fetch movies or reviews");
+          console.error("Error fetching movies or reviews:", err);
+        } finally {
+          setMonthlyLoading(false);
+        }
+      };
     fetchMovies();
+    fetchData();
+
   }, [isLoggedIn]);
 
   if (!isLoggedIn) {
@@ -76,7 +132,7 @@ export default function TabMovies() {
     );
   }
 
-  if (loading) {
+  if (loading || monthlyLoading) {
     return (
       <SafeAreaView style={[globalStyles.container, styles.center]}>
         <ActivityIndicator size="large" color={colors.light.secondary} />
@@ -85,7 +141,7 @@ export default function TabMovies() {
     );
   }
 
-  if (error) {
+  if (error || monthlyError) {
     return (
       <SafeAreaView style={[globalStyles.container, styles.center]}>
         <Text style={styles.errorText}>{error}</Text>
@@ -101,7 +157,7 @@ export default function TabMovies() {
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         <Text style={globalStyles.titleText}>Movies Tab</Text>
-        <MonthlyRecap user="User" type="Movie" action="Watched" data={movies}></MonthlyRecap>
+        <MonthlyRecap type="Movie" action="Watched" data={monthlyMovies} review={monthlyReviews}></MonthlyRecap>
         
         {movies.length > 0 ? (
           <View>

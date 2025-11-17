@@ -4,33 +4,40 @@ import { globalStyles } from "@app/styles/globalStyles";
 import { Review } from "@app/types/types";
 import Carousel from "./Carousel";
 import ReviewListItem from "./ReviewListItem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Tables } from "@app/types/database.types";
+
+type Movie = Tables<"movies">;
 
 type MonthlyRecapProps = ViewProps & {
-  user: String
   type: "Movie" | "Book";
   action: "Watched" | "Read";
-  review?: Review,
+  review?: Review[],
   data?: any
 };
 
 
 export default function MonthlyRecap({ type, action, review, data }: MonthlyRecapProps) {
-  const [newData, setDataMovies] = useState<any[]>(data);
-  const [newReview, setReviews] = useState<any>(review);
+  useEffect(() => {
+    setDataMovies(data)
+    setReviews(review)
+  }, [data, review]);
+  const [newData, setDataMovies] = useState<Movie[]>();
+  const [newReview, setReviews] = useState<Review[]>();
   const previousMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1)
   const monthToString = new Intl.DateTimeFormat("en-US", { month: "long", year: 'numeric' }).format(previousMonth);
   if (!review) {
-    review = {
+    review = [{
       id: 1,
       user_id: "bob123",
       username: "bob123",
       rating: 2,
       review: "This movie is a delight for those of all ages. I have seen it several times and each time I am enchanted by the characters and magic. The cast is outstanding, the special effects delightful, everything most believable.",
-    }
+    }]
   }
-  const moviewsWatched: Number = newData ? Object.keys(data).length : 0;
-  const reviewsLeft: Number = data ? Object.keys(review).length : 0;
+  const moviewsWatched: Number = newData ? Object.keys(newData).length : 0;
+  const reviewsLeft: Number = newReview ? Object.keys(newReview).length : 0;
+  const lastReview:Review |undefined = newReview? newReview.find((index)=>(index.review!=null)):undefined;
   return (
     <View style={styles.card}>
       <View style={styles.headerView}>
@@ -45,7 +52,7 @@ export default function MonthlyRecap({ type, action, review, data }: MonthlyReca
         <Text style={styles.emphasisText}>{reviewsLeft.toString()}</Text>
         <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Last Reviewed {type}:</Text>
         <Text style={[styles.emphasisText]}>{type} Name</Text>
-        <ReviewListItem review={review}></ReviewListItem>
+        {lastReview ? <ReviewListItem review={lastReview}></ReviewListItem>:null}
       </View>
     </View>
   );
