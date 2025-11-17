@@ -21,7 +21,7 @@ import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import { colors } from "@app/constants/colors";
-import createNotification from "@app/components/Notifications";
+import {createNotification, deleteNotification} from "@app/components/Notifications";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -80,8 +80,7 @@ export default function EditAccountScreen() {
 	// Input validation
 	const handleSubmit = () => {
 		if(!notificationsEnabled){
-			Notifications.unregisterForNotificationsAsync()
-			Notifications.cancelAllScheduledNotificationsAsync()
+			deleteNotification(profile)
 		}
 		else {
 			createNotification(profile)

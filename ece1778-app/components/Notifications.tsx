@@ -6,23 +6,41 @@ import { supabase } from '@app/lib/supabase.web';
 import { Tables } from '@app/types/database.types';
 import React, { useEffect, useState, useRef } from "react";
 
-export default async function createNotification(profile:Tables<"profiles">|null|undefined) {
+export async function createNotification(profile:Tables<"profiles">|null|undefined) {
 	await createPushNotification()
 	const token = await registerForPushNotificationsAsync()
   if (token && profile){
-    console.log(profile.username)
-    console.log(token)
     await savePushToken(token, profile);
   }
 
 }
+
+export async function deleteNotification(profile:Tables<"profiles">|null|undefined) {
+  Notifications.unregisterForNotificationsAsync()
+  Notifications.cancelAllScheduledNotificationsAsync()
+  if (profile){
+    await deletePushToken(profile);
+  }
+}
+
+async function deletePushToken(profile:Tables<"profiles">){
+  try {
+    const { data, error } = await supabase
+      .from ('tokens')
+      .delete()
+      .eq('user_id', profile.id)
+  } catch (err) {
+    console.error("Error!", err);
+  }
+}
+
 
 async function createPushNotification(){
   Notifications.scheduleNotificationAsync({
 		content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
 		trigger: {
 			type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-			seconds: 100,
+			seconds: 5,
 			repeats:true
 		},
 	});
