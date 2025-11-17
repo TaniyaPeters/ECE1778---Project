@@ -12,7 +12,6 @@ export default function ProfileScreen() {
 	const { theme } = useTheme();
 	const { id } = useLocalSearchParams();
 	const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
-	const [collections, setCollections] = useState<Tables<"collections">[]>([]);
 
 	const getProfileById = async (id: string) => {
 		let { data: profiles, error } = await supabase
@@ -30,25 +29,8 @@ export default function ProfileScreen() {
 		}
 	};
 
-	const getCollectionsById = async (id: string) => {
-		let { data: collections, error } = await supabase
-			.from("collections")
-			.select("*")
-			.eq("user_id", id);
-
-		if (error) {
-			Alert.alert("Error", error.message);
-			return;
-		}
-
-		if (collections) {
-			setCollections(collections);
-		}
-	};
-
 	useEffect(() => {
 		getProfileById(id as string);
-		getCollectionsById(id as string);
 	}, [id]);
 
 	return (

@@ -12,7 +12,6 @@ import { colors } from "@app/constants/colors";
 import { StyleSheet } from "react-native";
 
 type Movie = Tables<"movies">;
-
 export default function TabAll() {
   const { isLoggedIn } = useAuthContext();
   const lastDay = new Date(new Date().getFullYear(),new Date().getMonth(),0).toISOString()
@@ -114,7 +113,7 @@ export default function TabAll() {
     return (
       <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
         <ActivityIndicator size="large" color={colors.light.secondary} />
-        <Text style={styles.loadingText}>Loading collection...</Text>
+        <Text style={globalStyles.loadingText}>Loading...</Text>
       </SafeAreaView>
     );
   }
@@ -129,13 +128,3 @@ export default function TabAll() {
     </SafeAreaView>
   );
 }
-
-
-const styles = StyleSheet.create({
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
-  },
-});
-

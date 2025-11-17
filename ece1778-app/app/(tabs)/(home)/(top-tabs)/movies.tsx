@@ -136,7 +136,7 @@ export default function TabMovies() {
     return (
       <SafeAreaView style={[globalStyles.container, styles.center]}>
         <ActivityIndicator size="large" color={colors.light.secondary} />
-        <Text style={styles.loadingText}>Loading movies...</Text>
+        <Text style={globalStyles.loadingText}>Loading movies...</Text>
       </SafeAreaView>
     );
   }
@@ -230,11 +230,6 @@ const styles = StyleSheet.create({
   center: {
     justifyContent: "center",
     alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
   },
   errorText: {
     fontSize: 18,

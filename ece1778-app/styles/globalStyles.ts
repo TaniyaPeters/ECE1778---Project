@@ -67,4 +67,9 @@ export const globalStyles = StyleSheet.create({
 		marginTop: 16,
 		backgroundColor: colors.light.primary,
 	},
+	loadingText: {
+		marginTop: 16,
+		fontSize: 16,
+		color: colors.light.secondary,
+  	},
 });

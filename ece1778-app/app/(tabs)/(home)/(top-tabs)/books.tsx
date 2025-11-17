@@ -96,7 +96,7 @@ export default function TabBooks() {
       return (
         <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
           <ActivityIndicator size="large" color={colors.light.secondary} />
-          <Text style={styles.loadingText}>Loading collection...</Text>
+          <Text style={globalStyles.loadingText}>Loading...</Text>
         </SafeAreaView>
       );
     }
@@ -109,12 +109,3 @@ export default function TabBooks() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
-  },
-});
-

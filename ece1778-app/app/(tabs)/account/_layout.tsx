@@ -42,10 +42,6 @@ export default function AccountLayout() {
 					options={{ title: "Create Account" }}
 				/>
 				<Stack.Screen name="[id]" options={{ title: "Friend's Profile" }} />
-				<Stack.Screen
-					name="collection/[id]"
-					options={{ title: "Name of Collection" }}
-				/>
 			</Stack>
 		</Provider>
 	);
