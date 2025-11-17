@@ -30,7 +30,7 @@ export default function TabBooks() {
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
                 
           if (sessionError || !session?.user?.id) {
-            throw new Error("User not authenticated");
+            throw Error("User not authenticated");
           }
   
           const { data: reviewData, error: reviewError } = await supabase
@@ -66,8 +66,8 @@ export default function TabBooks() {
           setReviews(filtered_reviews || []);
           setMovies(moviesData || []);
         } catch (err: any) {
-          setError(err.message || "Failed to fetch movies or reviews");
-          console.error("Error fetching movies or reviews:", err);
+          // setError(err.message || "Failed to fetch movies or reviews");
+          // console.error("Error fetching movies or reviews:", err);
         } finally {
           setLoading(false);
         }
@@ -78,7 +78,7 @@ export default function TabBooks() {
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={globalStyles.errorText}>Error: {error}</Text>
         <Text style={globalStyles.errorDescriptionText}>Please login to view the available books.</Text>
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
