@@ -6,7 +6,7 @@ import Carousel from "./Carousel";
 import ReviewListItem from "./ReviewListItem";
 import { useEffect, useState } from "react";
 import { Tables } from "@app/types/database.types";
-
+import StarRating from "./starRating";
 type Movie = Tables<"movies">;
 
 type MonthlyRecapProps = ViewProps & {
@@ -14,44 +14,54 @@ type MonthlyRecapProps = ViewProps & {
   action: "Watched" | "Read";
   review?: Review[],
   data?: any
+  highestRating?:number
+  highestRatedMedia?:any[]
 };
 
 
-export default function MonthlyRecap({ type, action, review, data }: MonthlyRecapProps) {
+export default function MonthlyRecap({ type, action, review, data, highestRatedMedia, highestRating = 0}: MonthlyRecapProps) {
   useEffect(() => {
     setDataMovies(data)
     setReviews(review)
-  }, [data, review]);
+    setHighestRatedMedia(highestRatedMedia)
+    setHighestRating(highestRating)
+  }, [data, review, highestRatedMedia, highestRating]);
   const [newData, setDataMovies] = useState<Movie[]>();
   const [newReview, setReviews] = useState<Review[]>();
+  const [newHighestRatedMedia, setHighestRatedMedia] = useState<Movie[]>();
+  const [newHighestRating, setHighestRating] = useState<number>(0);
   const previousMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1)
   const monthToString = new Intl.DateTimeFormat("en-US", { month: "long", year: 'numeric' }).format(previousMonth);
-  if (!review) {
-    review = [{
-      id: 1,
-      user_id: "bob123",
-      username: "bob123",
-      rating: 2,
-      review: "This movie is a delight for those of all ages. I have seen it several times and each time I am enchanted by the characters and magic. The cast is outstanding, the special effects delightful, everything most believable.",
-    }]
-  }
-  const moviewsWatched: Number = newData ? Object.keys(newData).length : 0;
-  const reviewsLeft: Number = newReview ? Object.keys(newReview).length : 0;
+  const numberHighestRated: number = newHighestRatedMedia ? Object.keys(newHighestRatedMedia).length : 0;
   const lastReview:Review |undefined = newReview? newReview.find((index)=>(index.review!=null)):undefined;
   return (
-    <View style={styles.card}>
+     <View style={styles.card}>
       <View style={styles.headerView}>
         <Text style={styles.headerText}>{monthToString} {type} Recap</Text>
       </View>
       <View>
-        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>{type}s {action}:</Text>
-        <Text style={styles.emphasisText}>{moviewsWatched.toString()}</Text>
-        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Highest Rated {type}(s): </Text>
-        <Carousel cards={data}></Carousel>
-        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Number of Reviews Left:</Text>
-        <Text style={styles.emphasisText}>{reviewsLeft.toString()}</Text>
-        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Last Reviewed {type}:</Text>
-        <Text style={[styles.emphasisText]}>{type} Name</Text>
+        <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+          <Text style={globalStyles.paragraph}>{type}s {action}:</Text>
+          <Text style={styles.emphasisText}>{newData ? Object.keys(newData).length.toString() : '-'}</Text>
+        </View>
+        <View style={{paddingTop:10, paddingBottom:20}}>
+          <Carousel cards={newData}></Carousel>
+        </View>
+        <View style={{flexDirection:'row'}}>
+          <View style={{flexDirection:'column', justifyContent:'flex-end'}}>
+            <Text style={styles.emphasisText}>{numberHighestRated.toString()}</Text>
+          </View>
+          <View style={{flexDirection:'column', justifyContent:'flex-end'}}>
+            <Text style={globalStyles.paragraph}>  {type}s Rated  </Text>
+          </View>
+          <View style={{flexDirection:'column', justifyContent:'flex-end', paddingBottom:10}}>
+            <StarRating rating={newHighestRating} color={colors.light.secondary}></StarRating>
+          </View>
+        </View>
+        <Carousel cards={newHighestRatedMedia}></Carousel>
+        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Number of {type} Reviews Left:</Text>
+        <Text style={styles.emphasisText}>{newReview ? Object.keys(newReview.filter((index) => index.review !=null)).length.toString() : 0}</Text>
+        <Text style={[globalStyles.paragraph, { alignItems: "flex-end" }]}>Last {type} Review Left:</Text>
         {lastReview ? <ReviewListItem review={lastReview}></ReviewListItem>:null}
       </View>
     </View>
@@ -67,8 +77,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 3,
-    margin: 15,
-    padding: 15,
+    marginLeft:5,
+    marginRight:5,
+    marginBottom: 10,
+    padding: 10,
   },
   headerText: {
     fontSize: 30,
@@ -81,20 +93,9 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   emphasisText: {
-    fontSize: 30,
+    fontSize: 50,
     color: colors.light.secondary,
     textAlign: "right",
     fontWeight: 'bold'
   },
-
-  cardCollection: {
-    borderWidth: 1,
-    margin: 5,
-    padding: 5,
-  },
-  carousel: {
-    flexDirection: 'row',
-    backgroundColor: colors.light.background,
-    padding: 5,
-  }
 });

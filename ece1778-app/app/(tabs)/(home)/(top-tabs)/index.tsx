@@ -17,6 +17,8 @@ export default function TabAll() {
   const lastDay = new Date(new Date().getFullYear(),new Date().getMonth(),0).toISOString()
   const firstDay = new Date(new Date().getFullYear(),new Date().getMonth() - 1, 1).toISOString()
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [highestMovies, setHighestMovies] = useState<Movie[]>([]);
+  const [highestRating, setHighestRating] = useState<number>(0);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +79,28 @@ export default function TabAll() {
             rating: r.rating,
             review: r.review
           }));
+          console.log('here')
 
           setReviews(filtered_reviews || []);
           setMovies(moviesData || []);
+          if (reviewData){
+            reviewData.sort(
+              (a,b) =>{
+                if(a.rating == null){a.rating =0}
+                if(b.rating == null){b.rating = 0}
+                return b.rating - a.rating
+              })
+          }
+          const highestScore = reviewData[0].rating;
+
+          const highestReviews = reviewData
+          .filter((index) => index.rating == highestScore)
+          .map((index)=> index.movie_id);
+ 
+          const highestMovies = moviesData.filter((index)=>(highestReviews.includes(index.id)));
+          console.log(highestMovies)
+          setHighestMovies(highestMovies||[]);
+          setHighestRating(highestScore||0);
         } catch (err: any) {
             // setError(err.message || "Failed to fetch movies or reviews");
             // console.error("Error fetching movies or reviews:", err);
@@ -122,7 +143,7 @@ export default function TabAll() {
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         <Text style={globalStyles.titleText}>Media Recap</Text>
-        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews}></MonthlyRecap>
+        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
         <MonthlyRecap type="Book" action="Read" data={movies} review={reviews}></MonthlyRecap>
       </ScrollView>
     </SafeAreaView>
