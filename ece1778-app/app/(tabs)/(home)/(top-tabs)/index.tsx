@@ -97,9 +97,10 @@ export default function TabAll() {
               .filter((index) => index.rating == highestScore)
               .map((index)=> index.movie_id);
               if (moviesData){
-              let highestMoviesCheck = moviesData.filter((index)=>(highestReviews.includes(index.id)));
-              setHighestMovies(highestMoviesCheck||[]);
-              setHighestRating(highestScore||0);}
+                let highestMoviesCheck = moviesData.filter((index)=>(highestReviews.includes(index.id)));
+                setHighestMovies(highestMoviesCheck||[]);
+                setHighestRating(highestScore||0);
+              }
 
           }
 
