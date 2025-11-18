@@ -112,10 +112,6 @@ export default function TabAll() {
         }
       };
       fetchData();
-      console.log(movies)
-      console.log("highestRating: "+highestRating)
-      console.log('highestMovies')
-      console.log(highestMovies)
     }, [isLoggedIn]);
   async function registerForNotifications(){ await Notifications.requestPermissionsAsync();}
 
