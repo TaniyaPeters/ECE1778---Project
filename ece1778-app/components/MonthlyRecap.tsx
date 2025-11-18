@@ -30,6 +30,7 @@ export default function MonthlyRecap({ type, action, review, data, highestRatedM
   const [newReview, setReviews] = useState<Review[]>();
   const [newHighestRatedMedia, setHighestRatedMedia] = useState<Movie[]>();
   const [newHighestRating, setHighestRating] = useState<number>(0);
+
   const previousMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1)
   const monthToString = new Intl.DateTimeFormat("en-US", { month: "long", year: 'numeric' }).format(previousMonth);
   const numberHighestRated: number = newHighestRatedMedia ? Object.keys(newHighestRatedMedia).length : 0;
