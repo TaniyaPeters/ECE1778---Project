@@ -125,8 +125,6 @@ export async function sendUpdate(title:string, id:number, friends:string[], prof
     const a = await supabase
       .from ('notification')
       .insert([{user_id: friends, body:body, title:"Five Star Review ⭐⭐⭐⭐⭐", data:id}])
-      // .insert([{user_id: friends, body:body}])
-    console.log(a)
   } catch (err) {
     console.error("Error!", err);
   }

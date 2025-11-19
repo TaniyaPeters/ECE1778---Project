@@ -11,15 +11,20 @@ import { router } from 'expo-router';
 import { loadPreference } from "@app/storage/preferencesStorage";
 import { store } from "@app/store/store";
 import { setPreferences } from "@app/features/preferences/preferencesSlice";
+import { useRootNavigationState, Redirect } from 'expo-router';
 
 export default function RootLayout() {
+	const rootNavigationState = useRootNavigationState();
 	useEffect(() => {
       loadPreference().then((prefernce) => {
         store.dispatch(setPreferences(prefernce));
       });
     }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
-	useNotificationObserver();
+	// if(rootNavigationState){
+		// console.log('here')
+		useNotificationObserver();
+	// }
 	return (
 		<AuthProvider>
 			<ThemeProvider>
@@ -97,12 +102,14 @@ export default function RootLayout() {
 function useNotificationObserver() {
   useEffect(() => {
     function redirect(notification: Notifications.Notification) {
-       if(notification.request.content.data?.url =='(tabs)/(home)'){
-        router.push('/(tabs)/(home)/(top-tabs)')
-      }
-	  else{
-		router.push(`/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
-	  }
+		if(notification.request.content.data?.url){
+			if(notification.request.content.data.url =='(tabs)/(home)'){
+				router.push('/(tabs)/(home)/(top-tabs)')
+			}
+			else{
+				router.push(`/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
+			}
+		}
     }
 
     const response = Notifications.getLastNotificationResponse();
