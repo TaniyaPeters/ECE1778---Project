@@ -14,7 +14,7 @@ export async function createNotification(profile:Tables<"profiles">|null|undefin
     content: { title: "Monthly Recap", body: "Your Monthly Recap is ready!", data:{url:"(tabs)/(home)"} },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 100,
+      seconds: 15,
       repeats:true
     },
   });

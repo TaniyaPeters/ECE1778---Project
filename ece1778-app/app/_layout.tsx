@@ -6,25 +6,20 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
 import { useEffect } from 'react';
-import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
 import { loadPreference } from "@app/storage/preferencesStorage";
 import { store } from "@app/store/store";
 import { setPreferences } from "@app/features/preferences/preferencesSlice";
-import { useRootNavigationState, Redirect } from 'expo-router';
+import * as Notifications from "expo-notifications"
+import { router } from "expo-router";
 
 export default function RootLayout() {
-	const rootNavigationState = useRootNavigationState();
 	useEffect(() => {
       loadPreference().then((prefernce) => {
         store.dispatch(setPreferences(prefernce));
       });
     }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
-	// if(rootNavigationState){
-		// console.log('here')
-		useNotificationObserver();
-	// }
+	useNotificationObserver();
 	return (
 		<AuthProvider>
 			<ThemeProvider>
