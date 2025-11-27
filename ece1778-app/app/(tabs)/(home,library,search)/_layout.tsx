@@ -1,6 +1,5 @@
 import { colors } from "@app/constants/colors";
 import { Stack } from "expo-router";
-import React from "react";
 
 export default function DynamicLayout({segment}:any) {
   if(segment == '(tabs)/(home)'){

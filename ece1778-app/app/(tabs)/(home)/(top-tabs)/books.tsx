@@ -1,9 +1,16 @@
 import MonthlyRecap from "@app/components/MonthlyRecap";
+import { colors } from "@app/constants/colors";
 import { useAuthContext } from "@app/contexts/AuthContext";
+import { supabase } from "@app/lib/supabase.web";
 import { globalStyles } from "@app/styles/globalStyles";
+import { Tables } from "@app/types/database.types";
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native";
+type Movie = Tables<"movies">;
+type Review = Tables<"reviews">;
 
 export default function TabBooks() {
   const { isLoggedIn } = useAuthContext();
@@ -11,7 +18,6 @@ export default function TabBooks() {
   if (!isLoggedIn) {
     return (
       <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
         <Text style={globalStyles.errorDescriptionText}>Please login to view the available books.</Text>
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
@@ -29,7 +35,7 @@ export default function TabBooks() {
     <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         <Text style={globalStyles.titleText}>Books Tab</Text>
-        <MonthlyRecap user="User" type="Book" action="Read"></MonthlyRecap> 
+        <Text>No Books to Show right now, Please Come back later</Text>
       </ScrollView>
     </SafeAreaView>
   );

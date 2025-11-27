@@ -1,10 +1,6 @@
 import { colors } from "@app/constants/colors";
-import { useEffect, useRef } from "react";
 import {ScrollView, StyleSheet, ViewProps, Text, StyleProp, ViewStyle, View, Button, Dimensions, FlatList, TouchableOpacity,} from "react-native";
-import GeneralCard from "./generalCard";
 import { router } from "expo-router";
-import { globalStyles } from "@app/styles/globalStyles";
-import StarRating from "./starRating";
 import AutoImage from "./autoScaledImage";
 import { getLocalImage } from "@app/constants/postersMap";
 
@@ -21,7 +17,7 @@ export default function Carousel({ cards, style, ...props }: Props) {
   }
 
   return (
-    <ScrollView horizontal={true} pagingEnabled={true} snapToStart={true} snapToEnd={true} snapToInterval={200} style={[styles.carousel, style]} {...props}>
+    <ScrollView horizontal={true}  style={[styles.carousel, style]} {...props}>
       <FlatList
               data={cards}
               keyExtractor={(item) => item.id.toString()}
@@ -52,7 +48,7 @@ export default function Carousel({ cards, style, ...props }: Props) {
                   >
                     <View style={styles.cardCollection}>
                       <AutoImage 
-                        style={{ width: 60 }}
+                        style={{ width: 90, height:125}}
                         source={localPath ? getLocalImage(imageSource) : { uri: imageSource }}
                       />                      
                     </View>
@@ -69,12 +65,8 @@ const styles = StyleSheet.create({
   carousel:{
     flexDirection:'row',
     backgroundColor:colors.light.tertiary,
-    padding:5,
   },
   cardCollection:{
-    borderWidth :0,
-    padding:5,
-    margin:5,
-    elevation:3
+    paddingRight:5,
   },
 });

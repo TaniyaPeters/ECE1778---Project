@@ -152,7 +152,7 @@ export default function movieDetails() {
 
 	const handleSubmitReview = async (ratingNew: number, reviewTextNew: string) => {
 		if (ratingNew == 5){
-			sendPushNotification(Number(id), profile)
+			sendPushNotification(title, Number(id), profile)
 		}
 		if (!id || Number.isNaN(Number(id))) {
 			console.error("Invalid movie id");
