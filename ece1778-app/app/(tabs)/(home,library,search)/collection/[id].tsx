@@ -11,14 +11,12 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useNavigation, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../../../lib/supabase.web";
-import { Tables } from "../../../../types/database.types";
-import GeneralCard from "../../../../components/generalCard";
-import { globalStyles } from "../../../../styles/globalStyles";
-import { colors } from "../../../../constants/colors";
-import { dimentions } from "../../../../constants/dimentions";
-import { getLocalImage } from "../../../../constants/postersMap";
-import AutoImage from "../../../../components/autoScaledImage";
+import { supabase } from "@lib/supabase.web";
+import { Tables } from "@app/types/database.types";
+import GeneralCard from "@components/generalCard";
+import { globalStyles } from "@styles/globalStyles";
+import { colors } from "@constants/colors";
+import { dimentions } from "@constants/dimentions";
 
 type Collection = Tables<"collections">;
 type Movie = Tables<"movies">;
