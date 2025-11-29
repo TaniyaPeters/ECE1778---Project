@@ -11,84 +11,94 @@ import { store } from "@app/store/store";
 import { setPreferences } from "@app/features/preferences/preferencesSlice";
 import * as Notifications from "expo-notifications"
 import { router } from "expo-router";
+import { loadTheme } from "@app/storage/themeStorage";
+import { setTheme } from "@app/features/theme/themeSlice";
+import { Provider } from "react-redux";
 
 export default function RootLayout() {
 	useEffect(() => {
-      loadPreference().then((prefernce) => {
-        store.dispatch(setPreferences(prefernce));
+      loadPreference().then((preference) => {
+        store.dispatch(setPreferences(preference));
       });
+
+      loadTheme().then((theme) => {
+        store.dispatch(setTheme(theme));
+      });
+
     }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 	useNotificationObserver();
 	return (
 		<AuthProvider>
 			<ThemeProvider>
-				<NativeTabs>
-					<NativeTabs.Trigger name="(tabs)/(home)">
-						<Label>Home</Label>
-						{Platform.select({
-							ios: <Icon sf="house.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="home"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/(search)">
-						<Label>Search</Label>
-						{Platform.select({
-							ios: <Icon sf="magnifyingglass" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="search"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/(library)">
-						<Label>Library</Label>
-						{Platform.select({
-							ios: <Icon sf="folder.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="book"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/account">
-						<Label>Account</Label>
-						{Platform.select({
-							ios: <Icon sf="person.bust.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="person"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-				</NativeTabs>
+				<Provider store={store}>
+					<NativeTabs>
+						<NativeTabs.Trigger name="(tabs)/(home)">
+							<Label>Home</Label>
+							{Platform.select({
+								ios: <Icon sf="house.fill" />,
+								android: (
+									<Icon
+										src={
+											<VectorIcon
+												family={MaterialIcons}
+												name="home"
+											/>
+										}
+									/>
+								),
+							})}
+						</NativeTabs.Trigger>
+						<NativeTabs.Trigger name="(tabs)/(search)">
+							<Label>Search</Label>
+							{Platform.select({
+								ios: <Icon sf="magnifyingglass" />,
+								android: (
+									<Icon
+										src={
+											<VectorIcon
+												family={MaterialIcons}
+												name="search"
+											/>
+										}
+									/>
+								),
+							})}
+						</NativeTabs.Trigger>
+						<NativeTabs.Trigger name="(tabs)/(library)">
+							<Label>Library</Label>
+							{Platform.select({
+								ios: <Icon sf="folder.fill" />,
+								android: (
+									<Icon
+										src={
+											<VectorIcon
+												family={MaterialIcons}
+												name="book"
+											/>
+										}
+									/>
+								),
+							})}
+						</NativeTabs.Trigger>
+						<NativeTabs.Trigger name="(tabs)/account">
+							<Label>Account</Label>
+							{Platform.select({
+								ios: <Icon sf="person.bust.fill" />,
+								android: (
+									<Icon
+										src={
+											<VectorIcon
+												family={MaterialIcons}
+												name="person"
+											/>
+										}
+									/>
+								),
+							})}
+						</NativeTabs.Trigger>
+					</NativeTabs>
+				</Provider>
 			</ThemeProvider>
 		</AuthProvider>
 	);

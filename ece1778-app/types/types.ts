@@ -34,8 +34,13 @@ export type ThemeContextType = {
 	toggleTheme: () => void;
 };
 
-export type NotificationJson ={
-	id:string
-	user_id: string
-	body:string
+export type colorsType ={
+	background: string,
+	black: string,
+	text: string,
+	primary:string,
+	secondary:string,
+	tertiary:string,
+	danger:string,
+	discord: string,
 }

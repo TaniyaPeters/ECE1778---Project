@@ -25,6 +25,7 @@ import {createNotification, deleteNotification} from "@app/components/Notificati
 import { selectPreferences, setPreferences } from "@app/features/preferences/preferencesSlice";
 import { RootState, AppDispatch } from "@app/store/store";
 import { useDispatch, useSelector } from "react-redux";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
@@ -41,6 +42,7 @@ export default function EditAccountScreen() {
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
 	const preference = useSelector((state:RootState)=>selectPreferences(state));
 	const [notificationsEnabled, setNotificationsEnabled] = useState(preference);
+	const themeCheck = useSelector((state:RootState)=>selectTheme(state));
 	const dispatch:AppDispatch = useDispatch<AppDispatch>()
 	
 	async function checkPermissions(){
@@ -168,7 +170,7 @@ export default function EditAccountScreen() {
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView
 				style={[
-					globalStyles.container,
+					globalStyles().container,
 					accountStyles.container,
 					theme === "light"
 						? accountStyles.bgLight
@@ -181,7 +183,7 @@ export default function EditAccountScreen() {
 							profile?.avatar_url ??
 							"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
 					}}
-					style={globalStyles.profileImage}
+					style={globalStyles().profileImage}
 				/>
 
 				<View style={accountStyles.input}>

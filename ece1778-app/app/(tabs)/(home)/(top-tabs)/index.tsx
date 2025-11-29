@@ -9,7 +9,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Tables } from "@app/types/database.types";
 import { supabase } from "@app/lib/supabase.web";
 import { colors } from "@app/constants/colors";
-import { StyleSheet } from "react-native";
 
 type Movie = Tables<"movies">;
 export default function TabAll() {

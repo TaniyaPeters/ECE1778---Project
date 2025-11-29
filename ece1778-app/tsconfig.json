@@ -9,7 +9,10 @@
       "@constants/*":["./constants/*"],
       "@assets/*":["./assets/*"],
       "@contexts/*":["./contexts/*"],
-      "@lib/*":["./lib/*"]
+      "@lib/*":["./lib/*"],
+      "@storage/*":["./storage/*"],
+      "@features/*":["./features/*"],
+      "@store/*":["./store/*"]
     }
   },
   "include": [
