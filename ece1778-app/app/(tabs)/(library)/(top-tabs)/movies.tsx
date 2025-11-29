@@ -14,16 +14,16 @@ import {
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../../lib/supabase.web";
-import { Tables } from "../../../types/database.types";
-import GeneralCard from "../../../components/generalCard";
-import { globalStyles } from "../../../styles/globalStyles";
-import { colors } from "../../../constants/colors";
+import { supabase } from "@lib/supabase.web";
+import { Tables } from "@app/types/database.types";
+import GeneralCard from "@components/generalCard";
+import { globalStyles } from "@styles/globalStyles";
+import { colors } from "@constants/colors";
 import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Collection = Tables<"collections">;
 
-export default function Library() {
+export default function TabLibraryMovies() {
   const { isLoggedIn } = useAuthContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionThumbnails, setCollectionThumbnails] = useState<Map<number, string>>(new Map());

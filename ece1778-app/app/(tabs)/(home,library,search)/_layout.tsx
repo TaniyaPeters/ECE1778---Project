@@ -50,7 +50,7 @@ export default function DynamicLayout({segment}:any) {
           headerBackTitle: "Back",
         }}
       >        
-        <Stack.Screen name="index" options={{ title:"Library"}}/>
+        <Stack.Screen name="(top-tabs)" options={{ title:'Library'}}/>
         <Stack.Screen name="collection/[id]" options={{
           title:"",
           headerStyle: { backgroundColor: colors.light.primary },

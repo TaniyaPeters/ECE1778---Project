@@ -15,10 +15,9 @@ export const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
-export default function TopTabsLayout() {
+export default function TopTabsLayoutLibrary() {
   return (
     <MaterialTopTabs>
-      <MaterialTopTabs.Screen name="index" options={{ title: "Media Recap" }} />
       <MaterialTopTabs.Screen name="movies" options={{ title: "Movies" }} />
       <MaterialTopTabs.Screen name="books" options={{ title: "Books" }} />
     </MaterialTopTabs>
