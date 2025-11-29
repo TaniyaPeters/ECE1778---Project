@@ -18,8 +18,8 @@ export const MaterialTopTabs = withLayoutContext<
 export default function TopTabsLayoutLibrary() {
   return (
     <MaterialTopTabs>
-      <MaterialTopTabs.Screen name="movies" options={{ title: "Movies Tab" }} />
-      <MaterialTopTabs.Screen name="books" options={{ title: "Books Tab" }} />
+      <MaterialTopTabs.Screen name="movies" options={{ title: "Movies" }} />
+      <MaterialTopTabs.Screen name="books" options={{ title: "Books" }} />
     </MaterialTopTabs>
   );
 }

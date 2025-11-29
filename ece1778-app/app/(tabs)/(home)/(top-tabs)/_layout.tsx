@@ -19,8 +19,8 @@ export default function TopTabsLayout() {
   return (
     <MaterialTopTabs>
       <MaterialTopTabs.Screen name="index" options={{ title: "Media Recap" }} />
-      <MaterialTopTabs.Screen name="movies" options={{ title: "Movies Tab" }} />
-      <MaterialTopTabs.Screen name="books" options={{ title: "Books Tab" }} />
+      <MaterialTopTabs.Screen name="movies" options={{ title: "Movies" }} />
+      <MaterialTopTabs.Screen name="books" options={{ title: "Books" }} />
     </MaterialTopTabs>
   );
 }

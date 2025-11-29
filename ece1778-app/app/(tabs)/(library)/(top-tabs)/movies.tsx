@@ -23,7 +23,7 @@ import { useAuthContext } from "@app/contexts/AuthContext";
 
 type Collection = Tables<"collections">;
 
-export default function Library() {
+export default function TabLibraryMovies() {
   const { isLoggedIn } = useAuthContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionThumbnails, setCollectionThumbnails] = useState<Map<number, string>>(new Map());
