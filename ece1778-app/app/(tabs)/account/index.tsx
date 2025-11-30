@@ -13,21 +13,39 @@ import { useAuthContext } from "@contexts/AuthContext";
 import { globalStyles } from "@styles/globalStyles";
 import { useEffect, useState } from "react";
 import { Pressable } from "react-native";
-import { colors } from "@constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import OAuthSignInButton from "@app/components/OAuthSignIn";
 import { accountStyles } from "@app/styles/accountStyles";
-import { useTheme } from "@contexts/ThemeContext";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@app/store/store";
+import { selectTheme, setTheme } from "@app/features/theme/themeSlice";
+import { colors } from "@app/constants/colors";
+import { colorsType } from "@app/types/types";
 
 export default function AccountScreen() {
 	const { profile, isLoggedIn, signInWithEmail, signOut } = useAuthContext();
-	const { theme, toggleTheme } = useTheme();
 	const params = useLocalSearchParams();
 	const [email, setEmail] = useState((params.email as string) || "");
 	const [password, setPassword] = useState((params.password as string) || "");
 	const sun = require("@assets/sun.png");
 	const moon = require("@assets/moon.png");
+  	const getColors = useSelector((state:RootState)=>selectTheme(state));
+	const [colorsTheme, setColorsTheme] = useState<colorsType>(getColors)
+	const dispatch:AppDispatch = useDispatch<AppDispatch>()
+	const setGlobalStyles = globalStyles()
+
+
+	async function toggleTheme(){
+		if (colorsTheme.name == 'light'){
+			setColorsTheme(colors.dark)
+			dispatch(setTheme(colors.dark));		
+		}
+		else{
+			setColorsTheme(colors.light)
+			dispatch(setTheme(colors.light));		
+		}
+	}
 
 	const handleLogin = async () => {
 		if (email.trim() === "" || password.trim() === "") {
@@ -42,23 +60,14 @@ export default function AccountScreen() {
 			}
 		});
 	};
-
 	useEffect(() => {
 		setEmail("");
 		setPassword("");
+		setColorsTheme(getColors)
 	}, [isLoggedIn]);
-
 	return (
 		<SafeAreaView
-			style={[
-				globalStyles.container,
-				{
-					backgroundColor:
-						theme === "light"
-							? colors.light.background
-							: colors.dark.background,
-				},
-			]}
+			style={[setGlobalStyles.container, {backgroundColor:colorsTheme.background}]}
 		>
 			<View style={accountStyles.row}>
 				<Pressable
@@ -70,7 +79,7 @@ export default function AccountScreen() {
 					onPress={toggleTheme}
 				>
 					<Image
-						source={theme === "light" ? moon : sun}
+						source={colorsTheme.name === "light" ? moon : sun}
 						style={accountStyles.icon}
 					/>
 				</Pressable>
@@ -88,9 +97,7 @@ export default function AccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colorsTheme.text},
 							]}
 						>
 							Log Out
@@ -102,9 +109,7 @@ export default function AccountScreen() {
 				<View
 					style={[
 						accountStyles.container,
-						theme === "light"
-							? accountStyles.bgLight
-							: accountStyles.bgDark,
+						{backgroundColor: colorsTheme.background},
 					]}
 				>
 					<Image
@@ -113,14 +118,12 @@ export default function AccountScreen() {
 								profile?.avatar_url ??
 								"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzYyOTc5NDIzLCJleHAiOjE3OTQ1MTU0MjN9.Ax6ONyGoqi7EZJUceWpyuHhxD0RoYwajNTfjWp4Pvus",
 						}}
-						style={globalStyles.profileImage}
+						style={setGlobalStyles.profileImage}
 					/>
 					<Text
 						style={[
 							accountStyles.profileUsername,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colorsTheme.text},
 						]}
 					>
 						@{profile?.username}
@@ -129,9 +132,7 @@ export default function AccountScreen() {
 						<Pressable
 							style={({ pressed }: { pressed: boolean }) => [
 								accountStyles.button,
-								theme === "light"
-									? accountStyles.primaryLight
-									: accountStyles.primaryDark,
+								{backgroundColor: colorsTheme.primary},
 								{
 									opacity: pressed ? 0.6 : 1,
 								},
@@ -143,35 +144,10 @@ export default function AccountScreen() {
 							<Text
 								style={[
 									accountStyles.text,
-									theme === "light"
-										? accountStyles.textLight
-										: accountStyles.textDark,
+									{color: colorsTheme.text},
 								]}
 							>
 								Edit Profile
-							</Text>
-						</Pressable>
-						<Pressable
-							style={({ pressed }: { pressed: boolean }) => [
-								accountStyles.button,
-								theme === "light"
-									? accountStyles.primaryLight
-									: accountStyles.primaryDark,
-								{
-									opacity: pressed ? 0.6 : 1,
-								},
-							]}
-							onPress={async () => {}}
-						>
-							<Text
-								style={[
-									accountStyles.text,
-									theme === "light"
-										? accountStyles.textLight
-										: accountStyles.textDark,
-								]}
-							>
-								Share Profile
 							</Text>
 						</Pressable>
 					</View>
@@ -185,9 +161,7 @@ export default function AccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colorsTheme.text},
 							]}
 						>
 							Friends:{" "}
@@ -199,9 +173,7 @@ export default function AccountScreen() {
 					<Pressable
 						style={({ pressed }: { pressed: boolean }) => [
 							accountStyles.button,
-							theme === "light"
-								? accountStyles.primaryLight
-								: accountStyles.primaryDark,
+							{backgroundColor: colorsTheme.primary},
 							{
 								opacity: pressed ? 0.6 : 1,
 							},
@@ -213,9 +185,7 @@ export default function AccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colorsTheme.text},
 							]}
 						>
 							Collections
@@ -227,17 +197,13 @@ export default function AccountScreen() {
 					<View
 						style={[
 							accountStyles.container,
-							theme === "light"
-								? accountStyles.bgLight
-								: accountStyles.bgDark,
+							{backgroundColor: colorsTheme.background},
 						]}
 					>
 						<Text
 							style={[
 								accountStyles.header,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colorsTheme.text},
 							]}
 						>
 							Welcome! Sign in or create an account.
@@ -247,16 +213,12 @@ export default function AccountScreen() {
 								style={[
 									styles.input,
 									{
-										borderColor: colors.light.secondary,
+										borderColor: colorsTheme.secondary,
 									},
-									theme === "light"
-										? accountStyles.textLight
-										: accountStyles.textDark,
+									{color: colorsTheme.text},
 								]}
 								placeholderTextColor={
-									theme === "light"
-										? accountStyles.textLight.color
-										: accountStyles.textDark.color
+									colorsTheme.text
 								}
 								placeholder="Email"
 								value={email}
@@ -268,17 +230,12 @@ export default function AccountScreen() {
 								style={[
 									styles.input,
 									{
-										borderColor: colors.light.secondary,
-										color:
-											theme === "light"
-												? accountStyles.textLight.color
-												: accountStyles.textDark.color,
+										borderColor: colorsTheme.secondary,
+										color:colorsTheme.text,
 									},
 								]}
 								placeholderTextColor={
-									theme === "light"
-										? accountStyles.textLight.color
-										: accountStyles.textDark.color
+									colorsTheme.text
 								}
 								placeholder="Password"
 								value={password}
@@ -295,9 +252,7 @@ export default function AccountScreen() {
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									accountStyles.button,
-									theme === "light"
-										? accountStyles.primaryLight
-										: accountStyles.primaryDark,
+									{backgroundColor: colorsTheme.background},
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
@@ -307,9 +262,7 @@ export default function AccountScreen() {
 								<Text
 									style={[
 										accountStyles.text,
-										theme === "light"
-											? accountStyles.textLight
-											: accountStyles.textDark,
+										{color: colorsTheme.text},
 									]}
 								>
 									Login
@@ -318,9 +271,7 @@ export default function AccountScreen() {
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									accountStyles.button,
-									theme === "light"
-										? accountStyles.primaryLight
-										: accountStyles.primaryDark,
+									{backgroundColor: colorsTheme.primary},
 									{
 										opacity: pressed ? 0.6 : 1,
 									},
@@ -332,9 +283,7 @@ export default function AccountScreen() {
 								<Text
 									style={[
 										accountStyles.text,
-										theme === "light"
-											? accountStyles.textLight
-											: accountStyles.textDark,
+										{color: colorsTheme.text},
 									]}
 								>
 									Sign Up

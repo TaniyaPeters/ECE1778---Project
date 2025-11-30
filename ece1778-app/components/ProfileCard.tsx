@@ -1,7 +1,10 @@
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { RootState } from "@app/store/store";
 import { accountStyles } from "@app/styles/accountStyles";
 import { globalStyles } from "@app/styles/globalStyles";
+import { colorsType } from "@app/types/types";
 import { View, Text, Image, StyleSheet, Pressable } from "react-native";
-import { useTheme } from "@contexts/ThemeContext";
+import { useSelector } from "react-redux";
 
 export default function ProfileCard({
 	avatar_url,
@@ -12,28 +15,26 @@ export default function ProfileCard({
 	username: string;
 	removeFriend: () => void;
 }) {
-	const { theme } = useTheme();
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+	const styles = getStyles(colors)
+	const setGlobalStyles = globalStyles()
 
 	return (
 		<View
 			style={[
 				styles.card,
-				theme === "light"
-					? accountStyles.bgLight
-					: accountStyles.secondaryDark,
-				{ borderColor: theme === "light" ? "#ccc" : "#444" },
+				{backgroundColor: colors.secondary},
+				{ borderColor: colors.name === "light" ? "#ccc" : "#444" },
 			]}
 		>
 			<Image
 				source={{ uri: avatar_url }}
-				style={[globalStyles.profileImage, { width: 50, height: 50 }]}
+				style={[setGlobalStyles.profileImage, { width: 50, height: 50 }]}
 			/>
 			<Text
 				style={[
 					accountStyles.profileUsername,
-					theme === "light"
-						? accountStyles.textLight
-						: accountStyles.textDark,
+					{color: colors.text},
 				]}
 			>
 				{username}
@@ -54,15 +55,18 @@ export default function ProfileCard({
 	);
 }
 
-const styles = StyleSheet.create({
-	card: {
-		flexDirection: "row",
-		alignItems: "center",
-		padding: 10,
-		gap: 15,
-		borderRadius: 10,
-		borderWidth: 1,
-		shadowColor: "#000",
-		// width: 500,
-	},
-});
+function getStyles(colors:colorsType){	
+	const styles = StyleSheet.create({
+		card: {
+			flexDirection: "row",
+			alignItems: "center",
+			padding: 10,
+			gap: 15,
+			borderRadius: 10,
+			borderWidth: 1,
+			shadowColor: "#000",
+			// width: 500,
+		},
+	});
+	return styles
+}

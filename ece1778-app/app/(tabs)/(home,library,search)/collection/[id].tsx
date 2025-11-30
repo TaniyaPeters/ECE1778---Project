@@ -15,8 +15,11 @@ import { supabase } from "@lib/supabase.web";
 import { Tables } from "@app/types/database.types";
 import GeneralCard from "@components/generalCard";
 import { globalStyles } from "@styles/globalStyles";
-import { colors } from "@constants/colors";
 import { dimentions } from "@constants/dimentions";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Collection = Tables<"collections">;
 type Movie = Tables<"movies">;
@@ -28,6 +31,9 @@ export default function CollectionScreen() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+  const setGlobalStyles = globalStyles()
 
   useEffect(() => {
     const fetchCollection = async () => {
@@ -187,8 +193,8 @@ export default function CollectionScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <ActivityIndicator size="large" color={colors.light.secondary} />
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <ActivityIndicator size="large" color={colors.secondary} />
         <Text style={styles.loadingText}>Loading collection...</Text>
       </SafeAreaView>
     );
@@ -196,8 +202,8 @@ export default function CollectionScreen() {
 
   if (error || !collection) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={setGlobalStyles.errorText}>
           {error || "Collection not found"}
         </Text>
       </SafeAreaView>
@@ -208,7 +214,7 @@ export default function CollectionScreen() {
   const numberOfItems = collection.name === "Watched" ? movies.length : (collection.movie_list?.length || 0);
 
   return (
-    <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
         {/* Collection Header */}
         <View style={styles.headerContainer}>
@@ -283,7 +289,7 @@ export default function CollectionScreen() {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={globalStyles.errorDescriptionText}>
+            <Text style={setGlobalStyles.errorDescriptionText}>
               This collection doesn't have any movies yet.
             </Text>
           </View>
@@ -293,60 +299,62 @@ export default function CollectionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
-  },
-  headerContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-    paddingTop: 20,
-  },
-  thumbnailContainer: {
-    marginBottom: 16,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
-  thumbnail: {
-    width: dimentions.windowWidth * 0.4,
-    height: dimentions.windowWidth * 0.4 * 1.5, // 2:3 poster aspect ratio
-    borderRadius: 12,
-  },
-  collectionName: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: colors.light.secondary,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  itemCount: {
-    fontSize: 18,
-    color: colors.light.black,
-    textAlign: "center",
-  },
-  moviesContainer: {
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.light.secondary,
-    marginBottom: 12,
-    marginLeft: 5,
-  },
-  moviesList: {
-    paddingBottom: 20,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 40,
-  },
-});
-
+function getStyles(colors:colorsType){
+  const styles = StyleSheet.create({
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: colors.secondary,
+    },
+    headerContainer: {
+      alignItems: "center",
+      marginBottom: 20,
+      paddingTop: 20,
+    },
+    thumbnailContainer: {
+      marginBottom: 16,
+      borderRadius: 12,
+      shadowColor: "#000",
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 5,
+    },
+    thumbnail: {
+      width: dimentions.windowWidth * 0.4,
+      height: dimentions.windowWidth * 0.4 * 1.5, // 2:3 poster aspect ratio
+      borderRadius: 12,
+    },
+    collectionName: {
+      fontSize: 32,
+      fontWeight: "bold",
+      color: colors.secondary,
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    itemCount: {
+      fontSize: 18,
+      color: colors.black,
+      textAlign: "center",
+    },
+    moviesContainer: {
+      marginTop: 20,
+    },
+    sectionTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.secondary,
+      marginBottom: 12,
+      marginLeft: 5,
+    },
+    moviesList: {
+      paddingBottom: 20,
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: "center",
+      marginTop: 40,
+    },
+  });
+  return styles
+}

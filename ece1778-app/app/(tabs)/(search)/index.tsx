@@ -5,10 +5,13 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { router } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
 import GeneralCard from "@app/components/generalCard";
-import { Tables } from "../../../types/database.types";
-import { colors } from "@constants/colors";
+import { Tables } from "@app/types/database.types";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@app/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Movie = Tables<"movies">;
 
@@ -21,6 +24,10 @@ export default function Search() {
   const [genreFilter, setGenreFilter] = useState<string | null>(null);
   const [dateSort, setDateSort] = useState<'asc' | 'desc' | null>(null);
   const { isLoggedIn } = useAuthContext();
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+  const setGlobalStyles = globalStyles()
+
 
   //Retrieve movies from movies table
   async function retrieveMovies() {
@@ -86,24 +93,24 @@ export default function Search() {
 
   if (!isLoggedIn) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
-        <Text style={globalStyles.errorDescriptionText}>Please login to search for movies.</Text>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={setGlobalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={setGlobalStyles.errorDescriptionText}>Please login to search for movies.</Text>
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
-            globalStyles.errorLoginButton,
+            setGlobalStyles.errorLoginButton,
             { opacity: pressed ? 0.6 : 1, },
           ]}
           onPress={() => router.push('/account')}
         >
-          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+          <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
         </Pressable>
       </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={globalStyles.container}>
+    <ScrollView style={setGlobalStyles.container}>
       <View style={styles.horizontalContainer}>
         {/* Search bar */}
         <View style={styles.searchWrapper}>
@@ -112,7 +119,7 @@ export default function Search() {
             placeholder="Search for movies..."
             value={searchString}
             onChangeText={setSearchString}
-            placeholderTextColor={colors.light.black}
+            placeholderTextColor={colors.black}
           />
           {searchString.length > 0 && (
             <Pressable
@@ -132,13 +139,13 @@ export default function Search() {
           ]}
           onPress={retrieveMovies}
         >
-          <Text style={[globalStyles.paragraphBold, styles.searchButtonText]}>Search</Text>
+          <Text style={[setGlobalStyles.paragraphBold, styles.searchButtonText]}>Search</Text>
         </Pressable>
       </View>
 
       <View style={styles.filterContainer}>
         {/* Genre filter */}
-        <Text style={[globalStyles.paragraph, styles.dropdownLabel]}>Genre: </Text>
+        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>Genre: </Text>
         <Dropdown
           style={styles.dropdown}
           data={[
@@ -153,7 +160,7 @@ export default function Search() {
         />
 
         {/* Sort by release date */}
-        <Text style={[globalStyles.paragraph, styles.dropdownLabel]}>Sort: </Text>
+        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>Sort: </Text>
         <Dropdown
           style={styles.dropdown}
           data={[
@@ -170,14 +177,14 @@ export default function Search() {
       </View>
 
       {loading && (
-        <View style={[globalStyles.container, styles.center]}>
-          <ActivityIndicator size="large" color={colors.light.secondary} />
+        <View style={[setGlobalStyles.container, styles.center]}>
+          <ActivityIndicator size="large" color={colors.secondary} />
           <Text style={styles.loadingText}>Loading movies...</Text>
         </View>
       )}
 
       {error && (
-        <View style={[globalStyles.container, styles.center]}>
+        <View style={[setGlobalStyles.container, styles.center]}>
           <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
@@ -243,101 +250,104 @@ export default function Search() {
     </ScrollView>
   );
 }
+  function getStyles(colors:colorsType){
+  const styles = StyleSheet.create({
+    horizontalContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 14,
+      paddingBottom: 15,
+    },
+    searchWrapper: {
+      flex: 4,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.secondary,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      height: 50,
+      marginRight: 8,
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.black,
+    },
+    clearButton: {
+      marginLeft: 6,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: "#929292ff",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    clearButtonText: {
+      color: colors.background,
+      fontSize: 14,
+      fontWeight: "bold",
+      lineHeight: 16,
+    },
+    searchButton: {
+      flex: 1,
+      height: 50,
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.secondary,
+      paddingHorizontal: 10,
+    },
+    searchButtonText: {
+      fontSize: 14,
+      color: colors.background
+    },
+    filterContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 15,
+      paddingVertical: 4,
+      backgroundColor: colors.background,
+    },
+    dropdownLabel: {
+      fontSize: 15,
+    },
+    dropdown: {
+      flex: 1,
+      height: 45,
+      borderColor: colors.secondary,
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      marginRight: 10,
+    },
+    center: {
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: colors.secondary,
+    },
+    errorText: {
+      fontSize: 18,
+      color: colors.danger,
+      textAlign: "center",
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: "center",
+      marginTop: 40,
+    },
+    emptyText: {
+      fontSize: 18,
+      color: colors.secondary,
+      textAlign: "center",
+    },
+  });
 
-const styles = StyleSheet.create({
-  horizontalContainer: {
-		flexDirection: "row",
-		alignItems: "center",
-		marginTop: 14,
-    paddingBottom: 15,
-	},
-  searchWrapper: {
-    flex: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.light.background,
-    borderWidth: 1,
-    borderColor: colors.light.secondary,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 50,
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: colors.light.black,
-  },
-  clearButton: {
-    marginLeft: 6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#929292ff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  clearButtonText: {
-    color: colors.light.background,
-    fontSize: 14,
-    fontWeight: "bold",
-    lineHeight: 16,
-  },
-  searchButton: {
-    flex: 1,
-		height: 50,
-		borderRadius: 15,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: colors.light.secondary,
-    paddingHorizontal: 10,
-	},
-	searchButtonText: {
-		fontSize: 14,
-		color: colors.light.background
-	},
-  filterContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-    paddingVertical: 4,
-    backgroundColor: colors.light.background,
-  },
-  dropdownLabel: {
-    fontSize: 15,
-  },
-  dropdown: {
-    flex: 1,
-    height: 45,
-    borderColor: colors.light.secondary,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.light.danger,
-    textAlign: "center",
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: colors.light.secondary,
-    textAlign: "center",
-  },
-});
+  return styles
+}

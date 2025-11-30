@@ -1,4 +1,3 @@
-import { colors } from "@app/constants/colors";
 import { globalStyles } from "@app/styles/globalStyles";
 import {
 	View,
@@ -20,6 +19,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@app/contexts/AuthContext";
 import { useTheme } from "@contexts/ThemeContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 type Friend = {
 	id: string;
@@ -33,6 +35,8 @@ export default function EditFriendsScreen() {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [addFriendInput, setAddFriendInput] = useState("");
 	const [friends, setFriends] = useState<Array<Friend>>([]);
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+  	const setGlobalStyles = globalStyles()
 
 	const getProfileByIds = async (ids: string[]) => {
 		let { data, error } = await supabase
@@ -155,22 +159,17 @@ export default function EditFriendsScreen() {
 	return (
 		<SafeAreaView
 			style={[
-				globalStyles.container,
+				setGlobalStyles.container,
 				{
 					paddingTop: 0,
-					backgroundColor:
-						theme === "light"
-							? accountStyles.bgLight.backgroundColor
-							: accountStyles.bgDark.backgroundColor,
+					backgroundColor:colors.background
 				},
 			]}
 		>
 			<View
 				style={[
 					accountStyles.container,
-					theme === "light"
-						? accountStyles.bgLight
-						: accountStyles.bgDark,
+					{backgroundColor: colors.background},
 				]}
 			>
 				<Modal
@@ -189,7 +188,7 @@ export default function EditFriendsScreen() {
 								<TextInput
 									style={[
 										styles.input,
-										{ borderColor: colors.light.secondary },
+										{ borderColor: colors.secondary },
 									]}
 									placeholder="Enter a username..."
 									value={addFriendInput}
@@ -216,9 +215,7 @@ export default function EditFriendsScreen() {
 					<Text
 						style={[
 							accountStyles.header,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 							{ flex: 3 },
 						]}
 					>

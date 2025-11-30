@@ -35,6 +35,7 @@ export type ThemeContextType = {
 };
 
 export type colorsType ={
+	name:string,
 	background: string,
 	black: string,
 	text: string,
@@ -44,3 +45,10 @@ export type colorsType ={
 	danger:string,
 	discord: string,
 }
+
+export type NotificationJson ={
+	id:string
+	user_id: string
+	body:string
+}
+

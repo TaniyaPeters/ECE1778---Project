@@ -11,10 +11,12 @@ import {
 import { globalStyles } from "@styles/globalStyles";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useAuthContext } from "@contexts/AuthContext";
-import { colors } from "@constants/colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useTheme } from "@contexts/ThemeContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function EditAccountScreen() {
 	const { signUpWithEmail } = useAuthContext();
@@ -23,6 +25,8 @@ export default function EditAccountScreen() {
 	const [password, setPassword] = useState("");
 	const [username, setUsername] = useState("");
 	const [name, setName] = useState("");
+  	const setGlobalStyles = globalStyles()
+	const colors = useSelector((state:RootState)=>selectTheme(state));
 
 	// Input validation
 	const handleSubmit = () => {
@@ -77,34 +81,26 @@ export default function EditAccountScreen() {
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView
 				style={[
-					globalStyles.container,
+					setGlobalStyles.container,
 					accountStyles.container,
-					theme === "light"
-						? accountStyles.bgLight
-						: accountStyles.bgDark,
+					{backgroundColor: colors.background},
 				]}
 			>
 				<View style={accountStyles.input}>
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 					>
 						Name
 					</Text>
 					<TextInput
 						style={
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark
+							{color: colors.text}
 						}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 						placeholder="Name"
 						value={name}
@@ -115,23 +111,17 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text}
 						]}
 					>
 						Username
 					</Text>
 					<TextInput
 						style={
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark
+							{color: colors.text}
 						}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 						placeholder="Username"
 						value={username}
@@ -142,23 +132,17 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text}
 						]}
 					>
 						Email
 					</Text>
 					<TextInput
 						style={
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark
+							{color: colors.text}
 						}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 						placeholder="Email"
 						value={email}
@@ -169,23 +153,17 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text}
 						]}
 					>
 						Password
 					</Text>
 					<TextInput
 						style={
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark
+							{color: colors.text}
 						}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 						placeholder="***********"
 						value={password}
@@ -196,9 +174,7 @@ export default function EditAccountScreen() {
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						accountStyles.button,
-						theme === "light"
-							? accountStyles.primaryLight
-							: accountStyles.primaryDark,
+						{backgroundColor: colors.primary},
 						{
 							opacity: pressed ? 0.6 : 1,
 						},
@@ -208,9 +184,7 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text}
 						]}
 					>
 						Create Account

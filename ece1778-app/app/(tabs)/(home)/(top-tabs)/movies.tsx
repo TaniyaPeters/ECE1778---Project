@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import GeneralCard from "@app/components/generalCard";
-import MonthlyRecap from "@app/components/MonthlyRecap";
 import AddToCollection, { AddToCollectionHandle } from "@app/components/AddToCollection";
 import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
@@ -15,10 +14,13 @@ import {
   Pressable
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../../../lib/supabase.web";
-import { Tables } from "../../../../types/database.types";
-import { colors } from "../../../../constants/colors";
+import { supabase } from "@lib/supabase.web";
+import { Tables } from "@app/types/database.types";
 import { useAuthContext } from "@app/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Movie = Tables<"movies">;
 
@@ -28,6 +30,9 @@ export default function TabMovies() {
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
   const addToCollectionRef = useRef<AddToCollectionHandle>(null);
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+  const setGlobalStyles = globalStyles()
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -59,17 +64,17 @@ export default function TabMovies() {
 
   if (!isLoggedIn) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: User not authenticated</Text>
-        <Text style={globalStyles.errorDescriptionText}>Please login to view the available movies.</Text>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={setGlobalStyles.errorText}>Error: User not authenticated</Text>
+        <Text style={setGlobalStyles.errorDescriptionText}>Please login to view the available movies.</Text>
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
-            globalStyles.errorLoginButton,
+            setGlobalStyles.errorLoginButton,
             { opacity: pressed ? 0.6 : 1, },
           ]}
           onPress={() => router.push('/account')}
         >
-          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+          <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -77,16 +82,16 @@ export default function TabMovies() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.light.secondary} />
-        <Text style={globalStyles.loadingText}>Loading movies...</Text>
+      <SafeAreaView style={[setGlobalStyles.container, styles.center]}>
+        <ActivityIndicator size="large" color={colors.secondary} />
+        <Text style={setGlobalStyles.loadingText}>Loading movies...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={[globalStyles.container, styles.center]}>
+      <SafeAreaView style={[setGlobalStyles.container, styles.center]}>
         <Text style={styles.errorText}>{error}</Text>
       </SafeAreaView>
     );
@@ -95,11 +100,11 @@ export default function TabMovies() {
   const handleAddToCollection = (movieId: number) => {
     addToCollectionRef.current?.open(movieId);
   };
-
+  
   return (
-    <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <Text style={globalStyles.titleText}>Movies Tab</Text>        
+        <Text style={setGlobalStyles.titleText}>Movies Tab</Text>        
         {movies.length > 0 ? (
           <View>
             <FlatList
@@ -167,24 +172,27 @@ export default function TabMovies() {
   );
 }
 
-const styles = StyleSheet.create({
-  center: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    fontSize: 18,
-    color: colors.light.danger,
-    textAlign: "center",
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: colors.light.secondary,
-    textAlign: "center",
-  },
-});
+function getStyles(colors:colorsType){
+  const styles = StyleSheet.create({
+      center: {
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      errorText: {
+        fontSize: 18,
+        color: colors.danger,
+        textAlign: "center",
+      },
+      emptyContainer: {
+        padding: 20,
+        alignItems: "center",
+        marginTop: 40,
+      },
+      emptyText: {
+        fontSize: 18,
+        color: colors.secondary,
+        textAlign: "center",
+      },
+      });
+    return styles
+}

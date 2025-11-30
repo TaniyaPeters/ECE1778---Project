@@ -10,7 +10,6 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	Switch,
-	Platform,
 } from "react-native";
 import { globalStyles } from "@styles/globalStyles";
 import { useAuthContext } from "@contexts/AuthContext";
@@ -20,7 +19,6 @@ import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
 import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
-import { colors } from "@app/constants/colors";
 import {createNotification, deleteNotification} from "@app/components/Notifications";
 import { selectPreferences, setPreferences } from "@app/features/preferences/preferencesSlice";
 import { RootState, AppDispatch } from "@app/store/store";
@@ -42,9 +40,10 @@ export default function EditAccountScreen() {
 	const isOAuth = !session ? false : "iss" in session!.user.user_metadata;
 	const preference = useSelector((state:RootState)=>selectPreferences(state));
 	const [notificationsEnabled, setNotificationsEnabled] = useState(preference);
-	const themeCheck = useSelector((state:RootState)=>selectTheme(state));
 	const dispatch:AppDispatch = useDispatch<AppDispatch>()
-	
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+	const setGlobalStyles = globalStyles()
+
 	async function checkPermissions(){
 		const { status: existingStatus } = await Notifications.getPermissionsAsync();
 		let finalStatus = existingStatus;
@@ -165,16 +164,13 @@ export default function EditAccountScreen() {
 	useEffect(() => {
 		setPassword("");
 	}, [passwordLocked]);
-
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView
 				style={[
-					globalStyles().container,
+					setGlobalStyles.container,
 					accountStyles.container,
-					theme === "light"
-						? accountStyles.bgLight
-						: accountStyles.bgDark,
+					{backgroundColor: colors.background},
 				]}
 			>
 				<Image
@@ -183,16 +179,14 @@ export default function EditAccountScreen() {
 							profile?.avatar_url ??
 							"https://bcvznyabnzjhwrgsfxaj.supabase.co/storage/v1/object/sign/avatars/fern.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV83OGZhYTBkNC1jZGI0LTQzNzEtOWU1OC1mNTg1NDI4YTNlZTUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhdmF0YXJzL2Zlcm4uanBnIiwiaWF0IjoxNzU5NDk5MDcyLCJleHAiOjE3NjAxMDM4NzJ9.evUuAv0wn2urMfy6q4ZDJUs1kZ0pj_TkLSOEv44kUnM",
 					}}
-					style={globalStyles().profileImage}
+					style={setGlobalStyles.profileImage}
 				/>
 
 				<View style={accountStyles.input}>
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 					>
 						Name
@@ -202,14 +196,10 @@ export default function EditAccountScreen() {
 						value={name}
 						onChangeText={setName}
 						style={[
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 					/>
 				</View>
@@ -217,9 +207,7 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 					>
 						Username
@@ -228,14 +216,10 @@ export default function EditAccountScreen() {
 						value={username}
 						onChangeText={setUsername}
 						style={[
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 						placeholderTextColor={
-							theme === "light"
-								? accountStyles.textLight.color
-								: accountStyles.textDark.color
+							colors.text
 						}
 						placeholder="Username"
 					/>
@@ -245,9 +229,7 @@ export default function EditAccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colors.text},
 							]}
 						>
 							Email
@@ -257,15 +239,11 @@ export default function EditAccountScreen() {
 							value={email}
 							onChangeText={setEmail}
 							style={[
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
-							]}
-							placeholderTextColor={
-								theme === "light"
-									? accountStyles.textLight.color
-									: accountStyles.textDark.color
-							}
+							{color: colors.text},
+						]}
+						placeholderTextColor={
+							colors.text
+						}
 						/>
 					</View>
 				)}
@@ -274,9 +252,7 @@ export default function EditAccountScreen() {
 						<Text
 							style={[
 								accountStyles.text,
-								theme === "light"
-									? accountStyles.textLight
-									: accountStyles.textDark,
+								{color: colors.text},
 							]}
 						>
 							Password
@@ -289,14 +265,10 @@ export default function EditAccountScreen() {
 								secureTextEntry={true}
 								editable={passwordLocked ? false : true}
 								style={[
-									theme === "light"
-										? accountStyles.textLight
-										: accountStyles.textDark,
+									{color: colors.text},
 								]}
 								placeholderTextColor={
-									theme === "light"
-										? accountStyles.textLight.color
-										: accountStyles.textDark.color
+									colors.text
 								}
 							/>
 							<Pressable
@@ -322,11 +294,11 @@ export default function EditAccountScreen() {
 				)}
 				<View style={accountStyles.input}>
 					<View style={accountStyles.row}>
-						<Text>Enable Notifications</Text>
+						<Text style={{color:colors.text}}>Enable Notifications</Text>
 						<Switch
-							trackColor={{false: "gray", true: colors.light.primary}}
-							thumbColor={notificationsEnabled ? colors.light.secondary : 'white'}
-							ios_backgroundColor={colors.light.black}
+							trackColor={{false: "gray", true: colors.primary}}
+							thumbColor={notificationsEnabled ? colors.secondary : 'white'}
+							ios_backgroundColor={colors.black}
 							onValueChange={checkPermissions}
 							value={notificationsEnabled}
 						/>
@@ -335,9 +307,7 @@ export default function EditAccountScreen() {
 				<Pressable
 					style={({ pressed }: { pressed: boolean }) => [
 						accountStyles.button,
-						theme === "light"
-							? accountStyles.primaryLight
-							: accountStyles.primaryDark,
+						{backgroundColor: colors.primary},
 						{
 							opacity: pressed ? 0.6 : 1,
 						},
@@ -347,9 +317,7 @@ export default function EditAccountScreen() {
 					<Text
 						style={[
 							accountStyles.text,
-							theme === "light"
-								? accountStyles.textLight
-								: accountStyles.textDark,
+							{color: colors.text},
 						]}
 					>
 						Save Changes
