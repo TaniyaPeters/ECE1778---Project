@@ -33,6 +33,7 @@ yarn-error.*
 # local env files
 .env*.local
 .env
+ece1778-app/ece1778-project-47b62-firebase-adminsdk-fbsvc-771ff60c2b.json
 
 # typescript
 *.tsbuildinfo
