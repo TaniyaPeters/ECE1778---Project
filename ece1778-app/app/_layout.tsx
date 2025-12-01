@@ -23,16 +23,17 @@ export default function RootLayout() {
     
           loadTheme().then((theme) => {
             store.dispatch(setTheme(theme));
+            console.log('thie')
+            console.log(theme)
           });
     
     }, []);        
 	return (
-		<AuthProvider>
-			<Provider store={store}>
-                <Stack screenOptions={{headerShown:false}}>
-                </Stack>
-			</Provider>
-		</AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <Stack screenOptions={{headerShown:false}}></Stack>
+      </AuthProvider>
+    </Provider>
 	);
 }
 
@@ -41,10 +42,10 @@ function useNotificationObserver() {
     function redirect(notification: Notifications.Notification) {
 		if(notification.request.content.data?.url){
 			if(notification.request.content.data.url =='(tabs)/(home)'){
-				router.push('/(tabs)/(home)/(top-tabs)')
+				router.push('/(providers)/(tabs)/(home)/(top-tabs)')
 			}
 			else{
-				router.push(`/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
+				router.push(`/(providers)/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
 			}
 		}
     }
