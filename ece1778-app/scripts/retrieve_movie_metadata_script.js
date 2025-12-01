@@ -1,5 +1,5 @@
 // Script to retrieve movies metadata from TMDB and use it to populate the movies table of our database
-// Run 'npm install pg dotenv --legacy-peer-deps' and then 'node retrieve_metadata_script.js'
+// Run 'npm install pg dotenv --legacy-peer-deps' and then 'node retrieve_movie_metadata_script.js'
 // NOTE: Don't import or call this script from the app code (is standalone)
 
 require("dotenv").config({ path: "../.env" }); // Load .env file
