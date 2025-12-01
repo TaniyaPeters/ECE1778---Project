@@ -13,14 +13,12 @@ import { accountStyles } from "@app/styles/accountStyles";
 import { useAuthContext } from "@contexts/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { useTheme } from "@contexts/ThemeContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function EditAccountScreen() {
 	const { signUpWithEmail } = useAuthContext();
-	const { theme } = useTheme();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [username, setUsername] = useState("");
