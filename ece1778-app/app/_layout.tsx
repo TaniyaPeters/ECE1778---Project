@@ -5,7 +5,7 @@ import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { loadPreference } from "@app/storage/preferencesStorage";
 import { store } from "@app/store/store";
 import { setPreferences } from "@app/features/preferences/preferencesSlice";
@@ -14,7 +14,9 @@ import { router } from "expo-router";
 import { loadTheme } from "@app/storage/themeStorage";
 import { setTheme } from "@app/features/theme/themeSlice";
 import { Provider } from "react-redux";
-
+import { colorsType } from "@app/types/types";
+import { colors } from "@app/constants/colors";
+	
 export default function RootLayout() {
 	useEffect(() => {
       loadPreference().then((preference) => {
@@ -23,16 +25,23 @@ export default function RootLayout() {
 
       loadTheme().then((theme) => {
         store.dispatch(setTheme(theme));
+		setNativeTheme(theme)
       });
 
     }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 	useNotificationObserver();
+	
+	const [nativeTheme, setNativeTheme] = useState<colorsType>(colors.light)
+
 	return (
 		<AuthProvider>
 			<ThemeProvider>
 				<Provider store={store}>
-					<NativeTabs>
+					<NativeTabs
+						iconColor={nativeTheme?.secondary}
+						backgroundColor={nativeTheme?.background}
+						>
 						<NativeTabs.Trigger name="(tabs)/(home)">
 							<Label>Home</Label>
 							{Platform.select({

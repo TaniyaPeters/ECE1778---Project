@@ -45,6 +45,7 @@ export default function AccountScreen() {
 			setColorsTheme(colors.light)
 			dispatch(setTheme(colors.light));		
 		}
+
 	}
 
 	const handleLogin = async () => {
