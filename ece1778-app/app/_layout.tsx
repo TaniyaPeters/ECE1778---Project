@@ -29,8 +29,7 @@ export default function RootLayout() {
 	return (
 		<AuthProvider>
 			<Provider store={store}>
-          <Stack screenOptions={{headerShown:false}}>
-          </Stack>
+          <Stack screenOptions={{headerShown:false}}></Stack>
 			</Provider>
 		</AuthProvider>
 	);
