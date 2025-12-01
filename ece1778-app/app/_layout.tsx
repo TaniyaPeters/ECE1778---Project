@@ -1,110 +1,36 @@
 import AuthProvider from "@app/providers/auth-provider";
 import { Barlow_500Medium } from "@expo-google-fonts/barlow";
 import { Quicksand_400Regular, useFonts } from "@expo-google-fonts/quicksand";
-import { MaterialIcons } from "@expo/vector-icons";
-import { Platform } from "react-native";
-import { NativeTabs, Icon, Label, VectorIcon } from "expo-router/unstable-native-tabs";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { loadPreference } from "@app/storage/preferencesStorage";
 import { store } from "@app/store/store";
 import { setPreferences } from "@app/features/preferences/preferencesSlice";
 import * as Notifications from "expo-notifications"
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import { loadTheme } from "@app/storage/themeStorage";
 import { setTheme } from "@app/features/theme/themeSlice";
 import { Provider } from "react-redux";
-import { colorsType } from "@app/types/types";
-import { colors } from "@app/constants/colors";
+
 	
 export default function RootLayout() {
-	useEffect(() => {
-      loadPreference().then((preference) => {
-        store.dispatch(setPreferences(preference));
-      });
+    useFonts({ Quicksand_400Regular, Barlow_500Medium });
+    useNotificationObserver();
 
-      loadTheme().then((theme) => {
-        store.dispatch(setTheme(theme));
-		setNativeTheme(theme)
-      });
-
-    }, []);
-	useFonts({ Quicksand_400Regular, Barlow_500Medium });
-	useNotificationObserver();
-	
-	const [nativeTheme, setNativeTheme] = useState<colorsType>(colors.light)
-
+    useEffect(() => {
+          loadPreference().then((preference) => {
+            store.dispatch(setPreferences(preference));
+          });
+    
+          loadTheme().then((theme) => {
+            store.dispatch(setTheme(theme));
+          });
+    
+    }, []);        
 	return (
 		<AuthProvider>
 			<Provider store={store}>
-				<NativeTabs
-					iconColor={nativeTheme?.secondary}
-					backgroundColor={nativeTheme?.background}
-					>
-					<NativeTabs.Trigger name="(tabs)/(home)">
-						<Label>Home</Label>
-						{Platform.select({
-							ios: <Icon sf="house.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="home"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/(search)">
-						<Label>Search</Label>
-						{Platform.select({
-							ios: <Icon sf="magnifyingglass" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="search"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/(library)">
-						<Label>Library</Label>
-						{Platform.select({
-							ios: <Icon sf="folder.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="book"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-					<NativeTabs.Trigger name="(tabs)/account">
-						<Label>Account</Label>
-						{Platform.select({
-							ios: <Icon sf="person.bust.fill" />,
-							android: (
-								<Icon
-									src={
-										<VectorIcon
-											family={MaterialIcons}
-											name="person"
-										/>
-									}
-								/>
-							),
-						})}
-					</NativeTabs.Trigger>
-				</NativeTabs>
+          <Stack screenOptions={{headerShown:false}}>
+          </Stack>
 			</Provider>
 		</AuthProvider>
 	);
@@ -115,10 +41,10 @@ function useNotificationObserver() {
     function redirect(notification: Notifications.Notification) {
 		if(notification.request.content.data?.url){
 			if(notification.request.content.data.url =='(tabs)/(home)'){
-				router.push('/(tabs)/(home)/(top-tabs)')
+				router.push('/(providers)/(tabs)/(home)/(top-tabs)')
 			}
 			else{
-				router.push(`/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
+				router.push(`/(providers)/(tabs)/(search)/movieDetails/${notification.request.content.data?.url}`)
 			}
 		}
     }
