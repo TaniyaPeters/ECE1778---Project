@@ -17,6 +17,7 @@ import { colorsType } from "@app/types/types";
 import { colors } from "@app/constants/colors";
 	
 export default function RootLayout() {
+	const [nativeTheme, setNativeTheme] = useState<colorsType>(colors.light)
 	useEffect(() => {
       loadPreference().then((preference) => {
         store.dispatch(setPreferences(preference));
@@ -24,15 +25,12 @@ export default function RootLayout() {
 
       loadTheme().then((theme) => {
         store.dispatch(setTheme(theme));
-		setNativeTheme(theme)
+		setNativeTheme(theme);
       });
 
     }, []);
 	useFonts({ Quicksand_400Regular, Barlow_500Medium });
 	useNotificationObserver();
-	
-	const [nativeTheme, setNativeTheme] = useState<colorsType>(colors.light)
-
 	return (
 		<AuthProvider>
 			<Provider store={store}>

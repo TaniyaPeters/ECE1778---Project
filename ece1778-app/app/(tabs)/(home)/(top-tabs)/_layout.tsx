@@ -22,7 +22,10 @@ export const MaterialTopTabs = withLayoutContext<
 export default function TopTabsLayout() {
   const colors = useSelector((state:RootState)=>selectTheme(state));
   return (
-    <MaterialTopTabs>
+    <MaterialTopTabs screenOptions={{
+        tabBarItemStyle:{backgroundColor: colors.background},
+        tabBarActiveTintColor:colors.secondary
+      }} >
       <MaterialTopTabs.Screen name="index" options={{ title: "Media Recap" }} />
       <MaterialTopTabs.Screen name="movies" options={{ title: "Movies" }} />
       <MaterialTopTabs.Screen name="books" options={{ title: "Books" }} />
