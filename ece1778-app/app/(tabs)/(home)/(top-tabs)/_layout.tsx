@@ -5,6 +5,9 @@ import {
 } from "@react-navigation/material-top-tabs";
 import { withLayoutContext } from "expo-router";
 import { ParamListBase, TabNavigationState } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 const { Navigator } = createMaterialTopTabNavigator();
 
@@ -15,7 +18,9 @@ export const MaterialTopTabs = withLayoutContext<
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
+
 export default function TopTabsLayout() {
+  const colors = useSelector((state:RootState)=>selectTheme(state));
   return (
     <MaterialTopTabs>
       <MaterialTopTabs.Screen name="index" options={{ title: "Media Recap" }} />

@@ -10,8 +10,11 @@ import {
 } from "react-native";
 import { supabase } from "../lib/supabase.web";
 import { Tables } from "../types/database.types";
-import { colors } from "../constants/colors";
 import GeneralCard from "./generalCard";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Collection = Tables<"collections">;
 
@@ -30,6 +33,8 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
     Map<number, { imageSource: string; localPath: boolean }>
   >(new Map());
   const [updating, setUpdating] = useState<boolean>(false);
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
 
   const fetchCollectionsForModal = async (movieId: number) => {
     try {
@@ -213,7 +218,7 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
                     const numberOfItems = item.movie_list?.length || 0;
                     const isSelected = selectedCollectionIds.has(item.id);
                     const cardBackgroundColor = isSelected 
-                      ? colors.light.primary 
+                      ? colors.primary 
                       : "#E0E0E0"; // Light grey
 
                     return (
@@ -281,75 +286,78 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
 
 AddToCollection.displayName = "AddToCollection";
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    backgroundColor: colors.light.background,
-    width: "90%",
-    maxHeight: "80%",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: colors.light.black,
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.light.secondary,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  modalScrollView: {
-    maxHeight: 400,
-    marginBottom: 20,
-  },
-  collectionsList: {
-    paddingBottom: 10,
-  },
-  emptyModalContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  emptyModalText: {
-    fontSize: 16,
-    color: colors.light.secondary,
-    textAlign: "center",
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  modalButtonCancel: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.light.danger,
-  },
-  modalButtonUpdate: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.light.secondary,
-  },
-  modalButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.light.background,
-  },
-});
+function getStyles(colors:colorsType){  
+  const styles = StyleSheet.create({
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalBox: {
+      backgroundColor: colors.background,
+      width: "90%",
+      maxHeight: "80%",
+      borderRadius: 12,
+      padding: 20,
+      shadowColor: colors.black,
+      shadowOpacity: 0.3,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.secondary,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    modalScrollView: {
+      maxHeight: 400,
+      marginBottom: 20,
+    },
+    collectionsList: {
+      paddingBottom: 10,
+    },
+    emptyModalContainer: {
+      padding: 20,
+      alignItems: "center",
+    },
+    emptyModalText: {
+      fontSize: 16,
+      color: colors.secondary,
+      textAlign: "center",
+    },
+    modalButtonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    modalButtonCancel: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.danger,
+    },
+    modalButtonUpdate: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.secondary,
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: colors.background,
+    },
+  });
+  return styles
+}
 
 export default AddToCollection;
 

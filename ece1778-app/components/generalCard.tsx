@@ -3,10 +3,13 @@ import { View, Text, Pressable } from "react-native";
 import StarRating from "./starRating";
 import AutoImage from "./autoScaledImage";
 import { FontAwesome } from "@expo/vector-icons";
-import { colors } from "../constants/colors";
 import { StyleSheet, Image } from "react-native";
 import { getLocalImage } from "../constants/postersMap";
 import { globalStyles } from "@app/styles/globalStyles";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type GeneralCardProps = {
   image: string | undefined;
@@ -37,10 +40,14 @@ const GeneralCard = ({
   starRating,
   backgroundColor,
 }: GeneralCardProps) => {
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+  const setGlobalStyles = globalStyles()
+  
   return (
     <View style={[
       styles.card, 
-      globalStyles.center,
+      setGlobalStyles.center,
       backgroundColor ? { backgroundColor } : {}
     ]}>
       <AutoImage
@@ -67,7 +74,7 @@ const GeneralCard = ({
           </Pressable>
         )}
         {starRating !== undefined && (
-          <StarRating rating={starRating} color={colors.light.background} />
+          <StarRating rating={starRating} color={colors.background} />
         )}
         {del && (
           <Pressable onPress={delFunction}>
@@ -86,7 +93,7 @@ const GeneralCard = ({
               <FontAwesome
                 name="eye"
                 size={20}
-                color={colors.light.secondary}
+                color={colors.secondary}
               />
             </>
           )}
@@ -100,43 +107,46 @@ export default GeneralCard;
 
 // or use this in AutoImage for external urls source={{ uri: 'https://example.com/pic.jpg' }}
 
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: "row",
-    backgroundColor: colors.light.primary,
-    borderRadius: 8,
-    padding: 10,
-    justifyContent: "center",
-    shadowColor: colors.light.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
-    margin: 15,
-    marginTop:0,
-  },
-  cardHeader: {
-    flex: 1,
-    marginLeft: 15,
-    paddingVertical: 10,
-    justifyContent: "flex-start",
-    gap: 10,
-  },
-  cardFooter: {
-    flex: 1,
-    marginRight: 10,
-    paddingVertical: 10,
-    justifyContent: "center",
-    alignItems: "flex-end",
-    gap: 10,
-  },
-  cardHeaderText: {
-    color: colors.light.secondary,
-    fontSize: 25,
-    fontWeight: "bold",
-  },
-  cardSubText: {
-    color: colors.light.secondary,
-    fontSize: 15,
-  },
-});
+function getStyles(colors:colorsType){
+  const styles = StyleSheet.create({
+    card: {
+      flexDirection: "row",
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      padding: 10,
+      justifyContent: "center",
+      shadowColor: colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 3,
+      margin: 15,
+      marginTop:0,
+    },
+    cardHeader: {
+      flex: 1,
+      marginLeft: 15,
+      paddingVertical: 10,
+      justifyContent: "flex-start",
+      gap: 10,
+    },
+    cardFooter: {
+      flex: 1,
+      marginRight: 10,
+      paddingVertical: 10,
+      justifyContent: "center",
+      alignItems: "flex-end",
+      gap: 10,
+    },
+    cardHeaderText: {
+      color: colors.secondary,
+      fontSize: 25,
+      fontWeight: "bold",
+    },
+    cardSubText: {
+      color: colors.secondary,
+      fontSize: 15,
+    },
+  });
+  return styles
+}

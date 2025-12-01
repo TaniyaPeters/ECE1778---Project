@@ -12,16 +12,18 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { globalStyles } from "@styles/globalStyles";
-import { Review } from "@app/types/types";
+import { colorsType, Review } from "@app/types/types";
 import ReviewListItem from "@components/ReviewListItem";
 import Card from "@components/Card";
 import RatingReviewPopup from "@components/RatingReviewPopup";
 import AddToCollection, { AddToCollectionHandle } from "@components/AddToCollection";
-import { colors } from "@constants/colors";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@contexts/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { sendPushNotification } from "@app/components/Notifications";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function movieDetails() {
 	const { profile } = useAuthContext();
@@ -44,6 +46,10 @@ export default function movieDetails() {
 	const [deleteReviewModalVisible, setDeleteReviewModalVisible] = useState<boolean>(false);
 	const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
 	const [deleting, setDeleting] = useState<boolean>(false);
+
+	const colors = useSelector((state:RootState)=>selectTheme(state));
+	const styles = getStyles(colors)
+	const setGlobalStyles = globalStyles()
 
 	async function retrieveMovieDetails(id_num: number) {
 		//Retrieve movie details from movies table
@@ -307,14 +313,14 @@ export default function movieDetails() {
 	};
 
 	return (
-		<SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
+		<SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
 			<ScrollView>			
 				{/* Movie title */}
-				<Text style={globalStyles.titleText}>{title}</Text>
+				<Text style={setGlobalStyles.titleText}>{title}</Text>
 
-				<View style={[globalStyles.center, styles.yearAndAddContainer]}>
+				<View style={[setGlobalStyles.center, styles.yearAndAddContainer]}>
 					{/* Release year */}
-					<Text style={[globalStyles.paragraph, styles.year]}>
+					<Text style={[setGlobalStyles.paragraph, styles.year]}>
 						{releaseYear}
 					</Text>
 					<Pressable
@@ -337,10 +343,10 @@ export default function movieDetails() {
 
 				{/* Rating out of 5 and number of ratings */}
 				<View style={styles.ratingContainer}>
-					<Text style={[globalStyles.paragraph, styles.rating]}>
+					<Text style={[setGlobalStyles.paragraph, styles.rating]}>
 						⭐ {numRatings && numRatings > 0 ? `${rating?.toFixed(1) ?? "N/A"} / 5` : ""}
 					</Text>
-					<Text style={[globalStyles.paragraph, styles.num_ratings]}>
+					<Text style={[setGlobalStyles.paragraph, styles.num_ratings]}>
 						{" "}
 						({numRatings ?? 0} ratings)
 					</Text>
@@ -350,20 +356,20 @@ export default function movieDetails() {
 				<View style={styles.imageContainer}>
 					<Image
 						source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/no-image.jpg") }
-						style={globalStyles.detailsImage}
+						style={setGlobalStyles.detailsImage}
 						resizeMode="contain"
 					/>
 				</View>
 
 				<Card style={styles.card}>
 					{/* Movie description */}
-					<Text style={globalStyles.paragraph}>{description}</Text>
+					<Text style={setGlobalStyles.paragraph}>{description}</Text>
 
 					{/* Genres */}
 					<View style={styles.verticalContainer}>
-						<Text style={globalStyles.paragraphBold}>Genres: </Text>
+						<Text style={setGlobalStyles.paragraphBold}>Genres: </Text>
 						{genres.map((genre, index) => (
-							<Text key={index} style={globalStyles.paragraph}>
+							<Text key={index} style={setGlobalStyles.paragraph}>
 								• {genre}
 							</Text>
 						))}
@@ -371,9 +377,9 @@ export default function movieDetails() {
 
 					{/* Cast */}
 					<View style={styles.verticalContainer}>
-						<Text style={globalStyles.paragraphBold}>Cast: </Text>
+						<Text style={setGlobalStyles.paragraphBold}>Cast: </Text>
 						{castMembers.map((actor, index) => (
-							<Text key={index} style={globalStyles.paragraph}>
+							<Text key={index} style={setGlobalStyles.paragraph}>
 								• {actor}
 							</Text>
 						))}
@@ -382,7 +388,7 @@ export default function movieDetails() {
 
 				{/* Reviews */}
 				<View style={styles.horizontalContainer}>
-					<Text style={globalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+					<Text style={setGlobalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
 					<Pressable
 						style={({ pressed }: { pressed: boolean }) => [
 							styles.button, { opacity: pressed ? 0.6 : 1},
@@ -390,7 +396,7 @@ export default function movieDetails() {
 						onPress={() => setPopupVisible(true)}
 						disabled={!profile}
 					>
-						<Text style={[globalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
+						<Text style={[setGlobalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
 					</Pressable>
 				</View>
 				<FlatList
@@ -468,144 +474,147 @@ export default function movieDetails() {
 	);
 }
 
-const styles = StyleSheet.create({
-	year: {
-		textAlign: "center",
-		fontWeight: "bold",
-		color: colors.light.secondary,
-	},
-	ratingContainer: {
-		flexDirection: "row",
-		alignSelf: "center",
-		alignItems: "baseline",
-	},
-	rating: {
-		textAlign: "center",
-		fontWeight: "bold",
-		fontSize: 25,
-	},
-	num_ratings: {
-		textAlign: "center",
-	},
-	horizontalContainer: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		alignItems: "center",
-		marginHorizontal: 15,
-		marginTop: 14,
-		marginBottom: 5,
-		justifyContent: 'space-between',
-	},
-	verticalContainer: {
-		flexDirection: "column",
-	},
-	button: {
-		paddingVertical: 8,
-		width: 120,
-		height: 50,
-		borderRadius: 15,
-		alignItems: "center",
-		justifyContent: "center",
-		marginTop: 16,
-		backgroundColor: colors.light.secondary,
-	},
-	buttonText: {
-		fontSize: 14,
-		color: colors.light.background
-	},
-	reviewList: {
-		paddingBottom: 20,
-		paddingTop: 10,
-	},
-	card: {
-		backgroundColor: colors.light.background,
-	},
-	imageContainer: {
-		alignSelf: "center", // center container itself
-		alignItems: 'center',
-		marginBottom: 16,
-		borderRadius: 12,
-		shadowColor: "#000",
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 5,
-	},
-	yearAndAddContainer: {
-		flexDirection: "row", 
-		alignItems: "center", 
-		gap: 3
-	},
-	addButton: {
-		padding: 8,
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	addIcon: {
-		width: 24,
-		height: 24,
-	},
-	modalOverlay: {
-		flex: 1,
-		backgroundColor: "rgba(0,0,0,0.5)",
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	modalBox: {
-		backgroundColor: colors.light.background,
-		width: "85%",
-		borderRadius: 12,
-		padding: 20,
-		shadowColor: colors.light.black,
-		shadowOpacity: 0.3,
-		shadowOffset: { width: 0, height: 2 },
-		shadowRadius: 8,
-		elevation: 5,
-	},
-	modalTitle: {
-		fontSize: 24,
-		fontWeight: "bold",
-		color: colors.light.secondary,
-		marginBottom: 20,
-		textAlign: "center",
-	},
-	modalLabel: {
-		fontSize: 16,
-		fontWeight: "bold",
-		color: colors.light.secondary,
-		marginBottom: 8,
-		textAlign: "center",
-	},
-	modalWarningText: {
-		fontSize: 14,
-		color: colors.light.danger,
-		marginBottom: 20,
-		textAlign: "center",
-	},
-	modalButtonContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		gap: 12,
-	},
-	modalButtonSecondary: {
-		flex: 1,
-		paddingVertical: 12,
-		borderRadius: 8,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: colors.light.secondary,
-	},
-	modalButtonDanger: {
-		flex: 1,
-		paddingVertical: 12,
-		borderRadius: 8,
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: colors.light.danger,
-	},
-	modalButtonText: {
-		fontSize: 16,
-		fontWeight: "bold",
-		color: colors.light.background,
-	},
-});
+function getStyles(colors:colorsType){	
+	const styles = StyleSheet.create({
+		year: {
+			textAlign: "center",
+			fontWeight: "bold",
+			color: colors.secondary,
+		},
+		ratingContainer: {
+			flexDirection: "row",
+			alignSelf: "center",
+			alignItems: "baseline",
+		},
+		rating: {
+			textAlign: "center",
+			fontWeight: "bold",
+			fontSize: 25,
+		},
+		num_ratings: {
+			textAlign: "center",
+		},
+		horizontalContainer: {
+			flexDirection: "row",
+			flexWrap: "wrap",
+			alignItems: "center",
+			marginHorizontal: 15,
+			marginTop: 14,
+			marginBottom: 5,
+			justifyContent: 'space-between',
+		},
+		verticalContainer: {
+			flexDirection: "column",
+		},
+		button: {
+			paddingVertical: 8,
+			width: 120,
+			height: 50,
+			borderRadius: 15,
+			alignItems: "center",
+			justifyContent: "center",
+			marginTop: 16,
+			backgroundColor: colors.secondary,
+		},
+		buttonText: {
+			fontSize: 14,
+			color: colors.background
+		},
+		reviewList: {
+			paddingBottom: 20,
+			paddingTop: 10,
+		},
+		card: {
+			backgroundColor: colors.background,
+		},
+		imageContainer: {
+			alignSelf: "center", // center container itself
+			alignItems: 'center',
+			marginBottom: 16,
+			borderRadius: 12,
+			shadowColor: "#000",
+			shadowOpacity: 0.3,
+			shadowRadius: 8,
+			shadowOffset: { width: 0, height: 4 },
+			elevation: 5,
+		},
+		yearAndAddContainer: {
+			flexDirection: "row", 
+			alignItems: "center", 
+			gap: 3
+		},
+		addButton: {
+			padding: 8,
+			justifyContent: "center",
+			alignItems: "center",
+		},
+		addIcon: {
+			width: 24,
+			height: 24,
+		},
+		modalOverlay: {
+			flex: 1,
+			backgroundColor: "rgba(0,0,0,0.5)",
+			justifyContent: "center",
+			alignItems: "center",
+		},
+		modalBox: {
+			backgroundColor: colors.background,
+			width: "85%",
+			borderRadius: 12,
+			padding: 20,
+			shadowColor: colors.black,
+			shadowOpacity: 0.3,
+			shadowOffset: { width: 0, height: 2 },
+			shadowRadius: 8,
+			elevation: 5,
+		},
+		modalTitle: {
+			fontSize: 24,
+			fontWeight: "bold",
+			color: colors.secondary,
+			marginBottom: 20,
+			textAlign: "center",
+		},
+		modalLabel: {
+			fontSize: 16,
+			fontWeight: "bold",
+			color: colors.secondary,
+			marginBottom: 8,
+			textAlign: "center",
+		},
+		modalWarningText: {
+			fontSize: 14,
+			color: colors.danger,
+			marginBottom: 20,
+			textAlign: "center",
+		},
+		modalButtonContainer: {
+			flexDirection: "row",
+			justifyContent: "space-between",
+			gap: 12,
+		},
+		modalButtonSecondary: {
+			flex: 1,
+			paddingVertical: 12,
+			borderRadius: 8,
+			alignItems: "center",
+			justifyContent: "center",
+			backgroundColor: colors.secondary,
+		},
+		modalButtonDanger: {
+			flex: 1,
+			paddingVertical: 12,
+			borderRadius: 8,
+			alignItems: "center",
+			justifyContent: "center",
+			backgroundColor: colors.danger,
+		},
+		modalButtonText: {
+			fontSize: 16,
+			fontWeight: "bold",
+			color: colors.background,
+		},
+	});
+	return styles
+}

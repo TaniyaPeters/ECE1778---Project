@@ -8,8 +8,9 @@ import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Tables } from "@app/types/database.types";
 import { supabase } from "@app/lib/supabase.web";
-import { colors } from "@app/constants/colors";
-import { StyleSheet } from "react-native";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 type Movie = Tables<"movies">;
 export default function TabAll() {
@@ -22,6 +23,8 @@ export default function TabAll() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const setGlobalStyles = globalStyles()
 
 
   useEffect(() => {
@@ -117,17 +120,17 @@ export default function TabAll() {
 
   if (!isLoggedIn||error) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: {error}</Text>
-        <Text style={globalStyles.errorDescriptionText}>Please login to view your media recap.</Text>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
+        <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your media recap.</Text>
         <Pressable
           style={({ pressed }: { pressed: boolean }) => [
-            globalStyles.errorLoginButton,
+            setGlobalStyles.errorLoginButton,
             { opacity: pressed ? 0.6 : 1, },
           ]}
           onPress={() => router.push('/account')}
         >
-          <Text style={globalStyles.errorDescriptionText}>Login</Text>
+          <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -135,17 +138,17 @@ export default function TabAll() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <ActivityIndicator size="large" color={colors.light.secondary} />
-        <Text style={globalStyles.loadingText}>Loading...</Text>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <ActivityIndicator size="large" color={colors.secondary} />
+        <Text style={setGlobalStyles.loadingText}>Loading...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <Text style={globalStyles.titleText}>Media Recap</Text>
+        <Text style={setGlobalStyles.titleText}>Media Recap</Text>
         <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
         <MonthlyRecap type="Book" action="Read" data={movies} review={reviews}  highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
       </ScrollView>

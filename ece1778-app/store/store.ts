@@ -1,13 +1,15 @@
 // TODO: Import configureStore from "@reduxjs/toolkit"
 // TODO: Import preferencesReducer from "../features/preferences/preferencesSlice"
 import { configureStore } from "@reduxjs/toolkit";
-import preferencesReducer from "../features/preferences/preferencesSlice"
+import preferencesReducer from "@features/preferences/preferencesSlice"
+import themeReducer from "@features/theme/themeSlice"
 
 // TODO: Configure and export the Redux store using configureStore
 export const store = configureStore({
   // - Include the preferencesReducer under the key "preferences" in the reducer object
   reducer:{
-    'preferences': preferencesReducer
+    'preferences': preferencesReducer,
+    'theme':themeReducer
   }
 });
 

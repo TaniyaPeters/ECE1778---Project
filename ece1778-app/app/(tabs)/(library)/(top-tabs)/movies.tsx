@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -18,8 +18,11 @@ import { supabase } from "@lib/supabase.web";
 import { Tables } from "@app/types/database.types";
 import GeneralCard from "@components/generalCard";
 import { globalStyles } from "@styles/globalStyles";
-import { colors } from "@constants/colors";
 import { useAuthContext } from "@app/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { RootState } from "@app/store/store";
+import { colorsType } from "@app/types/types";
 
 type Collection = Tables<"collections">;
 
@@ -37,6 +40,9 @@ export default function TabLibraryMovies() {
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const [collectionToDelete, setCollectionToDelete] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+  const setGlobalStyles = globalStyles()
 
   useFocusEffect(
     useCallback(() => {
@@ -285,8 +291,8 @@ export default function TabLibraryMovies() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <ActivityIndicator size="large" color={colors.light.secondary} />
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <ActivityIndicator size="large" color={colors.secondary} />
         <Text style={styles.loadingText}>Loading collections...</Text>
       </SafeAreaView>
     );
@@ -294,19 +300,19 @@ export default function TabLibraryMovies() {
 
   if (error) {
     return (
-      <SafeAreaView style={[globalStyles.container, globalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={globalStyles.errorText}>Error: {error}</Text>
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
+        <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
         {!isLoggedIn && 
         <>
-          <Text style={globalStyles.errorDescriptionText}>Please login to view your saved collections.</Text>
+          <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your saved collections.</Text>
           <Pressable
             style={({ pressed }: { pressed: boolean }) => [
-              globalStyles.errorLoginButton,
+              setGlobalStyles.errorLoginButton,
               { opacity: pressed ? 0.6 : 1, },
             ]}
             onPress={() => router.push('/account')}
           >
-            <Text style={globalStyles.errorDescriptionText}>Login</Text>
+            <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
           </Pressable>
         </>
         }
@@ -315,9 +321,9 @@ export default function TabLibraryMovies() {
   }
 
   return (
-    <SafeAreaView style={globalStyles.container} edges={['bottom', 'left', 'right']}>
+    <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <Text style={globalStyles.titleText}>Collections</Text>
+        <Text style={setGlobalStyles.titleText}>Collections</Text>
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => setModalVisible(true)}
@@ -363,7 +369,7 @@ export default function TabLibraryMovies() {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={globalStyles.errorDescriptionText}>
+            <Text style={setGlobalStyles.errorDescriptionText}>
               No collections found.
             </Text>
           </View>
@@ -485,114 +491,117 @@ export default function TabLibraryMovies() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: colors.light.secondary,
-  },
-  collectionsContainer: {
-    marginTop: 20,
-  },
-  collectionsList: {
-    paddingBottom: 20,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 40,
-  },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  createButton: {
-    backgroundColor: colors.light.secondary,
-    alignItems: "center",
-    paddingVertical: 10,
-    marginTop: 15,
-    marginHorizontal: 15,
-    borderRadius: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    backgroundColor: colors.light.background,
-    width: "85%",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: colors.light.black,
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.light.secondary,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  modalLabel: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.light.secondary,
-    marginBottom: 8,
-  },
-  modalInput: {
-    width: "100%",
-    backgroundColor: colors.light.background,
-    borderWidth: 1,
-    borderColor: colors.light.black,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-    fontSize: 16,
-    color: colors.light.black,
-  },
-  modalButtonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  modalButtonDanger: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.light.danger,
-  },
-  modalButtonSecondary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.light.secondary,
-  },
-  modalButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.light.background,
-  },
-  modalWarningText: {
-    fontSize: 14,
-    color: colors.light.danger,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  modalErrorText: {
-    fontSize: 14,
-    color: colors.light.danger,
-    marginBottom: 10,
-    textAlign: "center",
-  },
-});
+function getStyles(colors:colorsType){  
+  const styles = StyleSheet.create({
+    loadingText: {
+      marginTop: 16,
+      fontSize: 16,
+      color: colors.secondary,
+    },
+    collectionsContainer: {
+      marginTop: 20,
+    },
+    collectionsList: {
+      paddingBottom: 20,
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: "center",
+      marginTop: 40,
+    },
+    headerContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    createButton: {
+      backgroundColor: colors.secondary,
+      alignItems: "center",
+      paddingVertical: 10,
+      marginTop: 15,
+      marginHorizontal: 15,
+      borderRadius: 8,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalBox: {
+      backgroundColor: colors.background,
+      width: "85%",
+      borderRadius: 12,
+      padding: 20,
+      shadowColor: colors.black,
+      shadowOpacity: 0.3,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 8,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.secondary,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    modalLabel: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: colors.secondary,
+      marginBottom: 8,
+    },
+    modalInput: {
+      width: "100%",
+      backgroundColor: colors.background,
+      borderWidth: 1,
+      borderColor: colors.black,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 20,
+      fontSize: 16,
+      color: colors.black,
+    },
+    modalButtonContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    modalButtonDanger: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.danger,
+    },
+    modalButtonSecondary: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.secondary,
+    },
+    modalButtonText: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: colors.background,
+    },
+    modalWarningText: {
+      fontSize: 14,
+      color: colors.danger,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    modalErrorText: {
+      fontSize: 14,
+      color: colors.danger,
+      marginBottom: 10,
+      textAlign: "center",
+    },
+  });
+  return styles;
+}

@@ -1,28 +1,19 @@
 import { Stack } from "expo-router";
-import { colors } from "@constants/colors";
-import { useTheme } from "@contexts/ThemeContext";
-import { Provider } from "react-redux";
-import { store } from "@app/store/store";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function AccountLayout() {
-	const { theme } = useTheme();
-
+  	const colors = useSelector((state:RootState)=>selectTheme(state));
 	return (
-		<Provider store={store}>
 			<Stack
 				screenOptions={{
 					headerStyle: {
-						backgroundColor:
-							theme === "light"
-								? colors.light.background
-								: colors.dark.background,
+						backgroundColor: colors.background,
 					},
 					headerTitleAlign: "center",
 					headerTitleStyle: {
-						color:
-							theme === "light"
-								? colors.light.secondary
-								: colors.dark.secondary,
+						color:colors.secondary,
 						fontFamily: "Quicksand_400Regular",
 					},
 					headerBackTitle: "Back",
@@ -43,7 +34,6 @@ export default function AccountLayout() {
 				/>
 				<Stack.Screen name="[id]" options={{ title: "Friend's Profile" }} />
 			</Stack>
-		</Provider>
 	);
 
 }

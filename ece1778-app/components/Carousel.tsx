@@ -1,8 +1,11 @@
-import { colors } from "@app/constants/colors";
 import {ScrollView, StyleSheet, ViewProps, Text, StyleProp, ViewStyle, View, Button, Dimensions, FlatList, TouchableOpacity,} from "react-native";
 import { router } from "expo-router";
 import AutoImage from "./autoScaledImage";
 import { getLocalImage } from "@app/constants/postersMap";
+import { useSelector } from "react-redux";
+import { RootState } from "@app/store/store";
+import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Props = ViewProps & {
   cards?: any;
@@ -12,6 +15,9 @@ type Props = ViewProps & {
 
 
 export default function Carousel({ cards, style, ...props }: Props) {
+  const colors = useSelector((state:RootState)=>selectTheme(state));
+  const styles = getStyles(colors)
+
   if(!cards){
     cards = <Text>There is Nothing to Show</Text>
   }
@@ -61,12 +67,15 @@ export default function Carousel({ cards, style, ...props }: Props) {
 }
 
 
-const styles = StyleSheet.create({
+function getStyles(colors:colorsType){
+  const styles = StyleSheet.create({
   carousel:{
     flexDirection:'row',
-    backgroundColor:colors.light.tertiary,
+    backgroundColor:colors.tertiary,
   },
   cardCollection:{
     paddingRight:5,
   },
 });
+  return styles
+}

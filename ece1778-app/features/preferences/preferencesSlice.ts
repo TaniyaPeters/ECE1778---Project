@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { savePreferences } from "../../storage/preferencesStorage";
-import { RootState } from "@app/store/store";
+import { savePreferences } from "@storage/preferencesStorage";
+import { RootState } from "@store/store";
 
 interface preferencesState {
   preferences:boolean,
@@ -30,7 +30,6 @@ const preferencesSlice = createSlice({
 export const {setPreferences, loadPreferences} = preferencesSlice.actions;
 
 export const selectPreferences = (state: RootState) => {
-  // Your code here
   return state.preferences.preferences
 }
 
