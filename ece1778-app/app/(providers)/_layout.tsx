@@ -12,6 +12,7 @@ export default function MainLayout() {
 			iconColor={colors.secondary}
 			backgroundColor={colors.background}
 			labelStyle={{color:colors.secondary}}
+			indicatorColor={colors.secondary+'30'}
 			>
 			<NativeTabs.Trigger name="(tabs)/(home)">
 				<Label>Home</Label>
