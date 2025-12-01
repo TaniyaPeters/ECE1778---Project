@@ -23,7 +23,8 @@ export default function TopTabsLayoutLibrary() {
   return (
     <MaterialTopTabs screenOptions={{
         tabBarItemStyle:{backgroundColor: colors.background},
-        tabBarActiveTintColor:colors.secondary
+        tabBarActiveTintColor:colors.secondary,
+        tabBarIndicatorStyle:{borderColor: colors.secondary,borderBottomWidth: 1},
       }} >
       <MaterialTopTabs.Screen name="movies" options={{ title: "Movies" }} />
       <MaterialTopTabs.Screen name="books" options={{ title: "Books" }} />

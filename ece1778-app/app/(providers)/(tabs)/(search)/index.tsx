@@ -250,7 +250,8 @@ export default function Search() {
     </ScrollView>
   );
 }
-  function getStyles(colors:colorsType){
+
+function getStyles(colors:colorsType){
   const styles = StyleSheet.create({
     horizontalContainer: {
       flexDirection: "row",
