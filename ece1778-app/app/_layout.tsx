@@ -23,17 +23,16 @@ export default function RootLayout() {
     
           loadTheme().then((theme) => {
             store.dispatch(setTheme(theme));
-            console.log('thie')
-            console.log(theme)
           });
     
     }, []);        
 	return (
-    <Provider store={store}>
-      <AuthProvider>
-        <Stack screenOptions={{headerShown:false}}></Stack>
-      </AuthProvider>
-    </Provider>
+		<AuthProvider>
+			<Provider store={store}>
+          <Stack screenOptions={{headerShown:false}}>
+          </Stack>
+			</Provider>
+		</AuthProvider>
 	);
 }
 
