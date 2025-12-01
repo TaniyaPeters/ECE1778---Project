@@ -253,7 +253,7 @@ export default function AccountScreen() {
 							<Pressable
 								style={({ pressed }: { pressed: boolean }) => [
 									accountStyles.button,
-									{backgroundColor: colorsTheme.background},
+									{backgroundColor: colorsTheme.primary},
 									{
 										opacity: pressed ? 0.6 : 1,
 									},

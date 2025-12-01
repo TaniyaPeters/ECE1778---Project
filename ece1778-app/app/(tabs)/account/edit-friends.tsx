@@ -18,7 +18,6 @@ import ProfileCard from "@app/components/ProfileCard";
 import { useEffect, useState } from "react";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@app/contexts/AuthContext";
-import { useTheme } from "@contexts/ThemeContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
@@ -31,7 +30,6 @@ type Friend = {
 
 export default function EditFriendsScreen() {
 	const { fetchProfile, session } = useAuthContext();
-	const { theme } = useTheme();
 	const [modalVisible, setModalVisible] = useState(false);
 	const [addFriendInput, setAddFriendInput] = useState("");
 	const [friends, setFriends] = useState<Array<Friend>>([]);
@@ -234,7 +232,7 @@ export default function EditFriendsScreen() {
 					>
 						<Image
 							source={
-								theme === "light"
+								colors.name === "light"
 									? require("@assets/add-friend-dark.png")
 									: require("@assets/add-friend-white.png")
 							}

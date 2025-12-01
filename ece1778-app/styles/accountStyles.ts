@@ -2,30 +2,6 @@ import { StyleSheet } from "react-native";
 import { colors } from "@constants/colors";
 
 export const accountStyles = StyleSheet.create({
-	bgLight: {
-		backgroundColor: colors.light.background,
-	},
-	bgDark: {
-		backgroundColor: colors.dark.background,
-	},
-	textLight: {
-		color: colors.light.black,
-	},
-	textDark: {
-		color: "white",
-	},
-	primaryLight: {
-		backgroundColor: colors.light.primary,
-	},
-	primaryDark: {
-		backgroundColor: colors.dark.secondary,
-	},
-	secondaryLight: {
-		backgroundColor: colors.light.secondary,
-	},
-	secondaryDark: {
-		backgroundColor: colors.dark.secondary,
-	},
 	button: {
 		paddingVertical: 8,
 		width: 120,

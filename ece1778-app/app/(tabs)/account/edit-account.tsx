@@ -17,7 +17,6 @@ import { supabase } from "@lib/supabase.web";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { accountStyles } from "@app/styles/accountStyles";
-import { useTheme } from "@contexts/ThemeContext";
 import * as Notifications from 'expo-notifications';
 import {createNotification, deleteNotification} from "@app/components/Notifications";
 import { selectPreferences, setPreferences } from "@app/features/preferences/preferencesSlice";
@@ -27,7 +26,6 @@ import { selectTheme } from "@app/features/theme/themeSlice";
 
 export default function EditAccountScreen() {
 	const { session, profile } = useAuthContext();
-	const { theme } = useTheme();
 	const [email, setEmail] = useState(profile?.email || "");
 	const [password, setPassword] = useState("");
 	const [passwordLocked, setPasswordLocked] = useState(true);
@@ -279,10 +277,10 @@ export default function EditAccountScreen() {
 								<Image
 									source={
 										passwordLocked
-											? theme === "light"
+											? colors.name === "light"
 												? lockDark
 												: lockWhite
-											: theme === "light"
+											: colors.name === "light"
 											? unlockDark
 											: unlockWhite
 									}
