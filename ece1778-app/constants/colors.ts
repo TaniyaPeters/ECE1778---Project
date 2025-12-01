@@ -16,10 +16,10 @@ export const colors = {
 		background: "#5C677E",
 		black: "#2E2B2B",
 		text: "#F7F2E8",
-		primary: "#6f8ccbff",
-		secondary: "#b9d4f0ff",
-		tertiary: "#5494a2ff",
-		danger: "#e8645aff",
+		primary: "#AFC8FF",
+		secondary: "#8BABCE",
+		tertiary: "#A8D1DA",
+		danger: "#DD4F44",
 		discord: "#5865F2"
 	},
 };
