@@ -1,5 +1,4 @@
-import { View, StyleSheet, ViewProps, Text, TouchableOpacity, FlatList } from "react-native";
-import { colors } from "../constants/colors";
+import { View, StyleSheet, ViewProps, Text } from "react-native";
 import { globalStyles } from "@app/styles/globalStyles";
 import { colorsType, Review } from "@app/types/types";
 import Carousel from "./Carousel";
