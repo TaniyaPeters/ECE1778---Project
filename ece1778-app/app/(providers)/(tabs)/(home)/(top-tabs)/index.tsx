@@ -148,7 +148,6 @@ export default function TabAll() {
   return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <Text style={setGlobalStyles.titleText}>Media Recap</Text>
         <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
         <MonthlyRecap type="Book" action="Read" data={movies} review={reviews}  highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
       </ScrollView>

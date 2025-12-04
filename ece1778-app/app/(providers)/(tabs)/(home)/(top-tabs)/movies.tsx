@@ -104,7 +104,6 @@ export default function TabMovies() {
   return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <Text style={setGlobalStyles.titleText}>Movies Tab</Text>        
         {movies.length > 0 ? (
           <View>
             <FlatList
