@@ -11,9 +11,6 @@ type Props = ViewProps & {
   cards?: any;
   style?: StyleProp<ViewStyle>;
 };
-
-
-
 export default function Carousel({ cards, style, ...props }: Props) {
   const colors = useSelector((state:RootState)=>selectTheme(state));
   const styles = getStyles(colors)
@@ -40,6 +37,13 @@ export default function Carousel({ cards, style, ...props }: Props) {
                     ? item.poster_path
                     : `/${item.poster_path}`;
                   imageSource = `https://image.tmdb.org/t/p/w500${posterPath}`;
+                  localPath = false;
+                } else if (item.cover_image) {
+                  // Use openlibrary poster URL - cover_image should be a poster path (e.g., "/abc123-M.jpg")
+                  const posterPath = item.cover_image.startsWith("/")
+                    ? item.cover_image
+                    : `/${item.cover_image}`;
+                  imageSource = `https://covers.openlibrary.org/b/id${posterPath}-M.jpg`;
                   localPath = false;
                 } else {
                   // Fallback to local image

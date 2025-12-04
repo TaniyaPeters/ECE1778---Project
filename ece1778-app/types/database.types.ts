@@ -216,7 +216,8 @@ export type Database = {
       reviews: {
         Row: {
           id: number
-          movie_id: number
+          movie_id?: number
+          book_id?: number
           rating: number | null
           review: string | null
           updated_at: string
@@ -224,7 +225,8 @@ export type Database = {
         }
         Insert: {
           id?: number
-          movie_id: number
+          movie_id?: number
+          book_id?: number
           rating?: number | null
           review?: string | null
           updated_at?: string
@@ -233,6 +235,7 @@ export type Database = {
         Update: {
           id?: number
           movie_id?: number
+          book_id?: number
           rating?: number | null
           review?: string | null
           updated_at?: string
@@ -244,6 +247,13 @@ export type Database = {
             columns: ["movie_id"]
             isOneToOne: false
             referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_books_id_fkey"
+            columns: ["books_id"]
+            isOneToOne: false
+            referencedRelation: "books"
             referencedColumns: ["id"]
           },
           {
