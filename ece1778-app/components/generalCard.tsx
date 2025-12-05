@@ -73,9 +73,6 @@ const GeneralCard = ({
             />
           </Pressable>
         )}
-        {starRating !== undefined && (
-          <StarRating rating={starRating} color={colors.background} />
-        )}
         {del && (
           <Pressable onPress={delFunction}>
             <Image
@@ -83,6 +80,9 @@ const GeneralCard = ({
               style={{ width: 24, height: 24 }}
             />
           </Pressable>
+        )}
+        {starRating !== undefined && (
+          <StarRating rating={starRating} color={colors.background} />
         )}
 
         <Text style={styles.cardSubText}>

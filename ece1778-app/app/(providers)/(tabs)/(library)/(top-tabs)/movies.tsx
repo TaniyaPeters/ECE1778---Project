@@ -30,7 +30,6 @@ export default function TabLibraryMovies() {
   const { isLoggedIn } = useAuthContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [collectionThumbnails, setCollectionThumbnails] = useState<Map<number, string>>(new Map());
-  const [watchedMoviesCount, setWatchedMoviesCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
@@ -93,75 +92,10 @@ export default function TabLibraryMovies() {
 
       setCollections(sortedCollections);
 
-      // Fetch thumbnails and counts for each collection
+      // Fetch thumbnails for each collection (first movie's poster)
       if (sortedCollections && sortedCollections.length > 0) {
         const thumbnailsMap = new Map<number, string>();
-
-        // Check if there's a "Watched" collection
-        const watchedCollection = sortedCollections.find(c => c.name === "Watched");
-        let watchedCount = 0;
-        let watchedFirstMovieId: number | null = null;
-
-        if (watchedCollection) {
-          // Fetch reviews for this user to get movie IDs with updated_at dates
-          const { data: reviewsData, error: reviewsError } = await supabase
-            .from("reviews")
-            .select("movie_id, updated_at")
-            .eq("user_id", userId);
-
-          if (!reviewsError && reviewsData) {
-            // Create a map of movie_id to earliest updated_at
-            const movieReviewMap = new Map<number, string>();
-            for (const review of reviewsData) {
-              if (review.movie_id !== null && review.updated_at) {
-                movieReviewMap.set(review.movie_id, review.updated_at);
-              }
-            }
-
-            // Get unique movie IDs
-            const movieIds = Array.from(movieReviewMap.keys());
-            watchedCount = movieIds.length;
-
-            if (movieIds.length > 0) {
-              // Find the movie with the earliest review date
-              let oldestDate = "";
-              let oldestMovieId: number | null = null;
-              for (const [movieId, date] of movieReviewMap.entries()) {
-                if (!oldestDate || date < oldestDate) {
-                  oldestDate = date;
-                  oldestMovieId = movieId;
-                }
-              }
-
-              watchedFirstMovieId = oldestMovieId;
-              // Get the first movie's poster
-              if (watchedFirstMovieId !== null) {
-                const { data: movieData, error: movieError } = await supabase
-                  .from("movies")
-                  .select("poster_path")
-                  .eq("id", watchedFirstMovieId)
-                  .maybeSingle();
-
-                if (!movieError && movieData?.poster_path) {
-                  const posterPath = movieData.poster_path.startsWith("/")
-                    ? movieData.poster_path
-                    : `/${movieData.poster_path}`;
-                  thumbnailsMap.set(watchedCollection.id, `https://image.tmdb.org/t/p/w500${posterPath}`);
-                }
-              }
-            }
-          }
-        }
-
-        setWatchedMoviesCount(watchedCount);
-
-        // Fetch thumbnails for other collections (first movie's poster)
         for (const collection of sortedCollections) {
-          // Skip "Watched" collection as we already handled it
-          if (collection.name === "Watched") {
-            continue;
-          }
-
           if (collection.movie_list && collection.movie_list.length > 0) {
             // Get the first movie's poster
             const firstMovieId = collection.movie_list[0];
@@ -329,7 +263,7 @@ export default function TabLibraryMovies() {
           onPress={() => setModalVisible(true)}
           activeOpacity={0.7}
         >
-          <Text style={styles.modalButtonText}>+  New Collection</Text>
+          <Text style={[styles.modalButtonText, {color: colors.background}]}>+  New Collection</Text>
         </TouchableOpacity>
 
         {collections.length > 0 ? (
@@ -340,9 +274,7 @@ export default function TabLibraryMovies() {
               scrollEnabled={false} // Use ScrollView's scrolling instead
               renderItem={({ item }) => {
                 const thumbnail = collectionThumbnails.get(item.id);
-                const numberOfItems = item.name === "Watched" 
-                  ? watchedMoviesCount 
-                  : (item.movie_list?.length || 0);
+                const numberOfItems = item.movie_list?.length || 0;
 
                 return (
                   <TouchableOpacity
@@ -390,6 +322,7 @@ export default function TabLibraryMovies() {
             <Text style={styles.modalLabel}>Collection Name</Text>
             <TextInput
               placeholder="Enter collection name"
+              placeholderTextColor={colors.secondary}
               value={collectionName}
               onChangeText={(text) => {
                 setCollectionName(text);
@@ -398,7 +331,7 @@ export default function TabLibraryMovies() {
                   setDuplicateNameError(null);
                 }
               }}
-              style={styles.modalInput}
+              style={[styles.modalInput, {color: colors.secondary, borderColor: colors.secondary}]}
               autoFocus
             />
 
@@ -418,7 +351,7 @@ export default function TabLibraryMovies() {
                   setDuplicateNameError(null);
                 }}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, {color: colors.white}]}>Cancel</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -428,7 +361,7 @@ export default function TabLibraryMovies() {
                 onPress={handleCreateCollection}
                 disabled={creating}
               >
-                <Text style={styles.modalButtonText}>
+                <Text style={[styles.modalButtonText, {color: colors.background}]}>
                   {creating ? "Creating..." : "Save"}
                 </Text>
               </Pressable>
@@ -469,7 +402,7 @@ export default function TabLibraryMovies() {
                   setCollectionToDelete(null);
                 }}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, {color: colors.background}]}>Cancel</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -479,7 +412,7 @@ export default function TabLibraryMovies() {
                 onPress={confirmDeleteCollection}
                 disabled={deleting}
               >
-                <Text style={styles.modalButtonText}>
+                <Text style={[styles.modalButtonText, {color: colors.white}]}>
                   {deleting ? "Deleting..." : "Delete"}
                 </Text>
               </Pressable>
@@ -588,7 +521,6 @@ function getStyles(colors:colorsType){
     modalButtonText: {
       fontSize: 16,
       fontWeight: "bold",
-      color: colors.background,
     },
     modalWarningText: {
       fontSize: 14,

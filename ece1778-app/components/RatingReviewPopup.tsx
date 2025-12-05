@@ -39,7 +39,7 @@ export default function RatingReviewPopup ({ visible, review, onClose, onSubmit 
                     <Text style={[setGlobalStyles.titleText, styles.title]}>Your Rating and Review</Text>
                     
                     {/*Input for rating*/}
-                    <Text style={[setGlobalStyles.paragraphBold, styles.labelText]}>Rating:</Text>
+                    <Text style={[setGlobalStyles.paragraphBold, styles.labelText, {color: colors.secondary}]}>Rating:</Text>
                     <View style={styles.starsContainer}>
                         {[1, 2, 3, 4, 5].map(num => (
                         <TouchableOpacity key={num} onPress={() => setRating(num)}>
@@ -51,14 +51,15 @@ export default function RatingReviewPopup ({ visible, review, onClose, onSubmit 
                     </View>
                         
                     {/*Input for review*/}
-                    <Text style={[setGlobalStyles.paragraphBold, styles.labelText]}>Review:</Text>
+                    <Text style={[setGlobalStyles.paragraphBold, styles.labelText, {color: colors.secondary}]}>Review:</Text>
                     <TextInput
                         placeholder="Write your review..."
+                        placeholderTextColor={colors.secondary}
                         value={reviewText}
                         onChangeText={setReviewText}
                         multiline
                         scrollEnabled={true}
-                        style={[styles.input, { height: 100 }]}
+                        style={[styles.input, { height: 100, color: colors.secondary, borderColor: colors.secondary }]}
                     />
                 
                     {/*Cancel and Submit buttons*/}
@@ -69,7 +70,7 @@ export default function RatingReviewPopup ({ visible, review, onClose, onSubmit 
                             ]}
                             onPress={onClose}
                         >
-                            <Text style={[setGlobalStyles.paragraphBold, styles.buttonText]}>Cancel</Text>
+                            <Text style={[setGlobalStyles.paragraphBold, styles.buttonText, {color: colors.white}]}>Cancel</Text>
                         </Pressable>
                         <Pressable
                             style={({ pressed }: { pressed: boolean }) => [
@@ -83,7 +84,7 @@ export default function RatingReviewPopup ({ visible, review, onClose, onSubmit 
                                 onSubmit(rating, reviewText)
                             }}
                         >
-                            <Text style={[setGlobalStyles.paragraphBold, styles.buttonText]}>Submit</Text>
+                            <Text style={[setGlobalStyles.paragraphBold, styles.buttonText, {color: colors.background}]}>Submit</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -181,7 +182,6 @@ function getStyles(colors:colorsType){
         },
         buttonText: {
             fontSize: 14,
-            color: colors.background
         }
     });
     return styles

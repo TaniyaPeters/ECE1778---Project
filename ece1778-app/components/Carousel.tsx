@@ -71,7 +71,7 @@ function getStyles(colors:colorsType){
   const styles = StyleSheet.create({
   carousel:{
     flexDirection:'row',
-    backgroundColor:colors.tertiary,
+    backgroundColor:colors.background,
   },
   cardCollection:{
     paddingRight:5,

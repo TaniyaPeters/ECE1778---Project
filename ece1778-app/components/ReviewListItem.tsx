@@ -10,10 +10,10 @@ import { selectTheme } from "@app/features/theme/themeSlice";
 
 type Props = {
 	review: Review;
-	delFunction?: () => void;
+	delFunction?: null | (() => void);
 };
 
-export default function ReviewListItem({ review, delFunction = () => {} }: Props) {
+export default function ReviewListItem({ review, delFunction = null }: Props) {
 	const { profile } = useAuthContext();
 	const colors = useSelector((state:RootState)=>selectTheme(state));
 	const styles = getStyles(colors)
@@ -24,15 +24,17 @@ export default function ReviewListItem({ review, delFunction = () => {} }: Props
 			<View style={styles.content}>
 				<View style={styles.headerRow}>
 					{/* User who wrote review */}
-					<Text style={profile?.id === review.user_id ? [setGlobalStyles.paragraphBold, styles.text] : [setGlobalStyles.paragraph, styles.text]}>
+					<Text style={profile?.id === review.user_id ? 
+						[setGlobalStyles.paragraphBold, styles.text] 
+						: [setGlobalStyles.paragraph, styles.text]}>
 						{review.username}
 					</Text>
 					{/* Rating associated to the review depicted out of 5 stars */}
 					<View style={styles.starAndDeleteContainer}>
 						{review.rating && (
-							<StarRating rating={review.rating} color={colors.background} />
+							<StarRating rating={review.rating} color={colors.secondary} />
 						)}
-						{profile?.id === review.user_id && (
+						{delFunction && profile?.id === review.user_id && (
 							<Pressable onPress={delFunction}>
 								<Image
 								source={require("../assets/trashIcon.png")}
@@ -59,6 +61,7 @@ function getStyles(colors:colorsType){
 			flexDirection: "row",
 			justifyContent: "space-between",
 			alignItems: "center",
+			backgroundColor: colors.background
 		},
 		content: {
 			flex: 1,
@@ -67,15 +70,16 @@ function getStyles(colors:colorsType){
 		headerRow: {
 			flexDirection: 'row',
 			justifyContent: 'space-between',
-			alignItems: 'center'
+			alignItems: 'center',
 		},
 		text: {
 			fontSize: 17,
 			marginVertical: 3,
+			color: colors.secondary
 		},
 		line: {
 			height: 1,
-			backgroundColor: colors.black,
+			backgroundColor: colors.secondary,
 			width: "100%",
 			marginVertical: 10,
 		},

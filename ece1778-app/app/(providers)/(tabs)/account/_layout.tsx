@@ -14,7 +14,6 @@ export default function AccountLayout() {
 					headerTitleAlign: "center",
 					headerTitleStyle: {
 						color:colors.secondary,
-						fontFamily: "Quicksand_400Regular",
 					},
 					headerBackTitle: "Back",
 				}}
@@ -33,6 +32,13 @@ export default function AccountLayout() {
 					options={{ title: "Create Account" }}
 				/>
 				<Stack.Screen name="[id]" options={{ title: "Friend's Profile" }} />
+				<Stack.Screen 
+					name="collection/[id]" 
+					options={{
+						title: "",
+						headerStyle: { backgroundColor: colors.primary },
+					}} 
+				/>
 			</Stack>
 	);
 
