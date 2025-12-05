@@ -50,7 +50,7 @@ export default function MonthlyRecap({ type, action, review, data, highestRatedM
       </View>
       <View>
         <View style={{flexDirection:'row', justifyContent:'space-between'}}>
-          <Text style={setGlobalStyles.paragraph}>{type}s {action}:</Text>
+          <Text style={setGlobalStyles.paragraph}>{type}s {action} and Rated:</Text>
           <Text style={styles.emphasisText}>{newData ? Object.keys(newData).length.toString() : '-'}</Text>
         </View>
         <View style={{paddingTop:10, paddingBottom:20}}>
@@ -80,7 +80,7 @@ export default function MonthlyRecap({ type, action, review, data, highestRatedM
 function getStyles(colors:colorsType){
   const styles = StyleSheet.create({
     card: {
-      backgroundColor: colors.tertiary,
+      backgroundColor: colors.primary,
       borderRadius: 8,
       shadowColor: colors.black,
       shadowOffset: { width: 0, height: 2 },

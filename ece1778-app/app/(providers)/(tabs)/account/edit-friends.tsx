@@ -21,6 +21,7 @@ import { useAuthContext } from "@app/contexts/AuthContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
+import { colorsType } from "@app/types/types";
 
 type Friend = {
 	id: string;
@@ -35,6 +36,7 @@ export default function EditFriendsScreen() {
 	const [friends, setFriends] = useState<Array<Friend>>([]);
 	const colors = useSelector((state:RootState)=>selectTheme(state));
   	const setGlobalStyles = globalStyles()
+	const styles = getStyles(colors)
 
 	const getProfileByIds = async (ids: string[]) => {
 		let { data, error } = await supabase
@@ -186,9 +188,11 @@ export default function EditFriendsScreen() {
 								<TextInput
 									style={[
 										styles.input,
-										{ borderColor: colors.secondary },
+										{ color: colors.secondary },
+										
 									]}
 									placeholder="Enter a username..."
+									placeholderTextColor={colors.secondary}
 									value={addFriendInput}
 									onChangeText={setAddFriendInput}
 								/>
@@ -199,7 +203,9 @@ export default function EditFriendsScreen() {
 									onPress={addFriend}
 								>
 									<Image
-										source={require("@assets/plus.png")}
+										source={colors.name === "dark" ? 
+											require("@assets/addIconWhite.png") 
+											: require("@assets/addIconBlue.png")}
 										style={accountStyles.icon}
 									/>
 								</Pressable>
@@ -264,33 +270,38 @@ export default function EditFriendsScreen() {
 	);
 }
 
-const styles = StyleSheet.create({
-	modal: {
-		margin: 20,
-		backgroundColor: "white",
-		borderRadius: 20,
-		padding: 35,
-		alignItems: "center",
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
+function getStyles(colors:colorsType){
+	const styles = StyleSheet.create({
+		modal: {
+			margin: 20,
+			backgroundColor: colors.background,
+			borderWidth: 2,
+  			borderColor: colors.secondary,
+			borderRadius: 20,
+			padding: 35,
+			alignItems: "center",
+			shadowColor: "#000",
+			shadowOffset: {
+				width: 0,
+				height: 2,
+			},
+			shadowOpacity: 0.25,
+			shadowRadius: 4,
+			elevation: 5,
+			width: 300,
+			height: 60,
+			justifyContent: "center",
+			flexDirection: "row",
 		},
-		shadowOpacity: 0.25,
-		shadowRadius: 4,
-		elevation: 5,
-		width: 300,
-		height: 60,
-		justifyContent: "center",
-		flexDirection: "row",
-	},
-	input: {
-		width: 250,
-		height: 40,
-		padding: 10,
-	},
-	list: {
-		width: 350,
-		gap: 10,
-	},
-});
+		input: {
+			width: 250,
+			height: 40,
+			padding: 10,
+		},
+		list: {
+			width: 350,
+			gap: 10,
+		},
+	});
+	return styles
+}

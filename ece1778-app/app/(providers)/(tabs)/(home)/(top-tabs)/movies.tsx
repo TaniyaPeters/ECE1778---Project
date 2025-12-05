@@ -11,7 +11,8 @@ import {
   FlatList, 
   ActivityIndicator, 
   TouchableOpacity, 
-  Pressable
+  Pressable,
+  RefreshControl
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@lib/supabase.web";
@@ -27,6 +28,7 @@ type Movie = Tables<"movies">;
 export default function TabMovies() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
   const addToCollectionRef = useRef<AddToCollectionHandle>(null);
@@ -34,33 +36,43 @@ export default function TabMovies() {
   const styles = getStyles(colors)
   const setGlobalStyles = globalStyles()
 
+  const fetchMovies = async () => {
+    try {
+      setError(null);
+
+      const { data: moviesData, error: moviesError } = await supabase
+        .from("movies")
+        .select("*")
+        .order("release_date", { ascending: false });
+
+      if (moviesError) {
+        throw moviesError;
+      }
+
+      setMovies(moviesData || []);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch movies");
+      console.error("Error fetching movies:", err);
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const fetchMovies = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const { data: moviesData, error: moviesError } = await supabase
-          .from("movies")
-          .select("*")
-          .order("release_date", { ascending: false });
-
-        if (moviesError) {
-          throw moviesError;
-        }
-
-        setMovies(moviesData || []);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch movies");
-        console.error("Error fetching movies:", err);
-      } finally {
-        setLoading(false);
-      }
+    const loadMovies = async () => {
+      setLoading(true);
+      await fetchMovies();
+      setLoading(false);
     };
-    fetchMovies();
+    loadMovies();
   }, [isLoggedIn]);
+
+  const onRefresh = async () => {
+    if (!isLoggedIn) return;
+    setRefreshing(true);
+    await fetchMovies();
+    setRefreshing(false);
+  };
 
   if (!isLoggedIn) {
     return (
@@ -103,8 +115,11 @@ export default function TabMovies() {
   
   return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
-      <ScrollView>
-        <Text style={setGlobalStyles.titleText}>Movies Tab</Text>        
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.secondary} />
+        }
+      >
         {movies.length > 0 ? (
           <View>
             <FlatList
@@ -174,25 +189,25 @@ export default function TabMovies() {
 
 function getStyles(colors:colorsType){
   const styles = StyleSheet.create({
-      center: {
-        justifyContent: "center",
-        alignItems: "center",
-      },
-      errorText: {
-        fontSize: 18,
-        color: colors.danger,
-        textAlign: "center",
-      },
-      emptyContainer: {
-        padding: 20,
-        alignItems: "center",
-        marginTop: 40,
-      },
-      emptyText: {
-        fontSize: 18,
-        color: colors.secondary,
-        textAlign: "center",
-      },
-      });
-    return styles
+    center: {
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    errorText: {
+      fontSize: 18,
+      color: colors.danger,
+      textAlign: "center",
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: "center",
+      marginTop: 40,
+    },
+    emptyText: {
+      fontSize: 18,
+      color: colors.secondary,
+      textAlign: "center",
+    },
+  });
+  return styles
 }

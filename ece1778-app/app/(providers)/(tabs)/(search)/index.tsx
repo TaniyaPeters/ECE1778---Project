@@ -115,11 +115,11 @@ export default function Search() {
         {/* Search bar */}
         <View style={styles.searchWrapper}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, {color: colors.secondary}]}
             placeholder="Search for movies..."
             value={searchString}
             onChangeText={setSearchString}
-            placeholderTextColor={colors.black}
+            placeholderTextColor={colors.secondary}
           />
           {searchString.length > 0 && (
             <Pressable
@@ -145,7 +145,7 @@ export default function Search() {
 
       <View style={styles.filterContainer}>
         {/* Genre filter */}
-        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>Genre: </Text>
+        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel, {color: colors.secondary}]}>Genre: </Text>
         <Dropdown
           style={styles.dropdown}
           data={[
@@ -157,10 +157,15 @@ export default function Search() {
           placeholder="All Genres"
           value={genreFilter}
           onChange={(item) => setGenreFilter(item.value)}
+          placeholderStyle={{color: colors.secondary}}
+          selectedTextStyle={{color: colors.secondary}}
+          itemTextStyle={{color: colors.secondary}}
+          itemContainerStyle={{backgroundColor: colors.background}}
+          activeColor={colors.primary}
         />
 
         {/* Sort by release date */}
-        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>Sort: </Text>
+        <Text style={[setGlobalStyles.paragraph, styles.dropdownLabel, {color: colors.secondary}]}>Sort: </Text>
         <Dropdown
           style={styles.dropdown}
           data={[
@@ -173,6 +178,11 @@ export default function Search() {
           placeholder="No Sorting"
           value={dateSort}
           onChange={(item) => setDateSort(item.value)}
+          placeholderStyle={{color: colors.secondary}}
+          selectedTextStyle={{color: colors.secondary}}
+          itemTextStyle={{color: colors.secondary}}
+          itemContainerStyle={{backgroundColor: colors.background}}
+          activeColor={colors.primary}
         />
       </View>
 
@@ -274,7 +284,6 @@ function getStyles(colors:colorsType){
     input: {
       flex: 1,
       fontSize: 16,
-      color: colors.black,
     },
     clearButton: {
       marginLeft: 6,
@@ -297,7 +306,7 @@ function getStyles(colors:colorsType){
       borderRadius: 15,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: colors.secondary,
+      backgroundColor: colors.primary,
       paddingHorizontal: 10,
     },
     searchButtonText: {

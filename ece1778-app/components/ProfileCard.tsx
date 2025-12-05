@@ -23,7 +23,7 @@ export default function ProfileCard({
 		<View
 			style={[
 				styles.card,
-				{backgroundColor: colors.secondary},
+				{backgroundColor: colors.primary},
 				{ borderColor: colors.name === "light" ? "#ccc" : "#444" },
 			]}
 		>
