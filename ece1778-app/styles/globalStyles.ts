@@ -9,8 +9,8 @@ import { useState } from "react";
 const defaultSerif = Platform.OS === "ios" ? "Times New Roman" : "serif";
 const defaultSans = Platform.OS === "ios" ? "Helvetica" : "sans-serif";
 
-export function globalStyles(){
-	const colors = useSelector((state:RootState)=>selectTheme(state));
+export function globalStyles() {
+	const colors = useSelector((state: RootState) => selectTheme(state));
 	const style = StyleSheet.create({
 		container: {
 			flex: 1,
@@ -24,13 +24,13 @@ export function globalStyles(){
 			fontWeight: "bold",
 			color: colors.secondary,
 			textAlign: "center",
-			fontFamily: defaultSerif,
+			fontFamily: "Quicksand_400Regular",
 		},
 		paragraph: {
 			fontSize: 20,
 			color: colors.black,
 			marginVertical: 8,
-			fontFamily: defaultSans,
+			fontFamily: "Barlow_500Medium",
 		},
 		paragraphBold: {
 			fontSize: 20,
@@ -79,6 +79,5 @@ export function globalStyles(){
 			color: colors.secondary,
 		},
 	});
-	return style
+	return style;
 }
-
