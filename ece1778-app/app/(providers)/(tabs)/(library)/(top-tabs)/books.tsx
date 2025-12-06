@@ -313,7 +313,7 @@ export default function TabLibraryBooks() {
 
                 return (
                   <TouchableOpacity
-                    onPress={() => router.push(`./collection/${item.id}`)}
+                    onPress={() => router.push(`/collection/${item.id}`)}
                     activeOpacity={0.7}
                   >
                     <GeneralCard

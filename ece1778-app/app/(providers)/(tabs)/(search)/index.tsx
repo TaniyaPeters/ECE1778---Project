@@ -217,7 +217,7 @@ export default function Search() {
 				{/* Search bar */}
 				<View style={styles.searchWrapper}>
 					<TextInput
-						style={styles.input}
+						style={[styles.input, {color: colors.secondary}]}
 						placeholder={`Search for ${
 							searchMode === "movies" ? "movies" : "books"
 						}...`}
@@ -258,7 +258,7 @@ export default function Search() {
 
 			<View style={styles.filterContainer}>
 				{/* Genre filter */}
-				<Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>
+				<Text style={[setGlobalStyles.paragraph, styles.dropdownLabel, {color: colors.secondary}]}>
 					Genre:{" "}
 				</Text>
 				<Dropdown
@@ -280,7 +280,7 @@ export default function Search() {
 				/>
 
 				{/* Sort by release date */}
-				<Text style={[setGlobalStyles.paragraph, styles.dropdownLabel]}>
+				<Text style={[setGlobalStyles.paragraph, styles.dropdownLabel, {color: colors.secondary}]}>
 					Sort:{" "}
 				</Text>
 				<Dropdown
@@ -488,7 +488,7 @@ function getStyles(colors: colorsType) {
 		},
 		radioLabel: {
 			fontSize: 18,
-			color: colors.black,
+			color: colors.secondary,
 		},
 		horizontalContainer: {
 			flexDirection: "row",
