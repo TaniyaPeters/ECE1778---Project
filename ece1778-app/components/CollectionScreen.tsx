@@ -51,13 +51,13 @@ export default function CollectionScreen() {
 					throw new Error("Invalid collection ID");
 				}
 
-				// Fetch collection data
-				const { data: collectionData, error: collectionError } =
-					await supabase
-						.from("collections")
-						.select("*")
-						.eq("id", collectionId)
-						.maybeSingle();
+        // Fetch collection data
+        const { data: collectionData, error: collectionError } = await supabase
+          .from("collections")
+          .select("*")
+          .eq("id", collectionId)
+          .is("book_list", null)
+          .maybeSingle();
 
 				if (collectionError) {
 					console.error("Collection error details:", collectionError);
@@ -178,7 +178,8 @@ export default function CollectionScreen() {
 					movie_list: updatedMovieList,
 					updated_at: new Date().toISOString(),
 				})
-				.eq("id", collection.id);
+				.eq("id", collection.id)
+        .is("book_list", null);
 
 			if (updateError) {
 				throw updateError;

@@ -254,13 +254,13 @@ export default function mediaDetails() {
 
 			// Ensure the movie is in the user's "Watched" collection
 			try {
-				const { data: watchedCollection, error: watchedError } =
-					await supabase
-						.from("collections")
-						.select("id, movie_list")
-						.eq("user_id", profile.id)
-						.eq("name", "Watched")
-						.maybeSingle();
+				const { data: watchedCollection, error: watchedError } = await supabase
+					.from("collections")
+					.select("id, movie_list")
+					.eq("user_id", profile.id)
+					.eq("name", "Watched")
+					.is("book_list", null)
+					.maybeSingle();
 
 				if (!watchedError && watchedCollection) {
 					const currentList: number[] =
@@ -274,7 +274,8 @@ export default function mediaDetails() {
 								movie_list: updatedMovieList,
 								updated_at: new Date().toISOString(),
 							})
-							.eq("id", watchedCollection.id);
+							.eq("id", watchedCollection.id)
+							.is("book_list", null);
 
 						if (updateWatchedError) {
 							console.error(

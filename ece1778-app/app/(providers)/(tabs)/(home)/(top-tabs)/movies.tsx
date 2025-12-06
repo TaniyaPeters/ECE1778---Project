@@ -114,13 +114,13 @@ export default function TabMovies() {
 		);
 	}
 
-	if (error) {
-		return (
-			<SafeAreaView style={[setGlobalStyles.container, styles.center]}>
-				<Text style={styles.errorText}>{error}</Text>
-			</SafeAreaView>
-		);
-	}
+  if (error) {
+    return (
+      <SafeAreaView style={[setGlobalStyles.container, styles.center]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </SafeAreaView>
+    );
+  }
 
 	const handleAddToCollection = (movieId: number) => {
 		addToCollectionRef.current?.open(movieId);

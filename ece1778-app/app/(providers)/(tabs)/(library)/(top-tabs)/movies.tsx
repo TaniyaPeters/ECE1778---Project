@@ -72,6 +72,7 @@ export default function TabLibraryMovies() {
         .from("collections")
         .select("*")
         .eq("user_id", userId)
+        .is("book_list", null)
         .order("updated_at", { ascending: false });
 
       if (collectionsError) {
@@ -160,6 +161,7 @@ export default function TabLibraryMovies() {
           name: trimmedName,
           user_id: session.user.id,
           movie_list: [],
+          book_list: null,
         })
         .select()
         .single();
