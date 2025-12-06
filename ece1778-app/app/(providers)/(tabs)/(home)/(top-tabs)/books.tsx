@@ -21,7 +21,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
 import { colorsType } from "@app/types/types";
-
 type Book = Tables<"books">;
 
 export default function TabBooks() {

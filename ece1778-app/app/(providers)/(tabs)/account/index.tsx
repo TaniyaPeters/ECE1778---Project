@@ -148,9 +148,12 @@ export default function AccountScreen() {
 						</Pressable>
 					</View>
 					<Pressable
-						style={({ pressed }) => [
-							styles.hiddenButton,
-							{ opacity: pressed ? 0.6 : 1 },
+						style={({ pressed }: { pressed: boolean }) => [
+							accountStyles.button,
+							{ backgroundColor: getColors.primary },
+							{
+								opacity: pressed ? 0.6 : 1,
+							},
 						]}
 						onPress={() => router.push("/account/edit-friends")}
 					>
@@ -164,27 +167,6 @@ export default function AccountScreen() {
 							<Text style={{ fontWeight: "bold" }}>
 								{profile?.friends || 0}
 							</Text>
-						</Text>
-					</Pressable>
-					<Pressable
-						style={({ pressed }: { pressed: boolean }) => [
-							accountStyles.button,
-							{ backgroundColor: getColors.primary },
-							{
-								opacity: pressed ? 0.6 : 1,
-							},
-						]}
-						onPress={() => {
-							router.push("/account/collection/1");
-						}}
-					>
-						<Text
-							style={[
-								accountStyles.text,
-								{ color: getColors.text },
-							]}
-						>
-							Collections
 						</Text>
 					</Pressable>
 				</View>

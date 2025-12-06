@@ -13,7 +13,6 @@ export const accountStyles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
-		marginBottom: 150,
 	},
 	header: {
 		fontSize: 32,

@@ -166,6 +166,7 @@ export default function movieDetails() {
 		}
 		
 		if (profile) {
+			const movieIdNum = Number(id);
 			const reviewValue = reviewTextNew === "" ? null : reviewTextNew;
 
 			if (userReview) { //update
@@ -187,7 +188,7 @@ export default function movieDetails() {
 				try {
 					const { data, error } = await supabase
 						.from ('reviews')
-						.insert([{movie_id: Number(id), user_id: profile?.id ?? "", rating: ratingNew, review: reviewValue}])
+						.insert([{movie_id: movieIdNum, user_id: profile?.id ?? "", rating: ratingNew, review: reviewValue}])
 						.select();
 
 					if (!data || data.length === 0) {
@@ -196,6 +197,37 @@ export default function movieDetails() {
 				} catch (err) {
 					console.error("Error creating user review:", err);
 				}
+			}
+
+			// Ensure the movie is in the user's "Watched" collection
+			try {
+				const { data: watchedCollection, error: watchedError } = await supabase
+					.from("collections")
+					.select("id, movie_list")
+					.eq("user_id", profile.id)
+					.eq("name", "Watched")
+					.maybeSingle();
+
+				if (!watchedError && watchedCollection) {
+					const currentList: number[] = watchedCollection.movie_list || [];
+					if (!currentList.includes(movieIdNum)) {
+						const updatedMovieList = [...currentList, movieIdNum];
+
+						const { error: updateWatchedError } = await supabase
+							.from("collections")
+							.update({
+								movie_list: updatedMovieList,
+								updated_at: new Date().toISOString(),
+							})
+							.eq("id", watchedCollection.id);
+
+						if (updateWatchedError) {
+							console.error("Error updating Watched collection:", updateWatchedError);
+						}
+					}
+				}
+			} catch (err) {
+				console.error("Error ensuring movie is in Watched collection:", err);
 			}
 		}
 
@@ -335,7 +367,9 @@ export default function movieDetails() {
 						]}
 					>
 						<Image
-							source={require("@assets/addIconBlue.png")}
+							source={colors.name === "dark" ? 
+								require("@assets/addIconWhite.png") 
+								: require("@assets/addIconBlue.png")}
 							style={styles.addIcon}
 						/>
 					</Pressable>
@@ -355,7 +389,7 @@ export default function movieDetails() {
 				{/* Movie poster */}
 				<View style={styles.imageContainer}>
 					<Image
-						source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/no-image.jpg") }
+						source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/brokenFile.png") }
 						style={setGlobalStyles.detailsImage}
 						resizeMode="contain"
 					/>
@@ -462,7 +496,7 @@ export default function movieDetails() {
 								onPress={confirmDeleteReview}
 								disabled={deleting}
 							>
-								<Text style={styles.modalButtonText}>
+								<Text style={[styles.modalButtonText, {color: colors.white}]}>
 									{deleting ? "Deleting..." : "Delete"}
 								</Text>
 							</Pressable>
@@ -525,7 +559,7 @@ function getStyles(colors:colorsType){
 			paddingTop: 10,
 		},
 		card: {
-			backgroundColor: colors.background,
+			backgroundColor: colors.primary,
 		},
 		imageContainer: {
 			alignSelf: "center", // center container itself
