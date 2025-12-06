@@ -1,5 +1,4 @@
-import { View, StyleSheet, ViewProps, Text, TouchableOpacity, FlatList } from "react-native";
-import { colors } from "../constants/colors";
+import { View, StyleSheet, ViewProps, Text } from "react-native";
 import { globalStyles } from "@app/styles/globalStyles";
 import { colorsType, Review } from "@app/types/types";
 import Carousel from "./Carousel";
@@ -11,6 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
 type Movie = Tables<"movies">;
+type Book = Tables<"books">;
 
 type MonthlyRecapProps = ViewProps & {
   type: "Movie" | "Book";
@@ -29,9 +29,9 @@ export default function MonthlyRecap({ type, action, review, data, highestRatedM
     setHighestRatedMedia(highestRatedMedia)
     setHighestRating(highestRating)
   }, [data, review, highestRatedMedia, highestRating]);
-  const [newData, setDataMovies] = useState<Movie[]>();
+  const [newData, setDataMovies] = useState<Movie[]|Book[]>();
   const [newReview, setReviews] = useState<Review[]>();
-  const [newHighestRatedMedia, setHighestRatedMedia] = useState<Movie[]>();
+  const [newHighestRatedMedia, setHighestRatedMedia] = useState<Movie[]|Book[]>();
   const [newHighestRating, setHighestRating] = useState<number>(0);
 
   const previousMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1)

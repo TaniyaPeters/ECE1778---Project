@@ -163,21 +163,21 @@ export type Database = {
       notification: {
         Row: {
           body: string | null
-          data: number | null
+          data: string | null
           id: number
           title: string | null
           user_id: string[] | null
         }
         Insert: {
           body?: string | null
-          data?: number | null
+          data?: string | null
           id?: number
           title?: string | null
           user_id?: string[] | null
         }
         Update: {
           body?: string | null
-          data?: number | null
+          data?: string | null
           id?: number
           title?: string | null
           user_id?: string[] | null
@@ -252,6 +252,13 @@ export type Database = {
             columns: ["movie_id"]
             isOneToOne: false
             referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_books_id_fkey"
+            columns: ["books_id"]
+            isOneToOne: false
+            referencedRelation: "books"
             referencedColumns: ["id"]
           },
           {

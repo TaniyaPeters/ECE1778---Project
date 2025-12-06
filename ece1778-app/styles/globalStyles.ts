@@ -1,10 +1,8 @@
 import { Platform, StyleSheet } from "react-native";
-import { colors } from "../constants/colors";
 import { dimentions } from "@app/constants/dimentions";
 import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
-import { useState } from "react";
 
 const defaultSerif = Platform.OS === "ios" ? "Times New Roman" : "serif";
 const defaultSans = Platform.OS === "ios" ? "Helvetica" : "sans-serif";

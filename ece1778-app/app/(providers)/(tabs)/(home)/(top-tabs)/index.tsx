@@ -13,20 +13,24 @@ import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
 
 type Movie = Tables<"movies">;
+type Book = Tables<"books">;
 export default function TabAll() {
   const { isLoggedIn } = useAuthContext();
   const lastDay = new Date(new Date().getFullYear(),new Date().getMonth(),0).toISOString()
   const firstDay = new Date(new Date().getFullYear(),new Date().getMonth() - 1, 1).toISOString()
   const [movies, setMovies] = useState<Movie[]>([]);
   const [highestMovies, setHighestMovies] = useState<Movie[]>([]);
-  const [highestRating, setHighestRating] = useState<number>(0);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [highestMovieRating, setHighestMovieRating] = useState<number>(0);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [highestBooks, setHighestBooks] = useState<Book[]>([]);
+  const [highestBookRating, setHighestBookRating] = useState<number>(0);
+  const [reviewsBooks, setBooksReviews] = useState<any[]>([]);
+  const [reviewsMovies, setMoviesReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const colors = useSelector((state:RootState)=>selectTheme(state));
   const setGlobalStyles = globalStyles()
-
 
   useEffect(() => {
     registerForNotifications();
@@ -55,7 +59,7 @@ export default function TabAll() {
 
       const { data: reviewData, error: reviewError } = await supabase
         .from("reviews")
-        .select(`movie_id, id,rating,review,user_id,profiles (username)`)
+        .select(`movie_id, book_id, id,rating,review,user_id,profiles (username)`)
         .eq("user_id", session.user.id)
         .gt('updated_at',firstDay)
         .lt('updated_at',lastDay)
@@ -64,17 +68,55 @@ export default function TabAll() {
       if (reviewError) {
         throw (reviewError);
       }
-      const movieIds = reviewData.map((item)=>{return item.movie_id})
+      let movieIds:number[] = []
+      let highestMRating:number =0
+      let movieListIds:number[] =[]
+      let bookIds:number[] = []
+      let highestBRating:number =0
+      let bookListIds:number[] =[]
+
+      for (let item of reviewData) {
+        if (item.movie_id != null){
+          movieIds.push(Number(item.movie_id))
+          if (item.rating && item.rating > highestMRating){
+            movieListIds =[]
+            highestMRating = item.rating
+          }
+          else if (item.rating ==highestMRating){
+            movieListIds.push(item.movie_id)
+          }
+        }
+        if (item.book_id != null){
+          bookIds.push(Number(item.book_id))
+          if (item.rating && item.rating > highestBRating){
+            bookListIds =[]
+            highestBRating = item.rating
+          }
+          else if (item.rating ==highestBRating){
+            bookListIds.push(item.book_id)
+          }
+        }
+      }
+                
       const { data: moviesData, error: moviesError } = await supabase
-        .from("movies")
-        .select("*")
-        .in('id', movieIds);
+      .from("movies")
+      .select("*")
+      .in('id', movieIds);
+
+      const { data: bookData, error: booksError } = await supabase
+      .from("books")
+      .select("*")
+      .in('id', bookIds);
 
       if (moviesError) {
         throw moviesError;
       }
-      const filtered_reviews = reviewData
-        .filter(r => r.review !== null || r.user_id === session.user.id)
+      if (booksError) {
+        throw booksError;
+      }
+
+      const filtered_movie_reviews = reviewData
+        .filter(r => (r.movie_id !== null && (r.review !== null || r.user_id === session.user.id)))
         .map(r => ({
         id: r.id,
         user_id: r.user_id,
@@ -82,32 +124,29 @@ export default function TabAll() {
         rating: r.rating,
         review: r.review
       }));
-      console.log("filtered_reviews", filtered_reviews);
-      setReviews(filtered_reviews || []);
+      
+      const filtered_book_reviews = reviewData
+        .filter(r => (r.book_id !== null && (r.review !== null || r.user_id === session.user.id)))
+        .map(r => ({
+        id: r.id,
+        user_id: r.user_id,
+        username: r.profiles?.username ?? "Anonymous",
+        rating: r.rating,
+        review: r.review
+      }));
+      const highestMoviesCheck = moviesData.filter((index)=>(movieListIds.includes(index.id)));
+      const highestBooksCheck = bookData.filter((index)=>(bookListIds.includes(index.id)));
+      
+      setMoviesReviews(filtered_movie_reviews || []);
+      setBooksReviews(filtered_book_reviews || []);
+
       setMovies(moviesData || []);
-      setHighestMovies(moviesData||[]);
-      setHighestRating(0);
+      setHighestMovies(highestMoviesCheck||[]);
+      setHighestMovieRating(highestMRating);
 
-      if (reviewData && reviewData.length > 0){
-        console.log("reviewData", reviewData);
-        const newReviewData = reviewData.sort(
-          (a,b) =>{
-            if(a.rating == null){a.rating =0}
-            if(b.rating == null){b.rating = 0}
-            return b.rating - a.rating
-          }).filter(r=> r.user_id === session.user.id)
-          let highestScore = newReviewData[0]?.rating;
-
-          let highestReviews = newReviewData
-          .filter((index) => index.rating == highestScore)
-          .map((index)=> index.movie_id);
-          if (moviesData){
-            let highestMoviesCheck = moviesData.filter((index)=>(highestReviews.includes(index.id)));
-            setHighestMovies(highestMoviesCheck||[]);
-            setHighestRating(highestScore||0);
-          }
-
-      }
+      setBooks(bookData || []);
+      setHighestBooks(highestBooksCheck||[]);
+      setHighestBookRating(highestBRating);
 
     } catch (err: any) {
       setError(err.message || "Failed to fetch movies or reviews");
@@ -173,8 +212,8 @@ export default function TabAll() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.secondary} />
         }
       >
-        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
-        <MonthlyRecap type="Book" action="Read" data={movies} review={reviews}  highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
+        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviewsMovies} highestRating={highestMovieRating} highestRatedMedia={highestMovies}></MonthlyRecap>
+        <MonthlyRecap type="Book" action="Read" data={books} review={reviewsBooks}  highestRating={highestBookRating} highestRatedMedia={highestBooks}></MonthlyRecap>
       </ScrollView>
     </SafeAreaView>
   );

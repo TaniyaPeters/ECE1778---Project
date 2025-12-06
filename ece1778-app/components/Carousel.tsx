@@ -48,26 +48,40 @@ export default function Carousel({ cards, style, ...props }: Props) {
 					let imageSource: string;
 					let localPath: boolean = false;
 
-					if (item.poster_path) {
-						// Use TMDB poster URL - poster_path should be a poster path (e.g., "/abc123.jpg")
-						const posterPath = item.poster_path.startsWith("/")
-							? item.poster_path
-							: `/${item.poster_path}`;
-						imageSource = `https://image.tmdb.org/t/p/w500${posterPath}`;
-						localPath = false;
-					} else {
-						// Fallback to local image
-						imageSource = "brokenImage";
-						localPath = true;
-					}
+                if (item.poster_path) {
+                  // Use TMDB poster URL - poster_path should be a poster path (e.g., "/abc123.jpg")
+                  const posterPath = item.poster_path.startsWith("/")
+                    ? item.poster_path
+                    : `/${item.poster_path}`;
+                  imageSource = `https://image.tmdb.org/t/p/w500${posterPath}`;
+                  localPath = false;
+                } else if (item.cover_image) {
+                  // Use openlibrary poster URL - cover_image should be a poster path (e.g., "/abc123-M.jpg")
+                  const posterPath = item.cover_image.startsWith("/")
+                    ? item.cover_image
+                    : `/${item.cover_image}`;
+                  imageSource = `https://covers.openlibrary.org/b/id${posterPath}-M.jpg`;
+                  localPath = false;
+                } else {
+                  // Fallback to local image
+                  imageSource = "brokenImage";
+                  localPath = true;
+                }
 
 					return (
 						<TouchableOpacity
-							onPress={() =>
-								router.push(
-									`../mediaDetails/${item.id}?type=movies`
-								)
-							}
+							onPress={() =>{
+								if(item.poster_path){
+									router.push(
+										`../mediaDetails/${item.id}?type=movies`
+									)
+								}
+								else{
+									router.push(
+										`../mediaDetails/${item.id}?type=books`
+									)
+								}
+							}}
 							activeOpacity={0.7}
 						>
 							<View style={styles.cardCollection}>
