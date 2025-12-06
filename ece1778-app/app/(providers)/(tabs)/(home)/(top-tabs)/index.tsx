@@ -170,11 +170,10 @@ export default function TabAll() {
   };
   async function registerForNotifications(){ await Notifications.requestPermissionsAsync();}
 
-  if (!isLoggedIn||error) {
+  if (!isLoggedIn) {
     return (
       <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
-        {!isLoggedIn && <>
+        <Text style={setGlobalStyles.errorText}>Error: User not authenticated</Text>
           <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your media recap.</Text>
           <Pressable
             style={({ pressed }: { pressed: boolean }) => [
@@ -185,7 +184,14 @@ export default function TabAll() {
             >
             <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
           </Pressable>
-        </>}
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]}>
+        <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
       </SafeAreaView>
     );
   }

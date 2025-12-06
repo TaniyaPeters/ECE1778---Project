@@ -18,6 +18,8 @@ export default function ProfileScreen() {
 	const [profile, setProfile] = useState<Tables<"profiles"> | null>(null);
 	const [watchedCollection, setWatchedCollection] = useState<Collection | null>(null);
 	const [watchedThumbnail, setWatchedThumbnail] = useState<string | undefined>(undefined);
+	const [readCollection, setReadCollection] = useState<Collection | null>(null);
+	const [readThumbnail, setReadThumbnail] = useState<string | undefined>(undefined);
   	const setGlobalStyles = globalStyles()
 	const colors = useSelector((state:RootState)=>selectTheme(state));
 
@@ -44,6 +46,7 @@ export default function ProfileScreen() {
 				.select("*")
 				.eq("user_id", userId)
 				.eq("name", "Watched")
+				.is("book_list", null)
 				.maybeSingle();
 
 			if (collectionError) {
@@ -76,10 +79,49 @@ export default function ProfileScreen() {
 		}
 	};
 
+	const getReadCollection = async (userId: string) => {
+		try {
+			const { data: collectionData, error: collectionError } = await supabase
+				.from("collections")
+				.select("*")
+				.eq("user_id", userId)
+				.eq("name", "Read")
+				.is("movie_list", null)
+				.maybeSingle();
+
+			if (collectionError) {
+				console.error("Error fetching Read collection:", collectionError);
+				return;
+			}
+
+			if (collectionData) {
+				setReadCollection(collectionData);
+
+				// Fetch thumbnail (first book's cover)
+				const bookList = (collectionData as any).book_list;
+				if (bookList && Array.isArray(bookList) && bookList.length > 0) {
+					const firstBookId = bookList[0];
+					const { data: bookData, error: bookError } = await supabase
+						.from("books")
+						.select("cover_image")
+						.eq("id", firstBookId)
+						.maybeSingle();
+
+					if (!bookError && bookData?.cover_image) {
+						setReadThumbnail(`https://covers.openlibrary.org/b/id/${bookData.cover_image}-M.jpg`);
+					}
+				}
+			}
+		} catch (err) {
+			console.error("Error fetching Read collection:", err);
+		}
+	};
+
 	useEffect(() => {
 		if (id) {
 			getProfileById(id as string);
 			getWatchedCollection(id as string);
+			getReadCollection(id as string);
 		}
 	}, [id]);
 
@@ -128,6 +170,25 @@ export default function ProfileScreen() {
 							rightSubText={
 								watchedCollection.updated_at
 									? new Date(watchedCollection.updated_at).toLocaleDateString()
+									: undefined
+							}
+						/>
+					</TouchableOpacity>
+				)}
+
+				{/* Read Collection Card */}
+				{readCollection && profile && (
+					<TouchableOpacity
+						onPress={() => router.push(`./collection/${readCollection.id}?username=${encodeURIComponent(profile.username)}`)}
+						activeOpacity={0.7}
+					>
+						<GeneralCard
+							image={readThumbnail}
+							name={readCollection.name}
+							leftSubText={`${((readCollection as any).book_list?.length || 0)} ${((readCollection as any).book_list?.length || 0) === 1 ? "item" : "items"}`}
+							rightSubText={
+								readCollection.updated_at
+									? new Date(readCollection.updated_at).toLocaleDateString()
 									: undefined
 							}
 						/>

@@ -7,8 +7,12 @@ begin
           else new.raw_user_meta_data->>'username' END));
   
   -- Create "Watched" collection for the new user
-  insert into public.collections (name, user_id, movie_list)
-  values ('Watched', new.id, '[]'::jsonb);
+  insert into public.collections (name, user_id, movie_list, book_list)
+  values ('Watched', new.id, '[]', null::jsonb);
+  
+  -- Create "Read" collection for the new user
+  insert into public.collections (name, user_id, movie_list, book_list)
+  values ('Read', new.id, null, '[]'::jsonb);
   
   return new;
 end;
