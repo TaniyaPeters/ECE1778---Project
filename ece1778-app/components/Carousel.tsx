@@ -70,11 +70,18 @@ export default function Carousel({ cards, style, ...props }: Props) {
 
 					return (
 						<TouchableOpacity
-							onPress={() =>
-								router.push(
-									`../mediaDetails/${item.id}?type=movies`
-								)
-							}
+							onPress={() =>{
+								if(item.poster_path){
+									router.push(
+										`../mediaDetails/${item.id}?type=movies`
+									)
+								}
+								else{
+									router.push(
+										`../mediaDetails/${item.id}?type=books`
+									)
+								}
+							}}
 							activeOpacity={0.7}
 						>
 							<View style={styles.cardCollection}>

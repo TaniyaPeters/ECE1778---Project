@@ -163,21 +163,21 @@ export type Database = {
       notification: {
         Row: {
           body: string | null
-          data: number | null
+          data: string | null
           id: number
           title: string | null
           user_id: string[] | null
         }
         Insert: {
           body?: string | null
-          data?: number | null
+          data?: string | null
           id?: number
           title?: string | null
           user_id?: string[] | null
         }
         Update: {
           body?: string | null
-          data?: number | null
+          data?: string | null
           id?: number
           title?: string | null
           user_id?: string[] | null

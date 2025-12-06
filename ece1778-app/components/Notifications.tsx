@@ -96,7 +96,7 @@ async function savePushToken(token:string, profile:Tables<"profiles">){
 }
 
 
-export async function sendPushNotification(title:string, id:number, profile:Tables<"profiles">|undefined|null){
+export async function sendPushNotification(title:string, id:string, profile:Tables<"profiles">|undefined|null){
   if (!profile) {return}
   await getFriends(profile).then((friends)=>sendUpdate(title, id, friends, profile))
 }
@@ -118,8 +118,7 @@ export async function getFriends(profile:Tables<"profiles">){
   return friends
 }
 
-export async function sendUpdate(title:string, id:number, friends:string[], profile:Tables<"profiles">){
-  console.log(friends)
+export async function sendUpdate(title:string, id:string, friends:string[], profile:Tables<"profiles">){
   const body = profile.username + " just left a FIVE star review on '"+title+"'.";
   try {
     const a = await supabase

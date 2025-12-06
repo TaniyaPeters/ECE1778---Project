@@ -145,7 +145,7 @@ return (
 
                 return (
                   <TouchableOpacity
-                    onPress={() => router.push(`../movieDetails/${item.id}`)}
+                    onPress={() => router.push(`../mediaDetails/${item.id}?type=books`)}
                     activeOpacity={0.7}
                   >
                     <GeneralCard

@@ -205,7 +205,7 @@ export default function mediaDetails() {
 		const mediaType = type as MediaType;
 
 		if (ratingNew == 5) {
-			sendPushNotification(media.title, idNum, profile);
+			sendPushNotification(media.title, `${idNum}?type=${type}`, profile);
 		}
 
 		if (profile) {
