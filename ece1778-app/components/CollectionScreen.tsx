@@ -59,6 +59,7 @@ export default function CollectionScreen({ movieDetailsPath = "../../movieDetail
           .from("collections")
           .select("*")
           .eq("id", collectionId)
+          .is("book_list", null)
           .maybeSingle();
 
         if (collectionError) {
@@ -156,7 +157,8 @@ export default function CollectionScreen({ movieDetailsPath = "../../movieDetail
           movie_list: updatedMovieList,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", collection.id);
+        .eq("id", collection.id)
+        .is("book_list", null);
 
       if (updateError) {
         throw updateError;

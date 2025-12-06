@@ -206,6 +206,7 @@ export default function movieDetails() {
 					.select("id, movie_list")
 					.eq("user_id", profile.id)
 					.eq("name", "Watched")
+					.is("book_list", null)
 					.maybeSingle();
 
 				if (!watchedError && watchedCollection) {
@@ -219,7 +220,8 @@ export default function movieDetails() {
 								movie_list: updatedMovieList,
 								updated_at: new Date().toISOString(),
 							})
-							.eq("id", watchedCollection.id);
+							.eq("id", watchedCollection.id)
+							.is("book_list", null);
 
 						if (updateWatchedError) {
 							console.error("Error updating Watched collection:", updateWatchedError);

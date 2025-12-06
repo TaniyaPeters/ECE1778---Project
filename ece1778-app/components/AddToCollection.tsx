@@ -52,6 +52,7 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
         .from("collections")
         .select("*")
         .eq("user_id", userId)
+        .is("book_list", null)
         .order("updated_at", { ascending: false });
 
       if (collectionsError) {
@@ -168,7 +169,8 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
               movie_list: updatedMovieList,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", collection.id);
+            .eq("id", collection.id)
+            .is("book_list", null);
 
           if (updateError) {
             throw updateError;
