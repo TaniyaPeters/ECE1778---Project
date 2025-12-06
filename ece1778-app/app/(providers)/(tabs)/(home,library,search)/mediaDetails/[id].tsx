@@ -16,7 +16,9 @@ import { colorsType, Review } from "@app/types/types";
 import ReviewListItem from "@components/ReviewListItem";
 import Card from "@components/Card";
 import RatingReviewPopup from "@components/RatingReviewPopup";
-import AddToCollection, { AddToCollectionHandle } from "@components/AddToCollection";
+import AddToCollection, {
+	AddToCollectionHandle,
+} from "@components/AddToCollection";
 import { supabase } from "@lib/supabase.web";
 import { useAuthContext } from "@contexts/AuthContext";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,156 +27,198 @@ import { useSelector } from "react-redux";
 import { RootState } from "@app/store/store";
 import { selectTheme } from "@app/features/theme/themeSlice";
 
-export default function movieDetails() {
+type MediaType = "movies" | "books";
+
+type Media = {
+	id: number;
+	title: string;
+	description: string;
+	releaseYear: string;
+	image: string | null;
+	type: MediaType;
+	rating: number | null;
+	numRatings: number | null;
+	creators: string[];
+	genres: string[];
+};
+
+const defaultMedia: Media = {
+	id: 0,
+	title: "Unknown",
+	description: "No description available.",
+	releaseYear: "",
+	image: null,
+	type: "movies",
+	rating: null,
+	numRatings: null,
+	creators: [],
+	genres: [],
+};
+
+export default function mediaDetails() {
 	const { profile } = useAuthContext();
-	const { id } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
+	const { id, type } = useLocalSearchParams(); //Passed from prev screen, note: id is a string by default
 
 	//State variables for all movie info
-	const [title, setTitle] = useState<string>("Movie not found");
-	const [releaseYear, setReleaseYear] = useState<string>("");
-	const [description, setDescription] = useState<string>("");
-	const [rating, setRating] = useState<number | null>(null);
-	const [numRatings, setNumRatings] = useState<number | null>(null);
-	const [moviePoster, setMoviePoster] = useState<string | null>(null);
-	const [castMembers, setCastMembers] = useState<string[]>([]);
-	const [genres, setGenres] = useState<string[]>([]);
+	const [media, setMedia] = useState<Media>(defaultMedia);
 	const [reviews, setReviews] = useState<Review[]>([]);
 
-	const [userReview, setUserReview] = useState<Review | null>(null); 
+	const [userReview, setUserReview] = useState<Review | null>(null);
 	const [popupVisible, setPopupVisible] = useState<boolean>(false);
 	const addToCollectionRef = useRef<AddToCollectionHandle>(null);
-	const [deleteReviewModalVisible, setDeleteReviewModalVisible] = useState<boolean>(false);
+	const [deleteReviewModalVisible, setDeleteReviewModalVisible] =
+		useState<boolean>(false);
 	const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
 	const [deleting, setDeleting] = useState<boolean>(false);
 
-	const colors = useSelector((state:RootState)=>selectTheme(state));
-	const styles = getStyles(colors)
-	const setGlobalStyles = globalStyles()
+	const colors = useSelector((state: RootState) => selectTheme(state));
+	const styles = getStyles(colors);
+	const setGlobalStyles = globalStyles();
 
-	async function retrieveMovieDetails(id_num: number) {
+	const isValidSearchParams = () => {
+		if (!id || Number.isNaN(Number(id))) return false;
+		if (type !== "movies" && type !== "books") return false;
+		return true;
+	};
+
+	async function retrieveMediaDetails(idNum: number, mediaType: MediaType) {
 		//Retrieve movie details from movies table
 		const { data, error } = await supabase
-		.from("movies")
-		.select("title,avg_rating,rating_count,description,release_date,poster_path,genres,cast_members")
-		.eq("id", id_num);
+			.from(mediaType)
+			.select("*")
+			.eq("id", idNum);
 
 		//If no error in retrieving movie, set all the movie details
 		if (!error && data && data.length > 0) {
-			setTitle(data[0].title);
-			setReleaseYear(data[0].release_date?.substring(0,4) ?? "");
-			setDescription(data[0].description ?? "");
-			setRating(data[0].avg_rating);
-			setNumRatings(data[0].rating_count);
-			setMoviePoster(data[0].poster_path ?? null);
-			setCastMembers(data[0].cast_members ?? []);
-			setGenres(data[0].genres ?? []);
-		}
-		else {
-			clearMovieDetails();
+			setMedia({
+				id: idNum,
+				title: data[0].title,
+				description: data[0].description ?? "",
+				releaseYear:
+					"release_date" in data[0]
+						? data[0].release_date?.substring(0, 4) ?? ""
+						: data[0].publish_year ?? "",
+				image:
+					"poster_path" in data[0]
+						? data[0].poster_path
+						: data[0].cover_image,
+				type: mediaType,
+				rating: data[0].avg_rating,
+				numRatings: data[0].rating_count,
+				creators:
+					"cast_members" in data[0]
+						? data[0].cast_members ?? []
+						: data[0].authors ?? [],
+				genres: data[0].genres ?? [],
+			});
+		} else {
+			clearMediaDetails();
 		}
 	}
 
-	async function retrieveReviews(id_num: number) {
+	async function retrieveReviews(idNum: number, mediaType: MediaType) {
 		setReviews([]); //clear old reviews
 		setUserReview(null);
 
+		const searchField = mediaType === "movies" ? "movie_id" : "book_id";
+
 		//Retrieve reviews for movie
 		const { data, error } = await supabase
-		.from("reviews")
-		.select(`id,rating,review,user_id,profiles (username)`)
-		.eq("movie_id", id_num)
-		.order("id", { ascending: true });
+			.from("reviews")
+			.select(`id,rating,review,user_id,profiles (username)`)
+			.eq(searchField, idNum)
+			.order("id", { ascending: true });
 
 		//If no error in retrieving reviews, set all the reviews
 		if (!error && data && data.length > 0) {
 			const filtered_reviews = data
-				.filter(r => r.review !== null || r.user_id === profile?.id)
-				.map(r => ({
+				.filter((r) => r.review !== null || r.user_id === profile?.id)
+				.map((r) => ({
 					id: r.id,
 					user_id: r.user_id,
 					username: r.profiles?.username ?? "Anonymous",
 					rating: r.rating,
-					review: r.review
+					review: r.review,
 				}));
 
 			//Put the review of the logged-in user at the top of list
-			const ordered_reviews = profile ? [...filtered_reviews.filter(r => r.user_id === profile.id), ...filtered_reviews.filter(r=> r.user_id !== profile.id)] : filtered_reviews;
+			const ordered_reviews = profile
+				? [
+						...filtered_reviews.filter(
+							(r) => r.user_id === profile.id
+						),
+						...filtered_reviews.filter(
+							(r) => r.user_id !== profile.id
+						),
+				  ]
+				: filtered_reviews;
 			setReviews(ordered_reviews);
-			
+
 			//Also save the user's review (eg. for updating purposes)
 			if (profile) {
-				const userReviewIndex = ordered_reviews.findIndex(r => r.user_id === profile.id);
+				const userReviewIndex = ordered_reviews.findIndex(
+					(r) => r.user_id === profile.id
+				);
 				if (userReviewIndex !== -1) {
 					setUserReview(ordered_reviews[userReviewIndex]);
 				}
 			}
-		}
-		else {
+		} else {
 			setReviews([]);
 			setUserReview(null);
 		}
 	}
 
 	//Set movie details to default values
-	const clearMovieDetails = () => {
-		setTitle("Movie not found");
-		setReleaseYear("");
-		setDescription("");
-		setRating(null);
-		setNumRatings(null);
-		setMoviePoster(null);
-		setCastMembers([]);
-		setGenres([]);
+	const clearMediaDetails = () => {
+		setMedia(defaultMedia);
 	};
+
 	useEffect(() => {
-		if (id) {
-			//id in db is a number so convert it and make sure it's valid
-			const id_num = Number(id);
-			if (!Number.isNaN(id_num)) {
-				//Run both fetches
-				(async () => {
-					try {
-						await Promise.all([retrieveMovieDetails(id_num), retrieveReviews(id_num)]);
-					} catch (err) {
-						console.error("Error fetching movie details:", err);
-    					clearMovieDetails();
-						setReviews([]);
-					}
-				})();
-			}
-			else {
-				//Clear if id is not a number
-				clearMovieDetails();
-				setReviews([]);
-			}
-		}
-		else {
-			//Clear if id doesn't exist
-			clearMovieDetails();
+		if (!isValidSearchParams()) {
+			clearMediaDetails();
 			setReviews([]);
-		}
-	}, [id, profile]);
-
-
-	const handleSubmitReview = async (ratingNew: number, reviewTextNew: string) => {
-		if (ratingNew == 5){
-			sendPushNotification(title, Number(id), profile)
-		}
-		if (!id || Number.isNaN(Number(id))) {
-			console.error("Invalid movie id");
 			return;
 		}
-		
+
+		(async () => {
+			try {
+				await Promise.all([
+					retrieveMediaDetails(Number(id), type as MediaType),
+					retrieveReviews(Number(id), type as MediaType),
+				]);
+			} catch (err) {
+				console.error("Error fetching media details:", err);
+				clearMediaDetails();
+				setReviews([]);
+			}
+		})();
+	}, [id, profile]);
+
+	const handleSubmitReview = async (
+		ratingNew: number,
+		reviewTextNew: string
+	) => {
+		if (!isValidSearchParams()) return;
+
+		const idNum = Number(id);
+		const mediaType = type as MediaType;
+
+		if (ratingNew == 5) {
+			sendPushNotification(media.title, idNum, profile);
+		}
+
 		if (profile) {
 			const movieIdNum = Number(id);
 			const reviewValue = reviewTextNew === "" ? null : reviewTextNew;
 
-			if (userReview) { //update
+			if (userReview) {
+				//update
 				try {
 					const { data, error } = await supabase
-						.from('reviews')
-						.update({rating: ratingNew, review: reviewValue})
-						.eq('id', userReview.id)
+						.from("reviews")
+						.update({ rating: ratingNew, review: reviewValue })
+						.eq("id", userReview.id)
 						.select();
 
 					if (!data || data.length === 0) {
@@ -183,12 +227,21 @@ export default function movieDetails() {
 				} catch (err) {
 					console.error("Error updating user review", err);
 				}
-			}
-			else { //create
+			} else {
+				//create
 				try {
 					const { data, error } = await supabase
-						.from ('reviews')
-						.insert([{movie_id: movieIdNum, user_id: profile?.id ?? "", rating: ratingNew, review: reviewValue}])
+						.from("reviews")
+						.insert([
+							{
+								[mediaType === "movies"
+									? "movie_id"
+									: "book_id"]: idNum,
+								user_id: profile?.id ?? "",
+								rating: ratingNew,
+								review: reviewValue,
+							},
+						])
 						.select();
 
 					if (!data || data.length === 0) {
@@ -210,7 +263,8 @@ export default function movieDetails() {
 					.maybeSingle();
 
 				if (!watchedError && watchedCollection) {
-					const currentList: number[] = watchedCollection.movie_list || [];
+					const currentList: number[] =
+						watchedCollection.movie_list || [];
 					if (!currentList.includes(movieIdNum)) {
 						const updatedMovieList = [...currentList, movieIdNum];
 
@@ -224,57 +278,83 @@ export default function movieDetails() {
 							.is("book_list", null);
 
 						if (updateWatchedError) {
-							console.error("Error updating Watched collection:", updateWatchedError);
+							console.error(
+								"Error updating Watched collection:",
+								updateWatchedError
+							);
 						}
 					}
 				}
 			} catch (err) {
-				console.error("Error ensuring movie is in Watched collection:", err);
+				console.error(
+					"Error ensuring movie is in Watched collection:",
+					err
+				);
 			}
 		}
 
 		//Recalculate and set the number of ratings and average rating for movie
 		try {
-			let { data: dataAgg, error: errorAgg } = await supabase
-				.from('reviews')
-				.select('rating')
-				.eq('movie_id', Number(id));
+			const searchField = mediaType === "movies" ? "movie_id" : "book_id";
+			const { data: dataAgg, error: errorAgg } = await supabase
+				.from("reviews")
+				.select("rating")
+				.eq(searchField, idNum);
 
 			if (!errorAgg && dataAgg) {
 				const ratingValues = dataAgg
-					.map(r => r.rating)
+					.map((r) => r.rating)
 					.filter((r): r is number => r !== null && r !== undefined);
 				const rating_count = ratingValues.length;
-				const rating_avg = rating_count > 0 
-					? Math.round((ratingValues.reduce((sum, r) => sum + r, 0) / rating_count) * 10) / 10
-					: null;
+				const rating_avg =
+					rating_count > 0
+						? Math.round(
+								(ratingValues.reduce((sum, r) => sum + r, 0) /
+									rating_count) *
+									10
+						  ) / 10
+						: null;
 
-				const { data: dataUpdate, error: errorUpdate } = await supabase 
-					.from('movies')
-					.update({rating_count: rating_count, avg_rating: rating_avg})
-					.eq("id", Number(id))
+				const { data: dataUpdate, error: errorUpdate } = await supabase
+					.from(mediaType)
+					.update({
+						rating_count: rating_count,
+						avg_rating: rating_avg,
+					})
+					.eq("id", idNum)
 					.select();
 
 				if (errorUpdate) {
-					console.error("Error updating rating count and average for movie: ", errorUpdate);
+					console.error(
+						"Error updating rating count and average for movie: ",
+						errorUpdate
+					);
 				}
-			}
-			else {
-				console.error("Error retrieving rating count and average for movie: ", errorAgg)
+			} else {
+				console.error(
+					"Error retrieving rating count and average for movie: ",
+					errorAgg
+				);
 			}
 		} catch (err) {
-			console.error("Error updating rating count and average for movie:", err);
+			console.error(
+				"Error updating rating count and average for movie:",
+				err
+			);
 		}
-		
-		//Refresh 
+
+		//Refresh
 		try {
-			await Promise.all([retrieveMovieDetails(Number(id)), retrieveReviews(Number(id))]);
+			await Promise.all([
+				retrieveMediaDetails(idNum, mediaType),
+				retrieveReviews(idNum, mediaType),
+			]);
 		} catch (err) {
 			console.error("Error fetching movie details:", err);
 		}
 
 		setPopupVisible(false);
-	}
+	};
 
 	const handleDeleteReview = (review: Review) => {
 		setReviewToDelete(review);
@@ -282,9 +362,12 @@ export default function movieDetails() {
 	};
 
 	const confirmDeleteReview = async () => {
-		if (!reviewToDelete || !id || Number.isNaN(Number(id))) {
+		if (!reviewToDelete || !isValidSearchParams()) {
 			return;
 		}
+
+		const idNum = Number(id);
+		const mediaType = type as MediaType;
 
 		try {
 			setDeleting(true);
@@ -301,35 +384,59 @@ export default function movieDetails() {
 
 			// Recalculate and set the number of ratings and average rating for movie
 			try {
-				let { data: dataAgg, error: errorAgg } = await supabase
-					.from('reviews')
-					.select('rating')
-					.eq('movie_id', Number(id));
+				const searchField =
+					mediaType === "movies" ? "movie_id" : "book_id";
+				const { data: dataAgg, error: errorAgg } = await supabase
+					.from("reviews")
+					.select("rating")
+					.eq(searchField, idNum);
 
 				if (!errorAgg && dataAgg) {
 					const ratingValues = dataAgg
-						.map(r => r.rating)
-						.filter((r): r is number => r !== null && r !== undefined);
+						.map((r) => r.rating)
+						.filter(
+							(r): r is number => r !== null && r !== undefined
+						);
 					const rating_count = ratingValues.length;
-					const rating_avg = rating_count > 0 
-						? Math.round((ratingValues.reduce((sum, r) => sum + r, 0) / rating_count) * 10) / 10
-						: null;
+					const rating_avg =
+						rating_count > 0
+							? Math.round(
+									(ratingValues.reduce(
+										(sum, r) => sum + r,
+										0
+									) /
+										rating_count) *
+										10
+							  ) / 10
+							: null;
 
-					const { data: dataUpdate, error: errorUpdate } = await supabase 
-						.from('movies')
-						.update({rating_count: rating_count, avg_rating: rating_avg})
-						.eq("id", Number(id))
-						.select();
+					const { data: dataUpdate, error: errorUpdate } =
+						await supabase
+							.from(mediaType)
+							.update({
+								rating_count: rating_count,
+								avg_rating: rating_avg,
+							})
+							.eq("id", idNum)
+							.select();
 
 					if (errorUpdate) {
-						console.error("Error updating rating count and average for movie: ", errorUpdate);
+						console.error(
+							"Error updating rating count and average for movie: ",
+							errorUpdate
+						);
 					}
-				}
-				else {
-					console.error("Error retrieving rating count and average for movie: ", errorAgg)
+				} else {
+					console.error(
+						"Error retrieving rating count and average for movie: ",
+						errorAgg
+					);
 				}
 			} catch (err) {
-				console.error("Error updating rating count and average for movie:", err);
+				console.error(
+					"Error updating rating count and average for movie:",
+					err
+				);
 			}
 
 			// Close modal and reset
@@ -337,7 +444,10 @@ export default function movieDetails() {
 			setReviewToDelete(null);
 
 			// Refresh reviews and movie details
-			await Promise.all([retrieveMovieDetails(Number(id)), retrieveReviews(Number(id))]);
+			await Promise.all([
+				retrieveMediaDetails(idNum, mediaType),
+				retrieveReviews(idNum, mediaType),
+			]);
 		} catch (err: any) {
 			Alert.alert("Error", err.message || "Failed to delete review");
 			console.error("Error deleting review:", err);
@@ -347,15 +457,20 @@ export default function movieDetails() {
 	};
 
 	return (
-		<SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
-			<ScrollView>			
-				{/* Movie title */}
-				<Text style={setGlobalStyles.titleText}>{title}</Text>
+		<SafeAreaView
+			style={[setGlobalStyles.container, setGlobalStyles.center]}
+			edges={["bottom", "left", "right"]}
+		>
+			<ScrollView>
+				{/* Media title */}
+				<Text style={setGlobalStyles.titleText}>{media.title}</Text>
 
-				<View style={[setGlobalStyles.center, styles.yearAndAddContainer]}>
+				<View
+					style={[setGlobalStyles.center, styles.yearAndAddContainer]}
+				>
 					{/* Release year */}
 					<Text style={[setGlobalStyles.paragraph, styles.year]}>
-						{releaseYear}
+						{media.releaseYear}
 					</Text>
 					<Pressable
 						onPress={() => {
@@ -369,9 +484,11 @@ export default function movieDetails() {
 						]}
 					>
 						<Image
-							source={colors.name === "dark" ? 
-								require("@assets/addIconWhite.png") 
-								: require("@assets/addIconBlue.png")}
+							source={
+								colors.name === "dark"
+									? require("@assets/addIconWhite.png")
+									: require("@assets/addIconBlue.png")
+							}
 							style={styles.addIcon}
 						/>
 					</Pressable>
@@ -380,43 +497,68 @@ export default function movieDetails() {
 				{/* Rating out of 5 and number of ratings */}
 				<View style={styles.ratingContainer}>
 					<Text style={[setGlobalStyles.paragraph, styles.rating]}>
-						⭐ {numRatings && numRatings > 0 ? `${rating?.toFixed(1) ?? "N/A"} / 5` : ""}
+						⭐{" "}
+						{media.numRatings && media.numRatings > 0
+							? `${media.rating?.toFixed(1) ?? "N/A"} / 5`
+							: ""}
 					</Text>
-					<Text style={[setGlobalStyles.paragraph, styles.num_ratings]}>
+					<Text
+						style={[setGlobalStyles.paragraph, styles.num_ratings]}
+					>
 						{" "}
-						({numRatings ?? 0} ratings)
+						({media.numRatings ?? 0} ratings)
 					</Text>
 				</View>
 
-				{/* Movie poster */}
+				{/* Media image */}
 				<View style={styles.imageContainer}>
 					<Image
-						source={moviePoster ? { uri: `https://image.tmdb.org/t/p/w500/${moviePoster}` } : require("@assets/brokenFile.png") }
+						source={
+							media.image
+								? {
+										uri:
+											media.type === "movies"
+												? `https://image.tmdb.org/t/p/w500/${media.image}`
+												: `https://covers.openlibrary.org/b/id/${media.image}-M.jpg`,
+								  }
+								: require("@assets/brokenFile.png")
+						}
 						style={setGlobalStyles.detailsImage}
 						resizeMode="contain"
 					/>
 				</View>
 
 				<Card style={styles.card}>
-					{/* Movie description */}
-					<Text style={setGlobalStyles.paragraph}>{description}</Text>
+					{/* Media description */}
+					<Text style={setGlobalStyles.paragraph}>
+						{media.description}
+					</Text>
 
 					{/* Genres */}
 					<View style={styles.verticalContainer}>
-						<Text style={setGlobalStyles.paragraphBold}>Genres: </Text>
-						{genres.map((genre, index) => (
+						<Text style={setGlobalStyles.paragraphBold}>
+							Genres:{" "}
+						</Text>
+						{media.genres.map((genre, index) => (
 							<Text key={index} style={setGlobalStyles.paragraph}>
 								• {genre}
 							</Text>
 						))}
 					</View>
 
-					{/* Cast */}
+					{/* Cast or Author */}
 					<View style={styles.verticalContainer}>
-						<Text style={setGlobalStyles.paragraphBold}>Cast: </Text>
-						{castMembers.map((actor, index) => (
+						<Text style={setGlobalStyles.paragraphBold}>
+							{media.type === "movies"
+								? "Cast"
+								: media.creators.length === 1
+								? "Author"
+								: "Authors"}
+							:
+						</Text>
+						{media.creators.map((creator, index) => (
 							<Text key={index} style={setGlobalStyles.paragraph}>
-								• {actor}
+								• {creator}
 							</Text>
 						))}
 					</View>
@@ -424,22 +566,39 @@ export default function movieDetails() {
 
 				{/* Reviews */}
 				<View style={styles.horizontalContainer}>
-					<Text style={setGlobalStyles.paragraphBold}>Reviews ({reviews.length}):</Text>
+					<Text style={setGlobalStyles.paragraphBold}>
+						Reviews ({reviews.length}):
+					</Text>
 					<Pressable
 						style={({ pressed }: { pressed: boolean }) => [
-							styles.button, { opacity: pressed ? 0.6 : 1},
+							styles.button,
+							{ opacity: pressed ? 0.6 : 1 },
 						]}
 						onPress={() => setPopupVisible(true)}
 						disabled={!profile}
 					>
-						<Text style={[setGlobalStyles.paragraphBold, styles.buttonText]}>{userReview ? "Update Review" : "Add Review"}</Text>
+						<Text
+							style={[
+								setGlobalStyles.paragraphBold,
+								styles.buttonText,
+							]}
+						>
+							{userReview ? "Update Review" : "Add Review"}
+						</Text>
 					</Pressable>
 				</View>
 				<FlatList
 					data={reviews}
 					keyExtractor={(item: Review) => item.id.toString()}
 					renderItem={({ item }) => (
-						<ReviewListItem review={item} delFunction={profile?.id === item.user_id ? () => handleDeleteReview(item) : () => {}}></ReviewListItem>
+						<ReviewListItem
+							review={item}
+							delFunction={
+								profile?.id === item.user_id
+									? () => handleDeleteReview(item)
+									: () => {}
+							}
+						></ReviewListItem>
 					)}
 					scrollEnabled={false} //disable FlatList's own scrolling and use ScrollViews scrolling instead (both enabled gives error)
 					contentContainerStyle={styles.reviewList}
@@ -469,7 +628,7 @@ export default function movieDetails() {
 				<View style={styles.modalOverlay}>
 					<View style={styles.modalBox}>
 						<Text style={styles.modalTitle}>Delete Review</Text>
-						
+
 						<Text style={styles.modalLabel}>
 							Are you sure you want to delete your review?
 						</Text>
@@ -488,7 +647,9 @@ export default function movieDetails() {
 									setReviewToDelete(null);
 								}}
 							>
-								<Text style={styles.modalButtonText}>Cancel</Text>
+								<Text style={styles.modalButtonText}>
+									Cancel
+								</Text>
 							</Pressable>
 							<Pressable
 								style={({ pressed }) => [
@@ -498,7 +659,12 @@ export default function movieDetails() {
 								onPress={confirmDeleteReview}
 								disabled={deleting}
 							>
-								<Text style={[styles.modalButtonText, {color: colors.white}]}>
+								<Text
+									style={[
+										styles.modalButtonText,
+										{ color: colors.white },
+									]}
+								>
 									{deleting ? "Deleting..." : "Delete"}
 								</Text>
 							</Pressable>
@@ -510,7 +676,7 @@ export default function movieDetails() {
 	);
 }
 
-function getStyles(colors:colorsType){	
+function getStyles(colors: colorsType) {
 	const styles = StyleSheet.create({
 		year: {
 			textAlign: "center",
@@ -537,7 +703,7 @@ function getStyles(colors:colorsType){
 			marginHorizontal: 15,
 			marginTop: 14,
 			marginBottom: 5,
-			justifyContent: 'space-between',
+			justifyContent: "space-between",
 		},
 		verticalContainer: {
 			flexDirection: "column",
@@ -554,7 +720,7 @@ function getStyles(colors:colorsType){
 		},
 		buttonText: {
 			fontSize: 14,
-			color: colors.background
+			color: colors.background,
 		},
 		reviewList: {
 			paddingBottom: 20,
@@ -565,7 +731,7 @@ function getStyles(colors:colorsType){
 		},
 		imageContainer: {
 			alignSelf: "center", // center container itself
-			alignItems: 'center',
+			alignItems: "center",
 			marginBottom: 16,
 			borderRadius: 12,
 			shadowColor: "#000",
@@ -575,9 +741,9 @@ function getStyles(colors:colorsType){
 			elevation: 5,
 		},
 		yearAndAddContainer: {
-			flexDirection: "row", 
-			alignItems: "center", 
-			gap: 3
+			flexDirection: "row",
+			alignItems: "center",
+			gap: 3,
 		},
 		addButton: {
 			padding: 8,
@@ -652,5 +818,5 @@ function getStyles(colors:colorsType){
 			color: colors.background,
 		},
 	});
-	return styles
+	return styles;
 }

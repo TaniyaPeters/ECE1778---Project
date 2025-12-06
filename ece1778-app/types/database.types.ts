@@ -1,11 +1,8 @@
-import { NotificationJson } from "./types"
-
 export type Json =
   | string
   | number
   | boolean
   | null
-  | string[]
   | { [key: string]: Json | undefined }
   | Json[]
 
@@ -58,6 +55,7 @@ export type Database = {
       }
       collections: {
         Row: {
+          book_list: number[] | null
           id: number
           movie_list: number[] | null
           name: string
@@ -65,6 +63,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          book_list?: number[] | null
           id?: number
           movie_list?: number[] | null
           name: string
@@ -72,6 +71,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          book_list?: number[] | null
           id?: number
           movie_list?: number[] | null
           name?: string
@@ -163,28 +163,26 @@ export type Database = {
       notification: {
         Row: {
           body: string | null
+          data: number | null
           id: number
-          user_id: string
+          title: string | null
+          user_id: string[] | null
         }
         Insert: {
           body?: string | null
+          data?: number | null
           id?: number
-          user_id: string[]
+          title?: string | null
+          user_id?: string[] | null
         }
         Update: {
           body?: string | null
+          data?: number | null
           id?: number
-          user_id?: string
+          title?: string | null
+          user_id?: string[] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "notification_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "tokens"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -215,30 +213,40 @@ export type Database = {
       }
       reviews: {
         Row: {
+          book_id: number | null
           id: number
-          movie_id: number
+          movie_id: number | null
           rating: number | null
           review: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          book_id?: number | null
           id?: number
-          movie_id: number
+          movie_id?: number | null
           rating?: number | null
           review?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          book_id?: number | null
           id?: number
-          movie_id?: number
+          movie_id?: number | null
           rating?: number | null
           review?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reviews_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reviews_movie_id_fkey"
             columns: ["movie_id"]
@@ -277,27 +285,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      webpayload: {
-        Row: {
-          id: number
-          old_record: string | null
-          record_id: string | null
-          table: string
-        }
-        Insert: {
-          id?: number
-          old_record?: string | null
-          record_id?: string | null
-          table: string
-        }
-        Update: {
-          id?: number
-          old_record?: string | null
-          record_id?: string | null
-          table?: string
-        }
-        Relationships: []
       }
     }
     Views: {
