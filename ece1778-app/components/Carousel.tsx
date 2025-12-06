@@ -106,7 +106,7 @@ function getStyles(colors: colorsType) {
 	const styles = StyleSheet.create({
 		carousel: {
 			flexDirection: "row",
-			backgroundColor: colors.background,
+			backgroundColor: colors.primary,
 		},
 		cardCollection: {
 			paddingRight: 5,
