@@ -209,7 +209,7 @@ export default function mediaDetails() {
 		}
 
 		if (profile) {
-			const movieIdNum = Number(id);
+			const mediaIdNum = Number(id);
 			const reviewValue = reviewTextNew === "" ? null : reviewTextNew;
 
 			if (userReview) {
@@ -254,40 +254,111 @@ export default function mediaDetails() {
 
 			// Ensure the movie is in the user's "Watched" collection
 			try {
-				const { data: watchedCollection, error: watchedError } = await supabase
-					.from("collections")
-					.select("id, movie_list")
-					.eq("user_id", profile.id)
-					.eq("name", "Watched")
-					.is("book_list", null)
-					.maybeSingle();
+				if (mediaType === "movies") {
+					const { data: watchedCollection, error: watchedError } = await supabase
+						.from("collections")
+						.select("id, movie_list")
+						.eq("user_id", profile.id)
+						.eq("name", "Watched")
+						.is("book_list", null)
+						.maybeSingle();
 
-				if (!watchedError && watchedCollection) {
-					const currentList: number[] =
-						watchedCollection.movie_list || [];
-					if (!currentList.includes(movieIdNum)) {
-						const updatedMovieList = [...currentList, movieIdNum];
+					if (!watchedError && watchedCollection) {
+						const currentList: number[] =
+							watchedCollection.movie_list || [];
+						if (!currentList.includes(mediaIdNum)) {
+							const updatedMovieList = [...currentList, mediaIdNum];
 
-						const { error: updateWatchedError } = await supabase
-							.from("collections")
-							.update({
-								movie_list: updatedMovieList,
-								updated_at: new Date().toISOString(),
-							})
-							.eq("id", watchedCollection.id)
-							.is("book_list", null);
+							const { error: updateWatchedError } = await supabase
+								.from("collections")
+								.update({
+									movie_list: updatedMovieList,
+									updated_at: new Date().toISOString(),
+								})
+								.eq("id", watchedCollection.id)
+								.is("book_list", null);
 
-						if (updateWatchedError) {
+							if (updateWatchedError) {
+								console.error(
+									"Error updating Watched collection:",
+									updateWatchedError
+								);
+							}
+						}
+					}
+				} else {
+					// Check if "Read" collection exists
+					const { data: readCollectionData, error: readError } = await supabase
+						.from("collections")
+						.select("id, book_list")
+						.eq("user_id", profile.id)
+						.eq("name", "Read")
+						.is("movie_list", null)
+						.maybeSingle();
+
+					if (readError) {
+						console.error(
+							"Error fetching Read collection:",
+							readError
+						);
+					}
+
+					let readCollection = readCollectionData;
+
+					// Create "Read" collection if it doesn't exist
+					if (!readCollection) {
+						const { data: newReadCollection, error: createError } =
+							await supabase
+								.from("collections")
+								.insert({
+									name: "Read",
+									user_id: profile.id,
+									movie_list: null,
+									book_list: [],
+								} as any)
+								.select("id, book_list")
+								.single();
+
+						if (createError) {
 							console.error(
-								"Error updating Watched collection:",
-								updateWatchedError
+								"Error creating Read collection:",
+								createError
 							);
+						} else {
+							readCollection = newReadCollection;
+						}
+					}
+
+					if (readCollection) {
+						const bookList = (readCollection as any).book_list || [];
+						const currentList: number[] = Array.isArray(bookList)
+							? bookList
+							: [];
+						if (!currentList.includes(mediaIdNum)) {
+							const updatedBookList = [...currentList, mediaIdNum];
+
+							const { error: updateReadError } = await supabase
+								.from("collections")
+								.update({
+									book_list: updatedBookList,
+									movie_list: null,
+									updated_at: new Date().toISOString(),
+								} as any)
+								.eq("id", readCollection.id)
+								.is("movie_list", null);
+
+							if (updateReadError) {
+								console.error(
+									"Error updating Read collection:",
+									updateReadError
+								);
+							}
 						}
 					}
 				}
 			} catch (err) {
 				console.error(
-					"Error ensuring movie is in Watched collection:",
+					"Error ensuring media item is in Default collection:",
 					err
 				);
 			}
@@ -613,7 +684,7 @@ export default function mediaDetails() {
 				/>
 			</ScrollView>
 
-			<AddToCollection ref={addToCollectionRef} />
+			<AddToCollection ref={addToCollectionRef} isBooks={media.type === "books"} />
 
 			{/* Delete Review Confirmation Modal */}
 			<Modal

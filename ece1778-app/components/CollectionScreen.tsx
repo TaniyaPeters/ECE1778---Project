@@ -23,12 +23,15 @@ import { colorsType } from "@app/types/types";
 
 type Collection = Tables<"collections">;
 type Movie = Tables<"movies">;
+type Book = Tables<"books">;
 
 export default function CollectionScreen() {
 	const { id, username } = useLocalSearchParams();
 	const navigation = useNavigation();
 	const [collection, setCollection] = useState<Collection | null>(null);
 	const [movies, setMovies] = useState<Movie[]>([]);
+	const [books, setBooks] = useState<Book[]>([]);
+	const [isBookCollection, setIsBookCollection] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isOwnCollection, setIsOwnCollection] = useState<boolean>(false);
@@ -51,12 +54,11 @@ export default function CollectionScreen() {
 					throw new Error("Invalid collection ID");
 				}
 
-        // Fetch collection data
+        // Fetch general collection data
         const { data: collectionData, error: collectionError } = await supabase
           .from("collections")
           .select("*")
           .eq("id", collectionId)
-          .is("book_list", null)
           .maybeSingle();
 
 				if (collectionError) {
@@ -77,9 +79,10 @@ export default function CollectionScreen() {
 					);
 				}
 
+				const isBook = collectionData.movie_list === null;
+				setIsBookCollection(isBook);
 				setCollection(collectionData);
 
-				// Check if this collection belongs to the current user
 				const {
 					data: { session },
 				} = await supabase.auth.getSession();
@@ -91,8 +94,8 @@ export default function CollectionScreen() {
 				if (username && typeof username === "string") {
 					displayUsername = username;
 					setProfileUsername(username);
-				} else if (!isOwn && collectionData.name === "Watched") {
-					// Fetch the profile username for other users' Watched collections
+				} else if (!isOwn && (collectionData.name === "Watched" || collectionData.name === "Read")) {
+					// Fetch the profile username for other users' Watched/Read collections
 					const { data: profileData, error: profileError } =
 						await supabase
 							.from("profiles")
@@ -115,41 +118,78 @@ export default function CollectionScreen() {
 						!isOwn
 					) {
 						title = `${displayUsername}'s Watched Collection`;
+					} else if (
+						collectionData.name === "Read" &&
+						displayUsername &&
+						!isOwn
+					) {
+						title = `${displayUsername}'s Read Collection`;
 					}
 					navigation.setOptions({
 						title: title,
 					});
 				}
 
-				// Fetch movies if collection has a movie_list
-				if (
-					collectionData?.movie_list &&
-					collectionData.movie_list.length > 0
-				) {
-					const { data: moviesData, error: moviesError } =
-						await supabase
-							.from("movies")
-							.select("*")
-							.in("id", collectionData.movie_list);
+				if (isBook) {
+					// Fetch books if collection has a book_list
+					const bookList = (collectionData as any).book_list;
+					if (bookList && Array.isArray(bookList) && bookList.length > 0) {
+						const { data: booksData, error: booksError } =
+							await supabase
+								.from("books")
+								.select("*")
+								.in("id", bookList);
 
-					if (moviesError) {
-						throw moviesError;
+						if (booksError) {
+							throw booksError;
+						}
+
+						// Order books by when they were added to the collection
+						const insertionOrderBooks = bookList
+							.map((bookId: number) =>
+								booksData?.find((b) => b.id === bookId)
+							)
+							.filter((b): b is Book => b !== undefined);
+
+						const displayOrderBooks = [...insertionOrderBooks].reverse();
+
+						setBooks(displayOrderBooks);
+					} else {
+						setBooks([]);
 					}
-
-					// Order movies by when they were added to the collection
-					const insertionOrderMovies = collectionData.movie_list
-						.map((movieId) =>
-							moviesData?.find((m) => m.id === movieId)
-						)
-						.filter((m): m is Movie => m !== undefined);
-
-					const displayOrderMovies = [
-						...insertionOrderMovies,
-					].reverse();
-
-					setMovies(displayOrderMovies);
-				} else {
 					setMovies([]);
+				} else {
+					// Fetch movies if collection has a movie_list
+					if (
+						collectionData?.movie_list &&
+						collectionData.movie_list.length > 0
+					) {
+						const { data: moviesData, error: moviesError } =
+							await supabase
+								.from("movies")
+								.select("*")
+								.in("id", collectionData.movie_list);
+
+						if (moviesError) {
+							throw moviesError;
+						}
+
+						// Order movies by when they were added to the collection
+						const insertionOrderMovies = collectionData.movie_list
+							.map((movieId) =>
+								moviesData?.find((m) => m.id === movieId)
+							)
+							.filter((m): m is Movie => m !== undefined);
+
+						const displayOrderMovies = [
+							...insertionOrderMovies,
+						].reverse();
+
+						setMovies(displayOrderMovies);
+					} else {
+						setMovies([]);
+					}
+					setBooks([]);
 				}
 			} catch (err: any) {
 				setError(err.message || "Failed to fetch collection");
@@ -164,59 +204,101 @@ export default function CollectionScreen() {
 		}
 	}, [id, username]);
 
-	const handleRemoveMovieFromCollection = async (movieId: number) => {
+	const handleRemoveItemFromCollection = async (itemId: number) => {
 		if (!collection) return;
 
 		try {
-			const updatedMovieList = (collection.movie_list || []).filter(
-				(id) => id !== movieId
-			);
+			if (isBookCollection) {
+				const bookList = (collection as any).book_list || [];
+				const updatedBookList = bookList.filter((id: number) => id !== itemId);
 
-			const { error: updateError } = await supabase
-				.from("collections")
-				.update({
-					movie_list: updatedMovieList,
-					updated_at: new Date().toISOString(),
-				})
-				.eq("id", collection.id)
-        .is("book_list", null);
+				const { error: updateError } = await supabase
+					.from("collections")
+					.update({
+						book_list: updatedBookList,
+						movie_list: null,
+						updated_at: new Date().toISOString(),
+					} as any)
+					.eq("id", collection.id)
+					.is("movie_list", null);
 
-			if (updateError) {
-				throw updateError;
+				if (updateError) {
+					throw updateError;
+				}
+
+				// Update local state to reflect the change
+				setCollection({ ...collection, book_list: updatedBookList } as any);
+				setBooks((prevBooks) =>
+					prevBooks.filter((book) => book.id !== itemId)
+				);
+			} else {
+				const updatedMovieList = (collection.movie_list || []).filter(
+					(id) => id !== itemId
+				);
+
+				const { error: updateError } = await supabase
+					.from("collections")
+					.update({
+						movie_list: updatedMovieList,
+						book_list: null,
+						updated_at: new Date().toISOString(),
+					} as any)
+					.eq("id", collection.id)
+					.is("book_list", null);
+
+				if (updateError) {
+					throw updateError;
+				}
+
+				// Update local state to reflect the change
+				setCollection({ ...collection, movie_list: updatedMovieList });
+				setMovies((prevMovies) =>
+					prevMovies.filter((movie) => movie.id !== itemId)
+				);
 			}
-
-			// Update local state to reflect the change
-			setCollection({ ...collection, movie_list: updatedMovieList });
-			setMovies((prevMovies) =>
-				prevMovies.filter((movie) => movie.id !== movieId)
-			);
 		} catch (err) {
-			console.error("Error removing movie from collection:", err);
+			console.error("Error removing item from collection:", err);
 		}
 	};
 
-	// Get collection thumbnail (use first movie's poster or default)
+	// Get collection thumbnail (use first item's image or default)
 	const getCollectionThumbnail = () => {
-		// Thumbnail should always be the first movie added to the collection
-		if (
-			!collection ||
-			!collection.movie_list ||
-			collection.movie_list.length === 0
-		) {
+		if (!collection) {
 			return undefined;
 		}
 
-		const firstAddedMovieId = collection.movie_list[0];
-		const firstMovie = movies.find((m) => m.id === firstAddedMovieId);
+		if (isBookCollection) {
+			const bookList = (collection as any).book_list || [];
+			if (bookList.length === 0) {
+				return undefined;
+			}
 
-		if (firstMovie && firstMovie.poster_path) {
-			const posterPath = firstMovie.poster_path.startsWith("/")
-				? firstMovie.poster_path
-				: `/${firstMovie.poster_path}`;
-			return `https://image.tmdb.org/t/p/w500${posterPath}`;
+			const firstAddedBookId = bookList[0];
+			const firstBook = books.find((b) => b.id === firstAddedBookId);
+
+			if (firstBook && firstBook.cover_image) {
+				return `https://covers.openlibrary.org/b/id/${firstBook.cover_image}-M.jpg`;
+			}
+
+			return undefined;
+		} else {
+			// Movie collection
+			if (!collection.movie_list || collection.movie_list.length === 0) {
+				return undefined;
+			}
+
+			const firstAddedMovieId = collection.movie_list[0];
+			const firstMovie = movies.find((m) => m.id === firstAddedMovieId);
+
+			if (firstMovie && firstMovie.poster_path) {
+				const posterPath = firstMovie.poster_path.startsWith("/")
+					? firstMovie.poster_path
+					: `/${firstMovie.poster_path}`;
+				return `https://image.tmdb.org/t/p/w500${posterPath}`;
+			}
+
+			return undefined;
 		}
-
-		return undefined;
 	};
 
 	if (loading) {
@@ -245,10 +327,13 @@ export default function CollectionScreen() {
 	}
 
 	const thumbnail = getCollectionThumbnail();
-	const numberOfItems =
-		collection.name === "Watched"
-			? movies.length
-			: collection.movie_list?.length || 0;
+	const numberOfItems = isBookCollection
+		? (collection.name === "Read"
+				? books.length
+				: ((collection as any).book_list?.length || 0))
+		: (collection.name === "Watched"
+				? movies.length
+				: collection.movie_list?.length || 0);
 
 	return (
 		<SafeAreaView
@@ -278,8 +363,74 @@ export default function CollectionScreen() {
 					</Text>
 				</View>
 
-				{/* Movies List */}
-				{movies.length > 0 ? (
+				{/* Items List */}
+				{isBookCollection ? (
+					books.length > 0 ? (
+						<View style={styles.moviesContainer}>
+							<Text style={styles.sectionTitle}>
+								Books in Collection
+							</Text>
+							<FlatList
+								data={books}
+								keyExtractor={(item) => item.id.toString()}
+								scrollEnabled={false} // Use ScrollView's scrolling instead
+								renderItem={({ item }) => {
+									// Determine image source for the book
+									let imageSource: string | undefined;
+
+									if (item.cover_image) {
+										imageSource = `https://covers.openlibrary.org/b/id/${item.cover_image}-M.jpg`;
+									} else {
+										imageSource = undefined;
+									}
+
+									return (
+										<TouchableOpacity
+											onPress={() =>
+												router.push(
+													`../mediaDetails/${item.id}?type=books`
+												)
+											}
+											activeOpacity={0.7}
+										>
+											<GeneralCard
+												image={imageSource}
+												name={item.title}
+												views={true}
+												leftSubText={
+													item.publish_year
+														? item.publish_year
+														: undefined
+												}
+												rightSubText={
+													item.rating_count
+														? item.rating_count.toFixed(1)
+														: "0"
+												}
+												starRating={
+													item.avg_rating ? item.avg_rating : 0
+												}
+												del={isOwnCollection}
+												delFunction={async () =>
+													await handleRemoveItemFromCollection(
+														item.id
+													)
+												}
+											/>
+										</TouchableOpacity>
+									);
+								}}
+								contentContainerStyle={styles.moviesList}
+							/>
+						</View>
+					) : (
+						<View style={styles.emptyContainer}>
+							<Text style={setGlobalStyles.errorDescriptionText}>
+								This collection doesn't have any books yet.
+							</Text>
+						</View>
+					)
+				) : movies.length > 0 ? (
 					<View style={styles.moviesContainer}>
 						<Text style={styles.sectionTitle}>
 							Movies in Collection
@@ -323,19 +474,15 @@ export default function CollectionScreen() {
 											}
 											rightSubText={
 												item.rating_count
-													? item.rating_count.toFixed(
-															1
-													  )
+													? item.rating_count.toFixed(1)
 													: "0"
 											}
 											starRating={
-												item.avg_rating
-													? item.avg_rating
-													: 0
+												item.avg_rating ? item.avg_rating : 0
 											}
 											del={isOwnCollection}
 											delFunction={async () =>
-												await handleRemoveMovieFromCollection(
+												await handleRemoveItemFromCollection(
 													item.id
 												)
 											}
