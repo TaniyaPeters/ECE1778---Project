@@ -8,7 +8,8 @@ Deno.serve(async (req)=>{
   if(data){
     tokenList = data.map(item => item.token);
   }
-
+  console.log('here')
+  console.log(tokenList)
   const res = await fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',
     headers: {
@@ -23,6 +24,7 @@ Deno.serve(async (req)=>{
       data:{url:payload.record.data},
     })
   }).then((res)=>{
+    console.log(res)
     res.json();
   });
   return new Response(JSON.stringify(res), {
