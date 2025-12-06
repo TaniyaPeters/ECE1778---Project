@@ -181,7 +181,7 @@ return (
         )}
       </ScrollView>
 
-      <AddToCollection ref={addToCollectionRef} />
+      <AddToCollection ref={addToCollectionRef} isBooks={true} />
     </SafeAreaView>
   );
 }
