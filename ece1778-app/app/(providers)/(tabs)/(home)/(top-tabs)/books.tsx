@@ -11,7 +11,9 @@ import {
   FlatList, 
   ActivityIndicator, 
   TouchableOpacity, 
-  Pressable
+  Pressable,
+  RefreshControl
+
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "@lib/supabase.web";
@@ -25,6 +27,7 @@ type Book = Tables<"books">;
 
 export default function TabBooks() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isLoggedIn } = useAuthContext();
@@ -32,34 +35,44 @@ export default function TabBooks() {
   const colors = useSelector((state:RootState)=>selectTheme(state));
   const styles = getStyles(colors)
   const setGlobalStyles = globalStyles()
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
+      const { data: booksData, error: booksError } = await supabase
+        .from("books")
+        .select("*")
+        .order("publish_year", { ascending: false });
+
+      if (booksError) {
+        throw booksError;
+      }
+
+      setBooks(booksData || []);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch books");
+      console.error("Error fetching books:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
     if (!isLoggedIn) return;
-
-    const fetchBooks = async () => {
-      try {
+      const loadBooks = async () => {
         setLoading(true);
-        setError(null);
-
-        const { data: booksData, error: booksError } = await supabase
-          .from("books")
-          .select("*")
-          .order("publish_year", { ascending: false });
-
-        if (booksError) {
-          throw booksError;
-        }
-
-        setBooks(booksData || []);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch books");
-        console.error("Error fetching books:", err);
-      } finally {
+        await fetchBooks();
         setLoading(false);
-      }
-    };
-    fetchBooks();
+      };
+    loadBooks();
   }, [isLoggedIn]);
+  const onRefresh = async () => {
+    if (!isLoggedIn) return;
+    setRefreshing(true);
+    await fetchBooks();
+    setRefreshing(false);
+  };
+
 
   if (!isLoggedIn) {
     return (
@@ -101,8 +114,12 @@ export default function TabBooks() {
   };
 return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
-      <ScrollView>
-        {books.length > 0 ? (
+      <ScrollView
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.secondary} />
+              }
+            >        
+          {books.length > 0 ? (
           <View>
             <FlatList
               data={books}
