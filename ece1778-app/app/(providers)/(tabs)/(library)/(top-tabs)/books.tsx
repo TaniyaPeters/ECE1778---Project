@@ -257,28 +257,6 @@ export default function TabLibraryBooks() {
     }
   };
 
-  if (error) {
-    return (
-      <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
-        <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
-        {!isLoggedIn && 
-        <>
-          <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your saved collections.</Text>
-          <Pressable
-            style={({ pressed }: { pressed: boolean }) => [
-              setGlobalStyles.errorLoginButton,
-              { opacity: pressed ? 0.6 : 1, },
-            ]}
-            onPress={() => router.push('/account')}
-          >
-            <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
-          </Pressable>
-        </>
-        }
-      </SafeAreaView>
-    );
-  }
-
   if (loading) {
     return (
       <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>

@@ -8,7 +8,7 @@ begin
   
   -- Create "Watched" collection for the new user
   insert into public.collections (name, user_id, movie_list, book_list)
-  values ('Watched', new.id, null, '[]'::jsonb);
+  values ('Watched', new.id, '[]', null::jsonb);
   
   -- Create "Read" collection for the new user
   insert into public.collections (name, user_id, movie_list, book_list)
