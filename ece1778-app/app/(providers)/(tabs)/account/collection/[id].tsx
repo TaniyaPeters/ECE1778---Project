@@ -1,5 +1,6 @@
 import CollectionScreen from "@components/CollectionScreen";
 
 export default function CollectionRoute() {
-	return <CollectionScreen />;
+  return <CollectionScreen movieDetailsPath="/movieDetails" />;
 }
+

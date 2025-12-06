@@ -47,12 +47,11 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
 
       const userId = session.user.id;
 
-      // Fetch collections for the user, excluding "Watched"
+      // Fetch collections for the user
       const { data: collectionsData, error: collectionsError } = await supabase
         .from("collections")
         .select("*")
         .eq("user_id", userId)
-        .neq("name", "Watched")
         .order("updated_at", { ascending: false });
 
       if (collectionsError) {
@@ -219,7 +218,7 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
                     const isSelected = selectedCollectionIds.has(item.id);
                     const cardBackgroundColor = isSelected 
                       ? colors.primary 
-                      : "#E0E0E0"; // Light grey
+                      : colors.grey;
 
                     return (
                       <Pressable
@@ -262,7 +261,7 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
                 ]}
                 onPress={handleCloseModal}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, {color: colors.white}]}>Cancel</Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => [
@@ -272,7 +271,7 @@ const AddToCollection = forwardRef<AddToCollectionHandle, AddToCollectionProps>(
                 onPress={handleUpdateCollections}
                 disabled={updating}
               >
-                <Text style={styles.modalButtonText}>
+                <Text style={[styles.modalButtonText, {color: colors.background}]}>
                   {updating ? "Updating..." : "Update"}
                 </Text>
               </Pressable>
@@ -352,8 +351,7 @@ function getStyles(colors:colorsType){
     },
     modalButtonText: {
       fontSize: 16,
-      fontWeight: "bold",
-      color: colors.background,
+      fontWeight: "bold"
     },
   });
   return styles

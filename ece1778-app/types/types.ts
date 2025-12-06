@@ -44,6 +44,8 @@ export type colorsType ={
 	tertiary:string,
 	danger:string,
 	discord: string,
+	grey: string,
+	white: string;
 }
 
 export type NotificationJson ={

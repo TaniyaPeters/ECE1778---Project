@@ -2,7 +2,7 @@ import MonthlyRecap from "@app/components/MonthlyRecap";
 import { useAuthContext } from "@app/contexts/AuthContext";
 import { globalStyles } from "@app/styles/globalStyles";
 import { router } from "expo-router";
-import {ActivityIndicator, Pressable, ScrollView, Text } from "react-native";
+import {ActivityIndicator, Pressable, ScrollView, Text, RefreshControl } from "react-native";
 import * as Notifications from "expo-notifications"
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,6 +22,7 @@ export default function TabAll() {
   const [highestRating, setHighestRating] = useState<number>(0);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const colors = useSelector((state:RootState)=>selectTheme(state));
   const setGlobalStyles = globalStyles()
@@ -42,96 +43,110 @@ export default function TabAll() {
     return () => subscription.remove();
   }, []);
 
+  const fetchData = async (showLoading: boolean = false) => {
+    try {
+      if (showLoading) setLoading(true);
+      setError(null);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+      if (sessionError || !session?.user?.id) {
+        throw Error("User not authenticated");
+      }
+
+      const { data: reviewData, error: reviewError } = await supabase
+        .from("reviews")
+        .select(`movie_id, id,rating,review,user_id,profiles (username)`)
+        .eq("user_id", session.user.id)
+        .gt('updated_at',firstDay)
+        .lt('updated_at',lastDay)
+        .order("updated_at", { ascending: false });        
+
+      if (reviewError) {
+        throw (reviewError);
+      }
+      const movieIds = reviewData.map((item)=>{return item.movie_id})
+      const { data: moviesData, error: moviesError } = await supabase
+        .from("movies")
+        .select("*")
+        .in('id', movieIds);
+
+      if (moviesError) {
+        throw moviesError;
+      }
+      const filtered_reviews = reviewData
+        .filter(r => r.review !== null || r.user_id === session.user.id)
+        .map(r => ({
+        id: r.id,
+        user_id: r.user_id,
+        username: r.profiles?.username ?? "Anonymous",
+        rating: r.rating,
+        review: r.review
+      }));
+      console.log("filtered_reviews", filtered_reviews);
+      setReviews(filtered_reviews || []);
+      setMovies(moviesData || []);
+      setHighestMovies(moviesData||[]);
+      setHighestRating(0);
+
+      if (reviewData && reviewData.length > 0){
+        console.log("reviewData", reviewData);
+        const newReviewData = reviewData.sort(
+          (a,b) =>{
+            if(a.rating == null){a.rating =0}
+            if(b.rating == null){b.rating = 0}
+            return b.rating - a.rating
+          }).filter(r=> r.user_id === session.user.id)
+          let highestScore = newReviewData[0]?.rating;
+
+          let highestReviews = newReviewData
+          .filter((index) => index.rating == highestScore)
+          .map((index)=> index.movie_id);
+          if (moviesData){
+            let highestMoviesCheck = moviesData.filter((index)=>(highestReviews.includes(index.id)));
+            setHighestMovies(highestMoviesCheck||[]);
+            setHighestRating(highestScore||0);
+          }
+
+      }
+
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch movies or reviews");
+      console.error("Error fetching movies or reviews:", err);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };  
+
   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
-          setError(null);  
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                
-          if (sessionError || !session?.user?.id) {
-            throw Error("User not authenticated");
-          }
-  
-          const { data: reviewData, error: reviewError } = await supabase
-            .from("reviews")
-            .select(`movie_id, id,rating,review,user_id,profiles (username)`)
-            .eq("user_id", session.user.id)
-            .gt('updated_at',firstDay)
-            .lt('updated_at',lastDay)
-            .order("updated_at", { ascending: false });        
+    if (isLoggedIn) {
+      fetchData(true);
+    }
+  }, [isLoggedIn]);
 
-          if (reviewError) {
-            throw (reviewError);
-          }
-          const movieIds = reviewData.map((item)=>{return item.movie_id})
-          const { data: moviesData, error: moviesError } = await supabase
-            .from("movies")
-            .select("*")
-            .in('id', movieIds);
-  
-          if (moviesError) {
-            throw moviesError;
-          }
-          const filtered_reviews = reviewData
-            .filter(r => r.review !== null || r.user_id === session.user.id)
-            .map(r => ({
-            id: r.id,
-            user_id: r.user_id,
-            username: r.profiles?.username ?? "Anonymous",
-            rating: r.rating,
-            review: r.review
-          }));
-          setReviews(filtered_reviews || []);
-          setMovies(moviesData || []);
-          setHighestMovies(moviesData||[]);
-          setHighestRating(0);
-
-          if (reviewData){
-            const newReviewData = reviewData.sort(
-              (a,b) =>{
-                if(a.rating == null){a.rating =0}
-                if(b.rating == null){b.rating = 0}
-                return b.rating - a.rating
-              }).filter(r=> r.user_id === session.user.id)
-              let highestScore = newReviewData[0].rating;
-
-              let highestReviews = newReviewData
-              .filter((index) => index.rating == highestScore)
-              .map((index)=> index.movie_id);
-              if (moviesData){
-                let highestMoviesCheck = moviesData.filter((index)=>(highestReviews.includes(index.id)));
-                setHighestMovies(highestMoviesCheck||[]);
-                setHighestRating(highestScore||0);
-              }
-
-          }
-
-        } catch (err: any) {
-            // setError(err.message || "Failed to fetch movies or reviews");
-            // console.error("Error fetching movies or reviews:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchData();
-    }, [isLoggedIn]);
+  const onRefresh = async () => {
+    if (!isLoggedIn) return;
+    setRefreshing(true);
+    await fetchData(false);
+    setRefreshing(false);
+  };
   async function registerForNotifications(){ await Notifications.requestPermissionsAsync();}
 
   if (!isLoggedIn||error) {
     return (
       <SafeAreaView style={[setGlobalStyles.container, setGlobalStyles.center]} edges={['bottom', 'left', 'right']}>
         <Text style={setGlobalStyles.errorText}>Error: {error}</Text>
-        <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your media recap.</Text>
-        <Pressable
-          style={({ pressed }: { pressed: boolean }) => [
-            setGlobalStyles.errorLoginButton,
-            { opacity: pressed ? 0.6 : 1, },
-          ]}
-          onPress={() => router.push('/account')}
-        >
-          <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
-        </Pressable>
+        {!isLoggedIn && <>
+          <Text style={setGlobalStyles.errorDescriptionText}>Please login to view your media recap.</Text>
+          <Pressable
+            style={({ pressed }: { pressed: boolean }) => [
+              setGlobalStyles.errorLoginButton,
+              { opacity: pressed ? 0.6 : 1, },
+            ]}
+            onPress={() => router.push('/account')}
+            >
+            <Text style={setGlobalStyles.errorDescriptionText}>Login</Text>
+          </Pressable>
+        </>}
       </SafeAreaView>
     );
   }
@@ -147,8 +162,11 @@ export default function TabAll() {
 
   return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
-      <ScrollView>
-        <Text style={setGlobalStyles.titleText}>Media Recap</Text>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.secondary} />
+        }
+      >
         <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
         <MonthlyRecap type="Book" action="Read" data={movies} review={reviews}  highestRating={highestRating} highestRatedMedia={highestMovies}></MonthlyRecap>
       </ScrollView>
