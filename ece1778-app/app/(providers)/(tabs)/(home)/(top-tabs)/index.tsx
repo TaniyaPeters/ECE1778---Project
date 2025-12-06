@@ -24,7 +24,8 @@ export default function TabAll() {
   const [books, setBooks] = useState<Book[]>([]);
   const [highestBooks, setHighestBooks] = useState<Book[]>([]);
   const [highestBookRating, setHighestBookRating] = useState<number>(0);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsBooks, setBooksReviews] = useState<any[]>([]);
+  const [reviewsMovies, setMoviesReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const colors = useSelector((state:RootState)=>selectTheme(state));
@@ -77,23 +78,17 @@ export default function TabAll() {
           for (let item of reviewData) {
             if (item.movie_id != null){
               movieIds.push(Number(item.movie_id))
-              bookIds.push(Number(item.movie_id))
               if (item.rating && item.rating > highestMRating){
                 movieListIds =[]
                 highestMRating = item.rating
-                bookListIds =[]
-                highestBRating = item.rating
-
               }
               else if (item.rating ==highestMRating){
                 movieListIds.push(item.movie_id)
-                bookListIds.push(item.movie_id)
-
               }
             }
             if (item.book_id != null){
               bookIds.push(Number(item.book_id))
-              if (item.rating && item.rating > highestMRating){
+              if (item.rating && item.rating > highestBRating){
                 bookListIds =[]
                 highestBRating = item.rating
               }
@@ -111,7 +106,7 @@ export default function TabAll() {
           const { data: bookData, error: booksError } = await supabase
           .from("books")
           .select("*")
-          .in('id', movieIds);
+          .in('id', bookIds);
 
           if (moviesError) {
             throw moviesError;
@@ -120,8 +115,8 @@ export default function TabAll() {
             throw booksError;
           }
 
-          const filtered_reviews = reviewData
-            .filter(r => r.review !== null || r.user_id === session.user.id)
+          const filtered_movie_reviews = reviewData
+            .filter(r => (r.movie_id !== null && (r.review !== null || r.user_id === session.user.id)))
             .map(r => ({
             id: r.id,
             user_id: r.user_id,
@@ -130,10 +125,20 @@ export default function TabAll() {
             review: r.review
           }));
           
-          let highestMoviesCheck = moviesData.filter((index)=>(movieListIds.includes(index.id)));
-          let highestBooksCheck = bookData.filter((index)=>(bookListIds.includes(index.id)));
-
-          setReviews(filtered_reviews || []);
+          const filtered_book_reviews = reviewData
+            .filter(r => (r.book_id !== null && (r.review !== null || r.user_id === session.user.id)))
+            .map(r => ({
+            id: r.id,
+            user_id: r.user_id,
+            username: r.profiles?.username ?? "Anonymous",
+            rating: r.rating,
+            review: r.review
+          }));
+          const highestMoviesCheck = moviesData.filter((index)=>(movieListIds.includes(index.id)));
+          const highestBooksCheck = bookData.filter((index)=>(bookListIds.includes(index.id)));
+          
+          setMoviesReviews(filtered_movie_reviews || []);
+          setBooksReviews(filtered_book_reviews || []);
 
           setMovies(moviesData || []);
           setHighestMovies(highestMoviesCheck||[]);
@@ -184,8 +189,8 @@ export default function TabAll() {
   return (
     <SafeAreaView style={setGlobalStyles.container} edges={['bottom', 'left', 'right']}>
       <ScrollView>
-        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviews} highestRating={highestMovieRating} highestRatedMedia={highestMovies}></MonthlyRecap>
-        <MonthlyRecap type="Book" action="Read" data={books} review={reviews}  highestRating={highestBookRating} highestRatedMedia={highestBooks}></MonthlyRecap>
+        <MonthlyRecap type="Movie" action="Watched" data={movies} review={reviewsMovies} highestRating={highestMovieRating} highestRatedMedia={highestMovies}></MonthlyRecap>
+        <MonthlyRecap type="Book" action="Read" data={books} review={reviewsBooks}  highestRating={highestBookRating} highestRatedMedia={highestBooks}></MonthlyRecap>
       </ScrollView>
     </SafeAreaView>
   );
