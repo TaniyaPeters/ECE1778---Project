@@ -1,7 +1,3 @@
-[![Watch the video](https://raw.githubusercontent.com/yourusername/yourrepository/main/assets/thumbnail.jpg)](https://raw.githubusercontent.com/taniyapeters/ECE1778---Project/main/'ECE1778 - Video Demo'.mp4)
-
-
-
 # Bespoke
 ### Team Information
 Nilofer Hyder — 1007273807 — nilofer.hyder@mail.utoronto.ca
