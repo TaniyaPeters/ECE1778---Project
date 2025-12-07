@@ -229,7 +229,7 @@ To setup the local environment, download the repository and cd into the `ece1778
 **Note:** Running without the `--tunnel` flag will cause OAuth provider authentication to fail, to login create a user manually or enable tunnelling to use OAuth authentication.
 
 ## Deployment Information
-This app is deployed with Expo Application Services (eas) through an apk file located here: https://expo.dev/accounts/tpeterra/projects/ece1778-app/builds/5913705b-9c4a-4b49-8d6b-cb9032b7d1a5. 
+This app is deployed with Expo Application Services (eas) through an apk file located here: https://expo.dev/accounts/tpeterra/projects/ece1778-app/builds/94c3dc9f-d956-4df3-9d33-4f0cb66486e2
 
 Click on the link to download the apk and install the file onto a physical device. Downloading and installing the APK from the provides link will allow the user access to all app features.
 
