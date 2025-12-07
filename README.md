@@ -5,6 +5,9 @@ Jesse Na — 1005890788 — jesse.na@mail.utoronto.ca
 Taniya Peterratnaraj — 1003004438 — taniya.peterratnaraj@mail.utoronto.ca    
 Nagham Sabbour — 1012636079 — n.sabbour@mail.utoronto.ca
 
+## Video Demo
+https://youtu.be/bgDgQDUZRdw
+
 ## Motivation
 Media, be it books, movies, TV shows, etc., are one of the cornerstones of today's world. There is probably not a single person who does not consume at least one type of media, and the majority of us consume multiple forms. Regardless of why or how we consume media, we have the tendency to want to review, save, and share our favourite media with the world, our friends, and our families. By sharing our thoughts on the latest book we read or movie we watched, we are expressing who we are, our interests and values, our likes or dislikes, in hopes of finding points of connection with others.
 
