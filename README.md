@@ -1,8 +1,8 @@
 # Bespoke
 ### Team Information
-Nilofer Hyder — 1007273807 — nilofer.hyder@mail.utoronto.ca
-Jesse Na — 1005890788 — jesse.na@mail.utoronto.ca
-Taniya Peterratnaraj — 1003004438 — taniya.peterratnaraj@mail.utoronto.ca
+Nilofer Hyder — 1007273807 — nilofer.hyder@mail.utoronto.ca    
+Jesse Na — 1005890788 — jesse.na@mail.utoronto.ca    
+Taniya Peterratnaraj — 1003004438 — taniya.peterratnaraj@mail.utoronto.ca    
 Nagham Sabbour — 1012636079 — n.sabbour@mail.utoronto.ca
 
 ## Motivation
@@ -117,14 +117,15 @@ Upon launching the app the user will need to create an account or login to view 
 ### Feature: User Accounts
 To create an account or login, the user can go to the Account tab (the right most tab on the bottom). 
 
-![Screenshot_20251128_152643_Bespoke](https://hackmd.io/_uploads/r1gZIFDWZg.jpg)
+![Screenshot_20251128_152643_Bespoke](https://github.com/user-attachments/assets/34eb46dd-c803-49f9-920f-610c660859dc)
 
 If they have an email/password account, they can enter their credentials and press Login. To create an email/password account, they can press Sign Up which will redirect them to the account creation screen. There, they enter their name, username, email, and password, then click Create Account. An alert will pop up asking them to verify their email. Once they click the confirmation link, it will redirect them back to the app (if they opened the email from their phone). They can now login using their credentials.
-![Screenshot_20251128_162918_Bespoke](https://hackmd.io/_uploads/rJmCNqDWbx.jpg)
+
+![Screenshot_20251128_162918_Bespoke](https://github.com/user-attachments/assets/e7096a0f-94cb-44a1-b8f1-7f280f99e932)
 
 If they have an OAuth provider account, they can click the appropriate button. Their phone browser will open to the provider's authorization page. If they already agreed before, they will be redirected back to the app and automatically signed in. If they are creating an account, they will be asked to provide authorization, and then will be redirected back. Notice their profile photo and username will be the same as the one on their provider. Below is an example of the Discord authorization page:
 
-![Screenshot_20251128_164046_Samsung Internet](https://hackmd.io/_uploads/Hk37wcvWZl.jpg)
+![Screenshot_20251128_164046_Samsung Internet](https://github.com/user-attachments/assets/96674fed-b713-4823-8eff-7989d6005c9e)
 
 Once logged-in, the account page transforms giving a few new options. The user can log out on the top right, edit their account information via the Edit Profile button, and edit their friends by clicking on Friends: (number). 
 
@@ -132,7 +133,7 @@ On the edit profile screen, the user can change their name, username, and toggle
 
 On the edit friends screen, the user can see a list of their friends usernames and profile photos. They can remove friends by clicking on the minus box to the right of their friend. They can add friends by clicking on the top right icon which will pop up a modal for them to enter their friend's username. After entering a username, they can press the plus button, and if the user exists, they will be added.
 
-![Screenshot_20251128_164916_Bespoke](https://hackmd.io/_uploads/SkkSKqwWbl.jpg)
+![Screenshot_20251128_164916_Bespoke](https://github.com/user-attachments/assets/61e6c819-f595-4adf-9df4-18f15c196fe6)
 
 ### Feature: Home Screen
 The user can go to the home screen by clicking on the house icon on the bottom navigator. There, they will see tabs at the top for Media Recap, Movies Tab, and the Books Tab.
@@ -168,7 +169,7 @@ To remove a media from a collection, the user can click on the red trash icon on
 
 Another way to add/remove a media to/from a collection is by clicking the + icon from the media card on the home screen. Alternatively the + icon is also available on the media details screen, which the user can get to by clicking on a media card from the Home or Search screens. For example, here is the movie details screen for Marco:
 
-![Screenshot_20251130_175746_Bespoke](https://hackmd.io/_uploads/HJwQ3B9-Wg.jpg)
+![Screenshot_20251130_175746_Bespoke](https://github.com/user-attachments/assets/50110032-1a8a-454c-a257-d5ce6f8627fa)
 
 Beside the year of the media, there is a plus icon which the user can click. A modal will appear allowing the user to see their collections. The user can click on a collection to add/remove the current media. The user can do this for multiple collections. If the background colour appears grey then the media is not in the collection and if it appears light blue, it is in the collection. The user must press the Update button to save their changes.
 
@@ -179,7 +180,7 @@ Again, once a user is on a media details screen by clicking on a media card, the
 
 The user can scroll down where they will see a reviews section, which is where they can click on the Add Review button. The user must enter at least click on a number of stars and optionally leave a comment. Once finished, they can click submit and the review will be saved for other users to see.
 
-![Screenshot_20251130_180101_Bespoke](https://hackmd.io/_uploads/Byd0hSq--g.jpg)
+![Screenshot_20251130_180101_Bespoke](https://github.com/user-attachments/assets/14261449-4486-48b9-9fda-8f39ddaa6eae)
 
 ### Feature: Notifications
 To see app notifications, the user must first allow notification privileges from the app. The first time the app launches the user will be prompted to allow notifications. The user can then navigate to Account > Edit Account and toggle the "Enable Notifications" switch and click "Save Changes" to enable notifications in app:
