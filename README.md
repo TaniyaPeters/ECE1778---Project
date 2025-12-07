@@ -157,7 +157,7 @@ To create, modify, and view media collections, the user can go to the Library sc
 
 A "Watched" collection is automatically created for every user under the Movies tab and cannot be deleted. Similarly, a "Read" collection is automatically created under the Books tab and connot be deleted. Rating or reviewing any media will automatically add it to the Watched or Read collections depending on the media type. The user can also manually add any media item that they have not rated or reviewed to these collections.
 
-![Screenshot 2025-12-03 at 1.36.22 PM](https://hackmd.io/_uploads/HkpNX-0Zbe.png)
+<img width="692" height="1512" alt="image" src="https://github.com/user-attachments/assets/bed5a2c3-0637-4f14-a71c-ef91cf796c07" />
 <!-- ![Screenshot_20251201_101129_Bespoke](https://hackmd.io/_uploads/SkZrlViZWx.jpg) -->
 
 To create a new collection, the user can press the New Collection button which pops up a modal. The user must enter a name and then press the Save button. If a collection with that name already exists for the same type of media, an error is displayed to pick a new name. The user can however have 2 separate collections named Action for example as long as they are for different media types.
@@ -174,7 +174,7 @@ Another way to add/remove a media to/from a collection is by clicking the + icon
 
 Beside the year of the media, there is a plus icon which the user can click. A modal will appear allowing the user to see their collections. The user can click on a collection to add/remove the current media. The user can do this for multiple collections. If the background colour appears grey then the media is not in the collection and if it appears light blue, it is in the collection. The user must press the Update button to save their changes.
 
-![Screenshot 2025-12-06 at 9.43.49 AM](https://hackmd.io/_uploads/r1P4Wa-fZl.png)
+<img width="686" height="1540" alt="image" src="https://github.com/user-attachments/assets/795235bf-4a99-4d0a-bc61-81a11d591b8c" />
 
 ### Feature: Ratings and Reviews
 Again, once a user is on a media details screen by clicking on a media card, they can add a review.
