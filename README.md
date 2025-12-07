@@ -42,7 +42,8 @@ The user can navigate between the four main app screens using the bottom tab nav
 
 This feature contributes to meeting the following core requirements:
 - **Navigation:** The different screens are made navigable with the use of Expo Navigator file-based routing. The root layout is setup with multiple nested route groups. The highest level route group holds the providers required for the app to run, the Authentication Provider and the Redux Toolkit Provider. The second route group, tabs, initializes the main four screens using Expo Router NativeTabs. The Home Screen, Library Screen and Search Screen are all distinct route groups, these route groups also have a shared route that returns an Expo Router Stack to access the movie details, book details and collection details screens. The account screen is treated as a distinct route and also returns an Expo Router Stack.
-![image](https://hackmd.io/_uploads/SJiRS-A-bg.png)
+<img width="388" height="318" alt="image" src="https://github.com/user-attachments/assets/1d828707-1d84-4d0a-b279-70d17c5d5074" />
+
 - **React Native and Expo Development:** This requirement is satisfied through the use of the Redux Toolkit's Provider as well as the Expo Router's routing, Native Tabs, and Stacks.
 
 ### Home Screen
@@ -184,12 +185,12 @@ The user can scroll down where they will see a reviews section, which is where t
 
 ### Feature: Notifications
 To see app notifications, the user must first allow notification privileges from the app. The first time the app launches the user will be prompted to allow notifications. The user can then navigate to Account > Edit Account and toggle the "Enable Notifications" switch and click "Save Changes" to enable notifications in app:
-![image](https://hackmd.io/_uploads/HJarCRTZ-x.png)
+<img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/e9ffd8bd-5230-4ff5-9f26-d4a2d73c4dcb" />
 
 If the user declines the permission the first time they are prompted, then trying to toggle the "Enable Notifications" switch will prompt the user for permissions again. Upon declining permissions once more, the user will then see an Alert to enable app permissions in the app settings.
 | Permissions Prompt | Permissions Alert |
 | -------- | -------- |
-| ![image](https://hackmd.io/_uploads/Sk11kyCW-l.png)| ![image](https://hackmd.io/_uploads/By50ACpb-x.png)|
+| <img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/fa0e80a0-e84b-4e62-ad98-af9fa35b4bf6" /> | <img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/fe9ad78e-0ce2-4b6f-855b-bf8e5c3e92e0" />|
 
 Once permission is granted the user will receive two different notifications.
 
@@ -198,14 +199,14 @@ Once permission is granted the user will receive two different notifications.
 
 | Monthly Notification | Push Notification |
 | -------- | -------- |
-|![image](https://hackmd.io/_uploads/SkaPSBAWZe.png)|![fivestart](https://hackmd.io/_uploads/Sy9QrSA-bx.jpg)|
+|<img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/708102f0-fab6-4a86-9256-746667822a5a" />|<img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/b312a639-f572-4a48-93cb-957cef7ec2d6" />|
 
 ### Feature: Themes
 To toggle between Light and Dark Theme the user can click on the sun or moon icon displayed at the top right corner of the app. The theme change will be automatically updated and saved.
 
 | Light Theme | Dark Theme |
 | -------- | -------- |
-| ![image](https://hackmd.io/_uploads/S1-3NxRb-g.png)|![image](https://hackmd.io/_uploads/BkIjEgC-Wx.png)|
+| <img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/179ef3f8-75c0-4d46-a17d-efb4a0c9e85e" />|<img width="1080" height="2376" alt="image" src="https://github.com/user-attachments/assets/52ab0b0a-5b9e-4652-8d28-07ed654d62fa" />|
 
 ## Development Guide
 ### Prerequisites
